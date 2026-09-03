@@ -11,7 +11,7 @@ services:
       SIMULATOR_LOG_LEVEL: info
       SIMULATOR_RELAX_PRECONDITIONS: "true"
     volumes:
-      - ./services/simulator/configs/world-config.json:/etc/media-planner/world-config.json:ro
+      - ./services/simulator/configs/world-config.mediaplan.json:/etc/media-planner/world-config.json:ro
     ports:
       - 127.0.0.1:8080:8080
     expose:
@@ -40,6 +40,30 @@ services:
           memory: 256M
         reservations:
           memory: 32M
+
+  planner:
+    build:
+      context: ./services/planner
+      dockerfile: Dockerfile
+    environment:
+      SIMULATOR_URL: http://simulator:8080
+      SIMULATOR_CONFIG: /etc/media-planner/world-config.json
+    volumes:
+      - ./services/simulator/configs/world-config.mediaplan.json:/etc/media-planner/world-config.json:ro
+    ports:
+      - 127.0.0.1:8501:8501
+    networks:
+      - media-planner-internal
+    depends_on:
+      simulator:
+        condition: service_healthy
+    init: true
+    stop_grace_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
 
 networks:
   media-planner-internal:
