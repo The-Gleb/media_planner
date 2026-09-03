@@ -1,0 +1,23 @@
+# Go
+*.exe
+*.test
+*.out
+vendor/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+
+# Runtime artifacts
+coverage/
+*.log
+*.log.*

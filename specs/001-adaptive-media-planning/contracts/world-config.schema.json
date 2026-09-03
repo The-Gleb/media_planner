@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://media-planner.local/schemas/simulator/world-config-v0.json",
+  "title": "Simulator v0 world model configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["engine_version", "currency", "money_scale", "channels"],
+  "properties": {
+    "engine_version": {
+      "const": "sim-v0"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "money_scale": {
+      "const": 6
+    },
+    "channels": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/channel"
+      }
+    }
+  },
+  "$defs": {
+    "positiveRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {"type": "number", "exclusiveMinimum": 0},
+        "max": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "nonNegativeRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {"type": "number", "minimum": 0},
+        "max": {"type": "number", "minimum": 0}
+      }
+    },
+    "probabilityRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {"type": "number", "minimum": 0, "maximum": 1},
+        "max": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "positiveIntegerRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {"type": "integer", "minimum": 1},
+        "max": {"type": "integer", "minimum": 1}
+      }
+    },
+    "hourRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {"type": "number", "minimum": 0, "exclusiveMaximum": 24},
+        "max": {"type": "number", "minimum": 0, "maximum": 24}
+      }
+    },
+    "basePositive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["distribution", "range"],
+      "properties": {
+        "distribution": {"const": "log_uniform"},
+        "range": {"$ref": "#/$defs/positiveRange"}
+      }
+    },
+    "baseProbability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["distribution", "range"],
+      "properties": {
+        "distribution": {"const": "logit_uniform"},
+        "range": {"$ref": "#/$defs/probabilityRange"}
+      }
+    },
+    "hourlyPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["peaks_count", "peak_center_hour", "peak_width_hours", "peak_amplitude"],
+      "properties": {
+        "peaks_count": {"$ref": "#/$defs/positiveIntegerRange"},
+        "peak_center_hour": {"$ref": "#/$defs/hourRange"},
+        "peak_width_hours": {"$ref": "#/$defs/positiveRange"},
+        "peak_amplitude": {"$ref": "#/$defs/nonNegativeRange"}
+      }
+    },
+    "weekdayPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variation", "weekend_modifier"],
+      "properties": {
+        "variation": {"$ref": "#/$defs/probabilityRange"},
+        "weekend_modifier": {"$ref": "#/$defs/positiveRange"}
+      }
+    },
+    "drift": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probability", "log_strength", "duration_hours"],
+      "properties": {
+        "probability": {"type": "number", "minimum": 0, "maximum": 1},
+        "log_strength": {"$ref": "#/$defs/nonNegativeRange"},
+        "duration_hours": {"$ref": "#/$defs/positiveIntegerRange"}
+      }
+    },
+    "shock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probability", "multiplier", "duration_hours"],
+      "properties": {
+        "probability": {"type": "number", "minimum": 0, "maximum": 1},
+        "multiplier": {"$ref": "#/$defs/nonNegativeRange"},
+        "duration_hours": {"$ref": "#/$defs/positiveIntegerRange"}
+      }
+    },
+    "pause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probability", "duration_hours"],
+      "properties": {
+        "probability": {"type": "number", "minimum": 0, "maximum": 1},
+        "duration_hours": {"$ref": "#/$defs/positiveIntegerRange"}
+      }
+    },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "base",
+        "hourly_patterns",
+        "weekday_patterns",
+        "saturation",
+        "volatility",
+        "drift",
+        "shocks"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "base": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cpm", "ctr", "cr", "requests_per_day", "audience_capacity"],
+          "properties": {
+            "cpm": {"$ref": "#/$defs/basePositive"},
+            "ctr": {"$ref": "#/$defs/baseProbability"},
+            "cr": {"$ref": "#/$defs/baseProbability"},
+            "requests_per_day": {"$ref": "#/$defs/basePositive"},
+            "audience_capacity": {"$ref": "#/$defs/basePositive"}
+          }
+        },
+        "hourly_patterns": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["supply", "cpm", "ctr", "cr"],
+          "properties": {
+            "supply": {"$ref": "#/$defs/hourlyPattern"},
+            "cpm": {"$ref": "#/$defs/hourlyPattern"},
+            "ctr": {"$ref": "#/$defs/hourlyPattern"},
+            "cr": {"$ref": "#/$defs/hourlyPattern"}
+          }
+        },
+        "weekday_patterns": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["supply", "cpm", "ctr", "cr"],
+          "properties": {
+            "supply": {"$ref": "#/$defs/weekdayPattern"},
+            "cpm": {"$ref": "#/$defs/weekdayPattern"},
+            "ctr": {"$ref": "#/$defs/weekdayPattern"},
+            "cr": {"$ref": "#/$defs/weekdayPattern"}
+          }
+        },
+        "saturation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "start_threshold",
+            "price_growth_strength",
+            "reach_decay_strength",
+            "frequency_reach_decay_strength",
+            "ctr_fatigue_strength",
+            "frequency_fatigue_strength"
+          ],
+          "properties": {
+            "start_threshold": {"$ref": "#/$defs/probabilityRange"},
+            "price_growth_strength": {"$ref": "#/$defs/nonNegativeRange"},
+            "reach_decay_strength": {"$ref": "#/$defs/nonNegativeRange"},
+            "frequency_reach_decay_strength": {"$ref": "#/$defs/nonNegativeRange"},
+            "ctr_fatigue_strength": {"$ref": "#/$defs/nonNegativeRange"},
+            "frequency_fatigue_strength": {"$ref": "#/$defs/nonNegativeRange"}
+          }
+        },
+        "volatility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requests_sigma", "cpm_sigma"],
+          "properties": {
+            "requests_sigma": {"$ref": "#/$defs/nonNegativeRange"},
+            "cpm_sigma": {"$ref": "#/$defs/nonNegativeRange"}
+          }
+        },
+        "drift": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["supply", "cpm", "ctr", "cr"],
+          "properties": {
+            "supply": {"$ref": "#/$defs/drift"},
+            "cpm": {"$ref": "#/$defs/drift"},
+            "ctr": {"$ref": "#/$defs/drift"},
+            "cr": {"$ref": "#/$defs/drift"}
+          }
+        },
+        "shocks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["supply", "cpm", "ctr", "cr", "pause"],
+          "properties": {
+            "supply": {"$ref": "#/$defs/shock"},
+            "cpm": {"$ref": "#/$defs/shock"},
+            "ctr": {"$ref": "#/$defs/shock"},
+            "cr": {"$ref": "#/$defs/shock"},
+            "pause": {"$ref": "#/$defs/pause"}
+          }
+        }
+      }
+    }
+  }
+}

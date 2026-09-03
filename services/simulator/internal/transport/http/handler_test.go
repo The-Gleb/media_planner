@@ -1,0 +1,60 @@
+package httptransport
+
+import (
+	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"media-planner/services/simulator/internal/app"
+	"media-planner/services/simulator/internal/config"
+)
+
+func testHandler(t *testing.T) http.Handler {
+	t.Helper()
+	model, err := config.LoadFile("../../../configs/world-config.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready := &Readiness{}
+	ready.Set(true)
+	return NewHandler(app.NewRegistry(model), ready)
+}
+
+func TestHTTPResetCurrentStepDelete(t *testing.T) {
+	h := testHandler(t)
+	id := "11111111-1111-4111-8111-111111111111"
+	resetBody := `{"world_seed":"42","campaign_seed":"77","start_hour":"2026-09-03T06:00:00Z","duration_hours":2,"time_zone":"Europe/Moscow"}`
+	req := httptest.NewRequest(http.MethodPut, "/v1/simulations/"+id, bytes.NewBufferString(resetBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("If-None-Match", "*")
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusCreated || rr.Header().Get("ETag") == "" {
+		t.Fatalf("reset %d %s", rr.Code, rr.Body.String())
+	}
+	etag := rr.Header().Get("ETag")
+	stepBody := `{"step_id":"a04ea33b-b91a-4faa-a0b5-f2869efbdf17","actions":[{"channel_id":"social_1","budget_cap":"10.000000"}]}`
+	req = httptest.NewRequest(http.MethodPost, "/v1/simulations/"+id+"/steps", bytes.NewBufferString(stepBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("If-Match", etag)
+	rr = httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK || !bytes.Contains(rr.Body.Bytes(), []byte(`"observed_hour":"2026-09-03T06:00:00Z"`)) {
+		t.Fatalf("step %d %s", rr.Code, rr.Body.String())
+	}
+	nextETag := rr.Header().Get("ETag")
+	req = httptest.NewRequest(http.MethodGet, "/v1/simulations/"+id+"/current-hour", nil)
+	rr = httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK || rr.Header().Get("ETag") != nextETag {
+		t.Fatalf("current %d %s", rr.Code, rr.Body.String())
+	}
+	req = httptest.NewRequest(http.MethodDelete, "/v1/simulations/"+id, nil)
+	req.Header.Set("If-Match", nextETag)
+	rr = httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusNoContent {
+		t.Fatalf("delete %d %s", rr.Code, rr.Body.String())
+	}
+}

@@ -1,0 +1,45 @@
+name: media-planner
+
+services:
+  simulator:
+    build:
+      context: .
+      dockerfile: services/simulator/Dockerfile
+    environment:
+      SIMULATOR_ADDR: :8080
+      SIMULATOR_CONFIG: /etc/media-planner/world-config.json
+      SIMULATOR_LOG_LEVEL: info
+    volumes:
+      - ./services/simulator/configs/world-config.json:/etc/media-planner/world-config.json:ro
+    ports:
+      - 127.0.0.1:8080:8080
+    expose:
+      - "8080"
+    networks:
+      - media-planner-internal
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "/simulator", "healthcheck", "--url", "http://127.0.0.1:8080/health/ready"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+      start_period: 2s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          memory: 32M
+
+networks:
+  media-planner-internal:
+    internal: true

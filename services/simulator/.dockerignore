@@ -1,0 +1,17 @@
+.git/
+.gitignore
+.dockerignore
+Dockerfile*
+*.log*
+.env*
+coverage/
+vendor/
+*.test
+*.out
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+testdata/

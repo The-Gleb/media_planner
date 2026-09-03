@@ -1,0 +1,59 @@
+[
+  {
+    "name": "baseline",
+    "config": {"world_seed":42,"campaign_seed":77,"start_hour":"2026-09-03T06:00:00Z","duration_hours":3,"time_zone":"Europe/Moscow"},
+    "world_fingerprint": "c5c0f3b29276d4cff356548333c517c84d1b7276a7d2946836af12fe9a40a832",
+    "observations": [
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T06:00:00Z","requests":4263,"impressions":4263,"unique_reach":4263,"clicks":139,"conversions":8,"spend":"435.932390","ecpm":"102.259534"},
+        {"channel_id":"social_1","hour":"2026-09-03T06:00:00Z","requests":15791,"impressions":11240,"unique_reach":11240,"clicks":92,"conversions":0,"spend":"1499.924285","ecpm":"133.445222"}
+      ],
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T07:00:00Z","requests":4574,"impressions":4574,"unique_reach":4574,"clicks":136,"conversions":11,"spend":"557.742734","ecpm":"121.937634"},
+        {"channel_id":"social_1","hour":"2026-09-03T07:00:00Z","requests":18894,"impressions":9740,"unique_reach":9740,"clicks":73,"conversions":1,"spend":"1499.877931","ecpm":"153.991575"}
+      ],
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T08:00:00Z","requests":5076,"impressions":5076,"unique_reach":5076,"clicks":149,"conversions":7,"spend":"614.007107","ecpm":"120.962788"},
+        {"channel_id":"social_1","hour":"2026-09-03T08:00:00Z","requests":21754,"impressions":11695,"unique_reach":11695,"clicks":113,"conversions":3,"spend":"1499.934940","ecpm":"128.254378"}
+      ]
+    ]
+  },
+  {
+    "name": "campaign-seed-change",
+    "config": {"world_seed":42,"campaign_seed":78,"start_hour":"2026-09-03T06:00:00Z","duration_hours":3,"time_zone":"Europe/Moscow"},
+    "world_fingerprint": "c5c0f3b29276d4cff356548333c517c84d1b7276a7d2946836af12fe9a40a832",
+    "observations": [
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T06:00:00Z","requests":4109,"impressions":4109,"unique_reach":4109,"clicks":134,"conversions":11,"spend":"506.014138","ecpm":"123.147759"},
+        {"channel_id":"social_1","hour":"2026-09-03T06:00:00Z","requests":18357,"impressions":11384,"unique_reach":11384,"clicks":84,"conversions":0,"spend":"1499.938810","ecpm":"131.758505"}
+      ],
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T07:00:00Z","requests":4720,"impressions":4720,"unique_reach":4720,"clicks":121,"conversions":8,"spend":"615.173087","ecpm":"130.333282"},
+        {"channel_id":"social_1","hour":"2026-09-03T07:00:00Z","requests":24519,"impressions":12648,"unique_reach":12648,"clicks":102,"conversions":1,"spend":"1499.892006","ecpm":"118.587288"}
+      ],
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T08:00:00Z","requests":5088,"impressions":5088,"unique_reach":5088,"clicks":152,"conversions":10,"spend":"591.638171","ecpm":"116.281088"},
+        {"channel_id":"social_1","hour":"2026-09-03T08:00:00Z","requests":22531,"impressions":10689,"unique_reach":10689,"clicks":87,"conversions":3,"spend":"1499.906284","ecpm":"140.322415"}
+      ]
+    ]
+  },
+  {
+    "name": "world-seed-change",
+    "config": {"world_seed":43,"campaign_seed":77,"start_hour":"2026-09-03T06:00:00Z","duration_hours":3,"time_zone":"Europe/Moscow"},
+    "world_fingerprint": "5bc89dd68b34fefe8d378f01239e5eb91c45929381dd31bbd2c88496ab87a5bb",
+    "observations": [
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T06:00:00Z","requests":6985,"impressions":5915,"unique_reach":5915,"clicks":238,"conversions":12,"spend":"899.910780","ecpm":"152.140454"},
+        {"channel_id":"social_1","hour":"2026-09-03T06:00:00Z","requests":10326,"impressions":10326,"unique_reach":10326,"clicks":87,"conversions":0,"spend":"1151.555903","ecpm":"111.520038"}
+      ],
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T07:00:00Z","requests":7289,"impressions":5265,"unique_reach":5265,"clicks":208,"conversions":13,"spend":"899.928086","ecpm":"170.926513"},
+        {"channel_id":"social_1","hour":"2026-09-03T07:00:00Z","requests":12175,"impressions":12175,"unique_reach":12175,"clicks":94,"conversions":3,"spend":"1435.929788","ecpm":"117.940846"}
+      ],
+      [
+        {"channel_id":"search_1","hour":"2026-09-03T08:00:00Z","requests":7965,"impressions":5321,"unique_reach":5321,"clicks":209,"conversions":8,"spend":"899.887356","ecpm":"169.119970"},
+        {"channel_id":"social_1","hour":"2026-09-03T08:00:00Z","requests":13843,"impressions":13843,"unique_reach":13843,"clicks":134,"conversions":7,"spend":"1494.883505","ecpm":"107.988407"}
+      ]
+    ]
+  }
+]

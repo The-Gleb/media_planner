@@ -1,0 +1,103 @@
+{
+  "engine_version": "sim-v0",
+  "currency": "RUB",
+  "money_scale": 6,
+  "channels": [
+    {
+      "id": "social_1",
+      "type": "social",
+      "base": {
+        "cpm": {"distribution": "log_uniform", "range": {"min": 80, "max": 180}},
+        "ctr": {"distribution": "logit_uniform", "range": {"min": 0.006, "max": 0.018}},
+        "cr": {"distribution": "logit_uniform", "range": {"min": 0.015, "max": 0.05}},
+        "requests_per_day": {"distribution": "log_uniform", "range": {"min": 200000, "max": 600000}},
+        "audience_capacity": {"distribution": "log_uniform", "range": {"min": 500000, "max": 2000000}}
+      },
+      "hourly_patterns": {
+        "supply": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 16, "max": 22}, "peak_width_hours": {"min": 2, "max": 5}, "peak_amplitude": {"min": 0.1, "max": 0.5}},
+        "cpm": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 17, "max": 23}, "peak_width_hours": {"min": 2, "max": 5}, "peak_amplitude": {"min": 0.1, "max": 0.4}},
+        "ctr": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 18, "max": 23}, "peak_width_hours": {"min": 2, "max": 6}, "peak_amplitude": {"min": 0.05, "max": 0.3}},
+        "cr": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 12, "max": 21}, "peak_width_hours": {"min": 3, "max": 7}, "peak_amplitude": {"min": 0.02, "max": 0.2}}
+      },
+      "weekday_patterns": {
+        "supply": {"variation": {"min": 0.02, "max": 0.12}, "weekend_modifier": {"min": 0.9, "max": 1.2}},
+        "cpm": {"variation": {"min": 0.02, "max": 0.1}, "weekend_modifier": {"min": 0.85, "max": 1.15}},
+        "ctr": {"variation": {"min": 0.01, "max": 0.08}, "weekend_modifier": {"min": 0.95, "max": 1.2}},
+        "cr": {"variation": {"min": 0.01, "max": 0.08}, "weekend_modifier": {"min": 0.9, "max": 1.1}}
+      },
+      "saturation": {
+        "start_threshold": {"min": 0.25, "max": 0.5},
+        "price_growth_strength": {"min": 0.3, "max": 1.2},
+        "reach_decay_strength": {"min": 1, "max": 3},
+        "frequency_reach_decay_strength": {"min": 0.05, "max": 0.3},
+        "ctr_fatigue_strength": {"min": 0.2, "max": 1},
+        "frequency_fatigue_strength": {"min": 0.03, "max": 0.2}
+      },
+      "volatility": {
+        "requests_sigma": {"min": 0.02, "max": 0.12},
+        "cpm_sigma": {"min": 0.01, "max": 0.08}
+      },
+      "drift": {
+        "supply": {"probability": 0.25, "log_strength": {"min": 0.02, "max": 0.2}, "duration_hours": {"min": 12, "max": 72}},
+        "cpm": {"probability": 0.25, "log_strength": {"min": 0.02, "max": 0.25}, "duration_hours": {"min": 12, "max": 72}},
+        "ctr": {"probability": 0.2, "log_strength": {"min": 0.01, "max": 0.15}, "duration_hours": {"min": 12, "max": 72}},
+        "cr": {"probability": 0.15, "log_strength": {"min": 0.01, "max": 0.12}, "duration_hours": {"min": 12, "max": 72}}
+      },
+      "shocks": {
+        "supply": {"probability": 0.2, "multiplier": {"min": 0.3, "max": 1.8}, "duration_hours": {"min": 1, "max": 12}},
+        "cpm": {"probability": 0.2, "multiplier": {"min": 0.7, "max": 1.7}, "duration_hours": {"min": 1, "max": 12}},
+        "ctr": {"probability": 0.15, "multiplier": {"min": 0.5, "max": 1.4}, "duration_hours": {"min": 1, "max": 12}},
+        "cr": {"probability": 0.1, "multiplier": {"min": 0.5, "max": 1.4}, "duration_hours": {"min": 1, "max": 12}},
+        "pause": {"probability": 0.05, "duration_hours": {"min": 1, "max": 6}}
+      }
+    },
+    {
+      "id": "search_1",
+      "type": "search",
+      "base": {
+        "cpm": {"distribution": "log_uniform", "range": {"min": 120, "max": 320}},
+        "ctr": {"distribution": "logit_uniform", "range": {"min": 0.015, "max": 0.05}},
+        "cr": {"distribution": "logit_uniform", "range": {"min": 0.03, "max": 0.1}},
+        "requests_per_day": {"distribution": "log_uniform", "range": {"min": 80000, "max": 300000}},
+        "audience_capacity": {"distribution": "log_uniform", "range": {"min": 250000, "max": 1000000}}
+      },
+      "hourly_patterns": {
+        "supply": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 8, "max": 20}, "peak_width_hours": {"min": 2, "max": 5}, "peak_amplitude": {"min": 0.1, "max": 0.45}},
+        "cpm": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 9, "max": 21}, "peak_width_hours": {"min": 2, "max": 5}, "peak_amplitude": {"min": 0.1, "max": 0.5}},
+        "ctr": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 8, "max": 19}, "peak_width_hours": {"min": 2, "max": 5}, "peak_amplitude": {"min": 0.05, "max": 0.25}},
+        "cr": {"peaks_count": {"min": 1, "max": 2}, "peak_center_hour": {"min": 9, "max": 18}, "peak_width_hours": {"min": 3, "max": 6}, "peak_amplitude": {"min": 0.02, "max": 0.18}}
+      },
+      "weekday_patterns": {
+        "supply": {"variation": {"min": 0.02, "max": 0.15}, "weekend_modifier": {"min": 0.7, "max": 1}},
+        "cpm": {"variation": {"min": 0.02, "max": 0.12}, "weekend_modifier": {"min": 0.75, "max": 1.05}},
+        "ctr": {"variation": {"min": 0.01, "max": 0.08}, "weekend_modifier": {"min": 0.8, "max": 1.05}},
+        "cr": {"variation": {"min": 0.01, "max": 0.08}, "weekend_modifier": {"min": 0.75, "max": 1.05}}
+      },
+      "saturation": {
+        "start_threshold": {"min": 0.2, "max": 0.45},
+        "price_growth_strength": {"min": 0.4, "max": 1.5},
+        "reach_decay_strength": {"min": 1.2, "max": 3.5},
+        "frequency_reach_decay_strength": {"min": 0.05, "max": 0.25},
+        "ctr_fatigue_strength": {"min": 0.15, "max": 0.8},
+        "frequency_fatigue_strength": {"min": 0.02, "max": 0.15}
+      },
+      "volatility": {
+        "requests_sigma": {"min": 0.02, "max": 0.1},
+        "cpm_sigma": {"min": 0.01, "max": 0.1}
+      },
+      "drift": {
+        "supply": {"probability": 0.2, "log_strength": {"min": 0.02, "max": 0.18}, "duration_hours": {"min": 12, "max": 72}},
+        "cpm": {"probability": 0.3, "log_strength": {"min": 0.02, "max": 0.3}, "duration_hours": {"min": 12, "max": 72}},
+        "ctr": {"probability": 0.2, "log_strength": {"min": 0.01, "max": 0.12}, "duration_hours": {"min": 12, "max": 72}},
+        "cr": {"probability": 0.15, "log_strength": {"min": 0.01, "max": 0.1}, "duration_hours": {"min": 12, "max": 72}}
+      },
+      "shocks": {
+        "supply": {"probability": 0.2, "multiplier": {"min": 0.35, "max": 1.7}, "duration_hours": {"min": 1, "max": 12}},
+        "cpm": {"probability": 0.25, "multiplier": {"min": 0.7, "max": 1.8}, "duration_hours": {"min": 1, "max": 12}},
+        "ctr": {"probability": 0.15, "multiplier": {"min": 0.55, "max": 1.35}, "duration_hours": {"min": 1, "max": 12}},
+        "cr": {"probability": 0.1, "multiplier": {"min": 0.55, "max": 1.35}, "duration_hours": {"min": 1, "max": 12}},
+        "pause": {"probability": 0.04, "duration_hours": {"min": 1, "max": 4}}
+      }
+    }
+  ]
+}
