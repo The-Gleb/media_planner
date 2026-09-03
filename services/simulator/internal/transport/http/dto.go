@@ -41,7 +41,7 @@ type stepRequestDTO struct {
 }
 
 func (d stepRequestDTO) domainActions() ([]domain.ChannelAction, error) {
-	if !uuidPattern.MatchString(d.StepID) {
+	if !stepIDPattern.MatchString(d.StepID) {
 		return nil, domain.NewError(domain.CodeValidation, "invalid step_id").WithField("step_id", "invalid_uuid")
 	}
 	actions := make([]domain.ChannelAction, 0, len(d.Actions))
@@ -55,4 +55,14 @@ func (d stepRequestDTO) domainActions() ([]domain.ChannelAction, error) {
 	return actions, nil
 }
 
-var uuidPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`)
+func parseSimulationID(value string) (string, error) {
+	if !simulationIDPattern.MatchString(value) {
+		return "", domain.NewError(domain.CodeValidation, "invalid simulation_id").WithField("simulation_id", "invalid_format")
+	}
+	return value, nil
+}
+
+var (
+	simulationIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
+	stepIDPattern       = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`)
+)

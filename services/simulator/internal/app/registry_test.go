@@ -59,3 +59,21 @@ func TestRegistryAllowsOneConcurrentCommit(t *testing.T) {
 		t.Fatalf("commits=%d", success.Load())
 	}
 }
+
+func TestRegistryCanRelaxPreconditionsForDevelopment(t *testing.T) {
+	strict, cfg := testRegistry(t)
+	registry := NewRegistry(strict.model, WithoutPreconditions())
+	state, _, created, err := registry.Reset("campaign-demo_1", cfg, "", false)
+	if err != nil || !created {
+		t.Fatalf("create without precondition: created=%v err=%v", created, err)
+	}
+	if _, _, err := registry.Step(state.ID, "a04ea33b-b91a-4faa-a0b5-f2869efbdf17", "", nil); err != nil {
+		t.Fatalf("step without precondition: %v", err)
+	}
+	if _, _, _, err := registry.Reset(state.ID, cfg, "", false); err != nil {
+		t.Fatalf("reset without precondition: %v", err)
+	}
+	if err := registry.Delete(state.ID, ""); err != nil {
+		t.Fatalf("delete without precondition: %v", err)
+	}
+}

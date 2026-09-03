@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"media-planner/services/simulator/internal/app"
-	"media-planner/services/simulator/internal/domain"
 )
 
 type API struct {
@@ -13,9 +12,9 @@ type API struct {
 }
 
 func (a *API) reset(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("simulation_id")
-	if !uuidPattern.MatchString(id) {
-		writeProblem(w, r, domain.NewError(domain.CodeValidation, "invalid simulation_id").WithField("simulation_id", "invalid_uuid"))
+	id, err := parseSimulationID(r.PathValue("simulation_id"))
+	if err != nil {
+		writeProblem(w, r, err)
 		return
 	}
 	var input simulationConfigDTO
@@ -42,7 +41,12 @@ func (a *API) reset(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *API) current(w http.ResponseWriter, r *http.Request) {
-	state, etag, err := a.registry.Current(r.PathValue("simulation_id"))
+	id, err := parseSimulationID(r.PathValue("simulation_id"))
+	if err != nil {
+		writeProblem(w, r, err)
+		return
+	}
+	state, etag, err := a.registry.Current(id)
 	if err != nil {
 		writeProblem(w, r, err)
 		return
@@ -51,7 +55,12 @@ func (a *API) current(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, state)
 }
 func (a *API) delete(w http.ResponseWriter, r *http.Request) {
-	if err := a.registry.Delete(r.PathValue("simulation_id"), r.Header.Get("If-Match")); err != nil {
+	id, err := parseSimulationID(r.PathValue("simulation_id"))
+	if err != nil {
+		writeProblem(w, r, err)
+		return
+	}
+	if err := a.registry.Delete(id, r.Header.Get("If-Match")); err != nil {
 		writeProblem(w, r, err)
 		return
 	}

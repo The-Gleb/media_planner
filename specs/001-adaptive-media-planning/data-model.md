@@ -21,7 +21,7 @@ Represents the externally addressable run and owns exactly one `Simulator` state
 
 | Field | Type | Rules |
 |---|---|---|
-| `simulation_id` | string | Planner-supplied UUID; immutable |
+| `simulation_id` | string | Planner-supplied URL-safe identifier; 1–128 characters; immutable |
 | `status` | enum | `active`, `finished`, `deleted` |
 | `revision` | uint64 | Starts at 1 after Reset; increments once per committed Step/Reset |
 | `engine_version` | string | Immutable for run; `sim-v0` initially |

@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-const lifecycleID = "11111111-1111-4111-8111-111111111111"
+const lifecycleID = "campaign-demo_1"
 
 type lifecycleStep struct {
 	Status         string `json:"status"`

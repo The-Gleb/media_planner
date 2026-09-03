@@ -64,15 +64,26 @@ type resource struct {
 }
 
 type Registry struct {
-	mu           sync.Mutex
-	model        config.Loaded
-	resource     *resource
-	tombstones   map[string]time.Time
-	tombstoneTTL time.Duration
+	mu                   sync.Mutex
+	model                config.Loaded
+	resource             *resource
+	tombstones           map[string]time.Time
+	tombstoneTTL         time.Duration
+	requirePreconditions bool
 }
 
-func NewRegistry(model config.Loaded) *Registry {
-	return &Registry{model: model, tombstones: make(map[string]time.Time), tombstoneTTL: time.Minute}
+type RegistryOption func(*Registry)
+
+func WithoutPreconditions() RegistryOption {
+	return func(registry *Registry) { registry.requirePreconditions = false }
+}
+
+func NewRegistry(model config.Loaded, options ...RegistryOption) *Registry {
+	registry := &Registry{model: model, tombstones: make(map[string]time.Time), tombstoneTTL: time.Minute, requirePreconditions: true}
+	for _, option := range options {
+		option(registry)
+	}
+	return registry
 }
 
 func (r *Registry) Reset(id string, cfg domain.SimulationConfig, ifMatch string, ifNoneMatch bool) (SimulationState, string, bool, error) {
@@ -84,13 +95,13 @@ func (r *Registry) Reset(id string, cfg domain.SimulationConfig, ifMatch string,
 		if r.resource.id != id {
 			return SimulationState{}, "", false, domain.NewError(domain.CodeActiveLimit, "another simulation already exists")
 		}
-		if ifNoneMatch {
+		if r.requirePreconditions && ifNoneMatch {
 			return SimulationState{}, "", false, domain.NewError(domain.CodePreconditionFailed, "simulation already exists")
 		}
-		if ifMatch == "" || ifMatch != r.resource.etag {
+		if r.requirePreconditions && (ifMatch == "" || ifMatch != r.resource.etag) {
 			return SimulationState{}, "", false, domain.NewError(domain.CodePreconditionFailed, "stale or missing If-Match")
 		}
-	} else if !ifNoneMatch {
+	} else if r.requirePreconditions && !ifNoneMatch {
 		return SimulationState{}, "", false, domain.NewError(domain.CodePreconditionFailed, "creation requires If-None-Match: *")
 	}
 	engine := simulation.New(r.model)
@@ -138,7 +149,7 @@ func (r *Registry) Step(id, stepID, ifMatch string, actions []domain.ChannelActi
 	if stepID == "" {
 		return StepResult{}, "", domain.NewError(domain.CodeValidation, "step_id is required").WithField("step_id", "required")
 	}
-	if ifMatch == "" || ifMatch != res.etag {
+	if r.requirePreconditions && (ifMatch == "" || ifMatch != res.etag) {
 		return StepResult{}, "", domain.NewError(domain.CodePreconditionFailed, "stale or missing If-Match")
 	}
 	observed := res.engine.CurrentHour()
@@ -170,7 +181,7 @@ func (r *Registry) Delete(id, ifMatch string) error {
 	if err != nil {
 		return err
 	}
-	if ifMatch == "" || ifMatch != res.etag {
+	if r.requirePreconditions && (ifMatch == "" || ifMatch != res.etag) {
 		return domain.NewError(domain.CodePreconditionFailed, "stale or missing If-Match")
 	}
 	r.resource = nil

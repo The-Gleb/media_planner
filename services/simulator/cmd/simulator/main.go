@@ -34,7 +34,11 @@ func main() {
 		os.Exit(1)
 	}
 	readiness := &httptransport.Readiness{}
-	registry := app.NewRegistry(loaded)
+	registryOptions := []app.RegistryOption{}
+	if envBool("SIMULATOR_RELAX_PRECONDITIONS") {
+		registryOptions = append(registryOptions, app.WithoutPreconditions())
+	}
+	registry := app.NewRegistry(loaded, registryOptions...)
 	handler := httptransport.NewHandler(registry, readiness)
 	server := httptransport.NewHTTPServer(envOr("SIMULATOR_ADDR", ":8080"), handler)
 	readiness.Set(true)
@@ -85,6 +89,14 @@ func envOr(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+func envBool(key string) bool {
+	switch os.Getenv(key) {
+	case "1", "true", "TRUE", "yes", "YES":
+		return true
+	default:
+		return false
+	}
 }
 func parseLevel(value string) slog.Level {
 	switch value {

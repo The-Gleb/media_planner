@@ -52,4 +52,9 @@ Step response safely retryable. A successful Step commits every channel atomical
 CurrentHour by 60 minutes. Restart intentionally loses the active run. Recover by Reset with the same
 identity inputs and replay the same ordered action sequence.
 
+Strict ETag preconditions are enabled by default. Local Compose sets
+`SIMULATOR_RELAX_PRECONDITIONS=true`, so Reset, Step and Delete can be called from Swagger UI without
+conditional headers. Remove that variable or set it to `false` to test production-style stale-write
+protection.
+
 See `specs/001-adaptive-media-planning/quickstart.md` for full contract examples and acceptance checks.

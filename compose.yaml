@@ -9,6 +9,7 @@ services:
       SIMULATOR_ADDR: :8080
       SIMULATOR_CONFIG: /etc/media-planner/world-config.json
       SIMULATOR_LOG_LEVEL: info
+      SIMULATOR_RELAX_PRECONDITIONS: "true"
     volumes:
       - ./services/simulator/configs/world-config.json:/etc/media-planner/world-config.json:ro
     ports:

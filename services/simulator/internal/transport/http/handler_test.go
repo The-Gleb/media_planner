@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"media-planner/services/simulator/internal/app"
@@ -21,9 +22,22 @@ func testHandler(t *testing.T) http.Handler {
 	return NewHandler(app.NewRegistry(model), ready)
 }
 
+func TestParseSimulationID(t *testing.T) {
+	for _, id := range []string{"campaign-demo_1", "demo.2026", "11111111-1111-4111-8111-111111111111"} {
+		if _, err := parseSimulationID(id); err != nil {
+			t.Errorf("valid id %q: %v", id, err)
+		}
+	}
+	for _, id := range []string{"", "-campaign", "campaign/id", "campaign id", "кампания", strings.Repeat("a", 129)} {
+		if _, err := parseSimulationID(id); err == nil {
+			t.Errorf("invalid id accepted: %q", id)
+		}
+	}
+}
+
 func TestHTTPResetCurrentStepDelete(t *testing.T) {
 	h := testHandler(t)
-	id := "11111111-1111-4111-8111-111111111111"
+	id := "campaign-demo_1"
 	resetBody := `{"world_seed":"42","campaign_seed":"77","start_hour":"2026-09-03T06:00:00Z","duration_hours":2,"time_zone":"Europe/Moscow"}`
 	req := httptest.NewRequest(http.MethodPut, "/v1/simulations/"+id, bytes.NewBufferString(resetBody))
 	req.Header.Set("Content-Type", "application/json")

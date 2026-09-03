@@ -2,14 +2,12 @@ package httptransport
 
 import (
 	"net/http"
-
-	"media-planner/services/simulator/internal/domain"
 )
 
 func (a *API) step(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("simulation_id")
-	if !uuidPattern.MatchString(id) {
-		writeProblem(w, r, domain.NewError(domain.CodeValidation, "invalid simulation_id").WithField("simulation_id", "invalid_uuid"))
+	id, err := parseSimulationID(r.PathValue("simulation_id"))
+	if err != nil {
+		writeProblem(w, r, err)
 		return
 	}
 	var input stepRequestDTO

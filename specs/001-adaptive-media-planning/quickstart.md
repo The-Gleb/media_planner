@@ -67,7 +67,7 @@ Both responses MUST be `{"status":"ok"}`.
 Use a stable simulation ID for the examples:
 
 ```bash
-export SIM_ID=11111111-1111-4111-8111-111111111111
+export SIM_ID=campaign-demo_1
 curl --silent --show-error \
   -D /tmp/simulator-reset.headers \
   -o /tmp/simulator-reset.json \
@@ -134,6 +134,10 @@ The response includes channels omitted from actions with a zero budget, zero pur
 and potentially nonzero requests representing available market supply.
 
 ## 5. Verify idempotent retry and stale-write protection
+
+The local Compose service sets `SIMULATOR_RELAX_PRECONDITIONS=true` for convenient Swagger/manual
+testing. To verify the strict stale-write checks in this section, set it to `false` and recreate the
+service. ETags are returned in both modes.
 
 Repeat the exact Step with the original ETag and step ID, saving a second body:
 

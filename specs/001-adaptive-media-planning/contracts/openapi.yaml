@@ -6,6 +6,8 @@ info:
     Contract for a seeded, hourly advertising-world simulator. Money uses decimal strings and
     counts use signed 64-bit integers constrained to non-negative values.
 servers:
+  - url: http://127.0.0.1:8080
+    description: Local Docker Compose host port
   - url: http://simulator:8080
     description: Docker Compose service network
 tags:
@@ -13,16 +15,21 @@ tags:
   - name: Health
 paths:
   /v1/simulations/{simulation_id}:
-    parameters:
-      - $ref: '#/components/parameters/SimulationID'
     put:
       tags: [Simulations]
       operationId: resetSimulation
       summary: Create or atomically reset a simulation
       description: >-
-        Creation requires If-None-Match: *. Reset of the same resource requires its current
-        If-Match ETag. At most one simulation resource may exist in v0.
+        In strict mode, creation requires If-None-Match: * and reset of the same resource requires
+        its current If-Match ETag. Local Compose relaxes these preconditions. At most one simulation
+        resource may exist in v0.
       parameters:
+        - name: simulation_id
+          in: path
+          required: true
+          description: Planner-assigned simulation identifier.
+          schema:
+            $ref: '#/components/schemas/SimulationID'
         - $ref: '#/components/parameters/IfMatchOptional'
         - $ref: '#/components/parameters/IfNoneMatchOptional'
       requestBody:
@@ -75,6 +82,12 @@ paths:
       operationId: deleteSimulation
       summary: Delete an in-memory simulation
       parameters:
+        - name: simulation_id
+          in: path
+          required: true
+          description: Planner-assigned simulation identifier.
+          schema:
+            $ref: '#/components/schemas/SimulationID'
         - $ref: '#/components/parameters/IfMatchRequired'
       responses:
         '204':
@@ -84,12 +97,17 @@ paths:
         '412':
           $ref: '#/components/responses/PreconditionFailed'
   /v1/simulations/{simulation_id}/current-hour:
-    parameters:
-      - $ref: '#/components/parameters/SimulationID'
     get:
       tags: [Simulations]
       operationId: getCurrentHour
       summary: Return the next hour not yet simulated
+      parameters:
+        - name: simulation_id
+          in: path
+          required: true
+          description: Planner-assigned simulation identifier.
+          schema:
+            $ref: '#/components/schemas/SimulationID'
       responses:
         '200':
           description: Current simulation position
@@ -105,17 +123,22 @@ paths:
         '410':
           $ref: '#/components/responses/Gone'
   /v1/simulations/{simulation_id}/steps:
-    parameters:
-      - $ref: '#/components/parameters/SimulationID'
     post:
       tags: [Simulations]
       operationId: stepSimulation
       summary: Atomically simulate the current hour and advance by one hour
       description: >-
-        For a new step_id, If-Match must equal the current resource ETag. A retry of a cached step_id
-        is resolved first: an identical normalized body returns the original response and ETag even
-        though the resource has advanced; a different body returns step_id_reused.
+        In strict mode, If-Match must equal the current resource ETag for a new step_id. Local
+        Compose relaxes this precondition. A cached step_id is resolved first: an identical
+        normalized body returns the original response and ETag even though the resource has
+        advanced; a different body returns step_id_reused.
       parameters:
+        - name: simulation_id
+          in: path
+          required: true
+          description: Planner-assigned simulation identifier.
+          schema:
+            $ref: '#/components/schemas/SimulationID'
         - $ref: '#/components/parameters/IfMatchRequired'
       requestBody:
         required: true
@@ -182,29 +205,21 @@ paths:
                 $ref: '#/components/schemas/Problem'
 components:
   parameters:
-    SimulationID:
-      name: simulation_id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: Planner-assigned simulation identifier.
     IfMatchRequired:
       name: If-Match
       in: header
-      required: true
+      required: false
       schema:
         type: string
         pattern: '^"[0-9]+-[a-f0-9]{16}"$'
-      description: Strong ETag from the latest state response.
+      description: Strong ETag from the latest state response; required only in strict mode.
     IfMatchOptional:
       name: If-Match
       in: header
       required: false
       schema:
         type: string
-      description: Required when resetting an existing simulation.
+      description: Required when resetting an existing simulation in strict mode.
     IfNoneMatchOptional:
       name: If-None-Match
       in: header
@@ -212,7 +227,7 @@ components:
       schema:
         type: string
         enum: ['*']
-      description: Must be `*` when creating a new simulation.
+      description: Must be `*` when creating a new simulation in strict mode.
   headers:
     ETag:
       required: true
@@ -270,8 +285,7 @@ components:
         - channel_ids
       properties:
         simulation_id:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/SimulationID'
         status:
           type: string
           enum: [active, finished]
@@ -308,8 +322,7 @@ components:
       required: [simulation_id, status, current_hour, remaining_hours]
       properties:
         simulation_id:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/SimulationID'
         status:
           type: string
           enum: [active, finished]
@@ -318,6 +331,12 @@ components:
         remaining_hours:
           type: integer
           minimum: 0
+    SimulationID:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'
+      example: campaign-demo_1
     ChannelID:
       type: string
       pattern: '^[a-z][a-z0-9_-]{0,63}$'
@@ -402,8 +421,7 @@ components:
         - observations
       properties:
         simulation_id:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/SimulationID'
         step_id:
           type: string
           format: uuid
