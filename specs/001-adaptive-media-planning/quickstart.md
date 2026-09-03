@@ -51,8 +51,8 @@ docker compose ps simulator
 
 Expected: Simulator is healthy. Planner and Predictor are not required in this phase.
 
-For local validation, Compose may publish Simulator on `127.0.0.1:8080`. The production profile
-keeps it internal and future Planner reaches it as `http://simulator:8080`.
+For local validation, Compose publishes Simulator on `127.0.0.1:8080`. Future Planner instances on
+the same Compose network reach it as `http://simulator:8080`.
 
 ```bash
 export SIM_BASE_URL=http://127.0.0.1:8080

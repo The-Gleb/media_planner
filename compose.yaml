@@ -42,4 +42,3 @@ services:
 
 networks:
   media-planner-internal:
-    internal: true

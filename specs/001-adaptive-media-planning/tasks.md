@@ -27,7 +27,7 @@ Simulator story, and cross-cutting release gates.
 
 - [X] T001 Initialize module `media-planner/services/simulator` with `go 1.27.0` and `toolchain go1.27.1` in services/simulator/go.mod
 - [X] T002 [P] Create the multi-stage non-root container build skeleton in services/simulator/Dockerfile and services/simulator/.dockerignore
-- [X] T003 [P] Define the Simulator-only local service, internal network, read-only config mount and healthcheck in compose.yaml
+- [X] T003 [P] Define the Simulator-only local service network, read-only config mount and healthcheck in compose.yaml
 - [X] T004 [P] Create a schema-conformant `sim-v0` model with `social_1` and `search_1` ranges in services/simulator/configs/world-config.json
 - [X] T005 Initialize the isolated contract/integration test module, pin a test-only OpenAPI 3.1 validator and add workspace references in tests/go.mod and go.work
 

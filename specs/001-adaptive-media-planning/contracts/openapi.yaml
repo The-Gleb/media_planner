@@ -7,7 +7,7 @@ info:
     counts use signed 64-bit integers constrained to non-negative values.
 servers:
   - url: http://simulator:8080
-    description: Docker Compose internal network
+    description: Docker Compose service network
 tags:
   - name: Simulations
   - name: Health

@@ -16,10 +16,13 @@ func TestComposeConfiguration(t *testing.T) {
 		t.Fatalf("compose: %v: %s", err, out)
 	}
 	configuration := string(out)
-	for _, required := range []string{"internal: true", "read_only: true", "target: /etc/media-planner/world-config.json", "host_ip: 127.0.0.1"} {
+	for _, required := range []string{"read_only: true", "target: /etc/media-planner/world-config.json", "host_ip: 127.0.0.1"} {
 		if !strings.Contains(configuration, required) {
 			t.Fatalf("compose config missing %q", required)
 		}
+	}
+	if strings.Contains(configuration, "internal: true") {
+		t.Fatal("local Compose network must allow published host ports")
 	}
 	if os.Getenv("RUN_COMPOSE_TESTS") == "" {
 		t.Log("set RUN_COMPOSE_TESTS=1 to additionally verify the running container")
