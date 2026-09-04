@@ -1,0 +1,89 @@
+openapi: 3.1.2
+info:
+  title: Media Planner Simulator Dashboard Bootstrap Addition
+  version: 0.2.0
+  description: >-
+    Additive contract required by the dashboard. Existing simulation, step and health operations
+    remain defined by specs/001-adaptive-media-planning/contracts/openapi.yaml.
+servers:
+  - url: http://127.0.0.1:8080
+    description: Direct local Simulator access
+  - url: http://127.0.0.1:8081/api
+    description: Same-origin dashboard proxy
+tags:
+  - name: World
+paths:
+  /v1/world-metadata:
+    get:
+      tags: [World]
+      operationId: getWorldMetadata
+      summary: Return the public immutable metadata needed to configure a campaign
+      description: >-
+        Returns only stable public identifiers. Base rates, audience capacities, temporal profiles,
+        drift, shocks and other hidden simulation parameters are not exposed.
+      responses:
+        '200':
+          description: Loaded Simulator model metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorldMetadata'
+              examples:
+                default:
+                  value:
+                    engine_version: sim-v0
+                    world_config_digest: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+                    currency: RUB
+                    channel_ids: [search_1, social_1]
+        '503':
+          description: World configuration is unavailable or invalid
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  schemas:
+    ChannelID:
+      type: string
+      pattern: '^[a-z][a-z0-9_-]{0,63}$'
+    WorldMetadata:
+      type: object
+      additionalProperties: false
+      required: [engine_version, world_config_digest, currency, channel_ids]
+      properties:
+        engine_version:
+          type: string
+          minLength: 1
+        world_config_digest:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        channel_ids:
+          type: array
+          minItems: 1
+          maxItems: 20
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/ChannelID'
+    Problem:
+      type: object
+      additionalProperties: true
+      required: [type, title, status, code]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        code:
+          type: string
+        trace_id:
+          type: string

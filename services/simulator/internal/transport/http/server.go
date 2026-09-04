@@ -13,6 +13,7 @@ func NewHandler(registry *app.Registry, readiness *Readiness) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health/live", readiness.LivenessHandler())
 	mux.HandleFunc("GET /health/ready", readiness.ReadinessHandler())
+	mux.HandleFunc("GET /v1/world-metadata", api.worldMetadata)
 	mux.HandleFunc("PUT /v1/simulations/{simulation_id}", api.reset)
 	mux.HandleFunc("GET /v1/simulations/{simulation_id}/current-hour", api.current)
 	mux.HandleFunc("POST /v1/simulations/{simulation_id}/steps", api.step)

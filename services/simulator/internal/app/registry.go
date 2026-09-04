@@ -30,6 +30,15 @@ type SimulationState struct {
 	ChannelIDs        []domain.ChannelID      `json:"channel_ids"`
 }
 
+// WorldMetadata is the stable public projection of the loaded world model.
+// Hidden rates, capacities, profiles and event settings are deliberately excluded.
+type WorldMetadata struct {
+	EngineVersion     string             `json:"engine_version"`
+	WorldConfigDigest string             `json:"world_config_digest"`
+	Currency          string             `json:"currency"`
+	ChannelIDs        []domain.ChannelID `json:"channel_ids"`
+}
+
 type CurrentState struct {
 	ID             string                  `json:"simulation_id"`
 	Status         domain.SimulationStatus `json:"status"`
@@ -190,6 +199,19 @@ func (r *Registry) Delete(id, ifMatch string) error {
 }
 
 func (r *Registry) Model() config.Loaded { return r.model }
+func (r *Registry) WorldMetadata() WorldMetadata {
+	ids := make([]domain.ChannelID, 0, len(r.model.Model.Channels))
+	for _, channel := range r.model.Model.Channels {
+		ids = append(ids, channel.ID)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return WorldMetadata{
+		EngineVersion:     r.model.Model.EngineVersion,
+		WorldConfigDigest: r.model.Digest,
+		Currency:          r.model.Model.Currency,
+		ChannelIDs:        ids,
+	}
+}
 func (r *Registry) find(id string) (*resource, error) {
 	r.expireTombstones()
 	if r.resource != nil && r.resource.id == id {

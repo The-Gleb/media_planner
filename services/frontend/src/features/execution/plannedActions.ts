@@ -1,0 +1,3 @@
+import type { ActivePlan } from '../../domain/planning'
+import type { ChannelBudget } from '../../domain/types'
+export function plannedActions(plan:ActivePlan,relativeHour:number,channels:readonly string[]):ChannelBudget[]{if(new Set(channels).size!==channels.length)throw new Error('duplicate_active_channel');const hour=plan.index.get(relativeHour);if(!hour)throw new Error('missing_plan_hour');if(hour.size!==channels.length)throw new Error('unexpected_plan_allocation');return channels.map(channelId=>{const budgetCap=hour.get(channelId);if(budgetCap===undefined)throw new Error('missing_plan_allocation');return{channelId,budgetCap}})}

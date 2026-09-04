@@ -33,6 +33,7 @@ func TestSimulatorBlackBoxLifecycle(t *testing.T) {
 	if base == "" {
 		t.Skip("set SIMULATOR_BASE_URL to run black-box lifecycle")
 	}
+	defer cleanupSimulation(t, base, lifecycleID)
 	assertStatus(t, request(t, http.MethodGet, base+"/health/ready", "", nil), http.StatusOK)
 	resetBody := `{"world_seed":"42001","campaign_seed":"77001","start_hour":"2026-09-03T06:00:00Z","duration_hours":24,"time_zone":"Europe/Moscow"}`
 	etag := reset(t, base, resetBody)
@@ -61,6 +62,24 @@ func TestSimulatorBlackBoxLifecycle(t *testing.T) {
 	}
 }
 
+func cleanupSimulation(t *testing.T, base, id string) {
+	t.Helper()
+	resp := request(t, http.MethodGet, base+"/v1/simulations/"+id+"/current-hour", "", nil)
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return
+	}
+	etag := resp.Header.Get("ETag")
+	resp.Body.Close()
+	deleted := request(t, http.MethodDelete, base+"/v1/simulations/"+id, etag, nil)
+	if deleted.StatusCode != http.StatusNoContent {
+		body := readBody(t, deleted)
+		t.Logf("cleanup status=%d body=%s", deleted.StatusCode, body)
+		return
+	}
+	deleted.Body.Close()
+}
+
 func TestSimulatorRestartStartsEmpty(t *testing.T) {
 	base := os.Getenv("SIMULATOR_BASE_URL")
 	if base == "" || os.Getenv("CHECK_RESTART_EMPTY") == "" {
@@ -85,7 +104,7 @@ func reset(t *testing.T, base, body string) string {
 func stepBody(hour int) []byte {
 	actions := `[]`
 	if hour > 0 {
-		actions = `[{"channel_id":"social_1","budget_cap":"1500.000000"},{"channel_id":"search_1","budget_cap":"900.000000"}]`
+		actions = `[{"channel_id":"social_1","budget_cap":"1500.000000"},{"channel_id":"marketplace_2","budget_cap":"900.000000"}]`
 	}
 	return []byte(fmt.Sprintf(`{"step_id":"00000000-0000-4000-8000-%012x","actions":%s}`, hour+1, actions))
 }
@@ -138,7 +157,7 @@ func assertStepInvariants(t *testing.T, payload []byte, hour int) {
 	if err := json.Unmarshal(payload, &step); err != nil {
 		t.Fatal(err)
 	}
-	if len(step.Observations) != 2 || step.RemainingHours != 23-hour {
+	if len(step.Observations) != 8 || step.RemainingHours != 23-hour {
 		t.Fatalf("unexpected step %d: %+v", hour, step)
 	}
 	if hour == 23 && step.Status != "finished" {
@@ -155,7 +174,7 @@ func assertStepInvariants(t *testing.T, payload []byte, hour int) {
 		cap := 0.0
 		if hour > 0 && observation.ChannelID == "social_1" {
 			cap = 1500
-		} else if hour > 0 {
+		} else if hour > 0 && observation.ChannelID == "marketplace_2" {
 			cap = 900
 		}
 		if spend > cap || (observation.Impressions == 0) != (observation.ECPM == nil) {

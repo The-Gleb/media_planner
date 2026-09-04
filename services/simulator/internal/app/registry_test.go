@@ -19,6 +19,17 @@ func testRegistry(t *testing.T) (*Registry, domain.SimulationConfig) {
 	return NewRegistry(model), domain.SimulationConfig{WorldSeed: 42, CampaignSeed: 77, StartHour: h, DurationHours: 2, TimeZone: "Europe/Moscow"}
 }
 
+func TestWorldMetadataIsSanitizedAndSorted(t *testing.T) {
+	r, _ := testRegistry(t)
+	metadata := r.WorldMetadata()
+	if metadata.EngineVersion == "" || metadata.Currency == "" || len(metadata.WorldConfigDigest) != 64 {
+		t.Fatalf("incomplete metadata: %+v", metadata)
+	}
+	if len(metadata.ChannelIDs) != 2 || metadata.ChannelIDs[0] != "search_1" || metadata.ChannelIDs[1] != "social_1" {
+		t.Fatalf("channel IDs are not stable and sorted: %v", metadata.ChannelIDs)
+	}
+}
+
 func TestRegistryConditionalStepAndRetry(t *testing.T) {
 	r, cfg := testRegistry(t)
 	state, etag, created, err := r.Reset("11111111-1111-4111-8111-111111111111", cfg, "", true)

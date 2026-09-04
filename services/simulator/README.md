@@ -16,11 +16,22 @@ docker compose up --build --wait simulator
 The local Compose profile exposes `http://127.0.0.1:8080`. Service health is available at
 `/health/live` and `/health/ready`; low-cardinality process metrics are internal at `/metrics`.
 
+`GET /v1/world-metadata` returns only the public immutable bootstrap fields used by clients:
+`engine_version`, `world_config_digest`, `currency`, and ordered `channel_ids`. Hidden market rates,
+audience capacities, profiles, drift and shocks are intentionally excluded.
+
 ## Configuration
 
-`configs/world-config.json` defines currency, engine version and plausible ranges for each channel.
-It is strict JSON and is mounted read-only in Compose. The service refuses readiness when the config
-is unknown, incomplete, out of range, contains duplicate channel IDs or cannot be normalized.
+`configs/world-config.mediaplan.json` is the Compose default. It defines eight channels:
+`social_1..3`, `programmatic`, `marketplace_1..3`, and `sms`, with channel-specific CPM, CTR, CR,
+supply, volatility and saturation ranges. It is strict JSON and is mounted read-only in Compose.
+The smaller `configs/world-config.json` remains a deterministic test fixture. The service refuses
+readiness when a config is unknown, incomplete, out of range, contains duplicate channel IDs or
+cannot be normalized.
+
+The current action contract purchases impressions under a CPM budget cap. Until package-priced
+inventory is introduced, `sms` therefore uses an explicit effective CPM-equivalent in the default
+world; it must not be interpreted as a real SMS tariff.
 
 The reset call supplies WorldSeed, CampaignSeed, StartHour, DurationHours and IANA timezone. Exact
 replay identity consists of:
@@ -32,8 +43,14 @@ replay identity consists of:
 - normalized sequence of channel actions.
 
 WorldSeed selects base market properties, time profiles and response curves. CampaignSeed selects
-noise, outcomes, drift and shock schedules. Independent keyed random streams prevent channel order or
-an unrelated random draw from changing other processes.
+noise, outcomes, drift and random shock schedules. Independent keyed random streams prevent channel
+order or an unrelated random draw from changing other processes.
+
+Reset can additionally supply deterministic `scenario_events` for `supply`, `cpm`, `ctr`, `cr`, or
+`pause`, with a channel, relative start hour, duration and multiplier. Set
+`disable_random_events=true` when comparing strategies so both sequential runs see only the same
+controlled scenario. Scenario events are validated against the selected channels and horizon and
+become part of the replay identity.
 
 ## Money and reach semantics
 

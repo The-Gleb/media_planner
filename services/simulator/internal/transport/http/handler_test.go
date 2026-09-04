@@ -2,6 +2,7 @@ package httptransport
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -32,6 +33,26 @@ func TestParseSimulationID(t *testing.T) {
 		if _, err := parseSimulationID(id); err == nil {
 			t.Errorf("invalid id accepted: %q", id)
 		}
+	}
+}
+
+func TestWorldMetadata(t *testing.T) {
+	h := testHandler(t)
+	req := httptest.NewRequest(http.MethodGet, "/v1/world-metadata", nil)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String())
+	}
+	var metadata app.WorldMetadata
+	if err := json.Unmarshal(rr.Body.Bytes(), &metadata); err != nil {
+		t.Fatal(err)
+	}
+	if metadata.Currency != "RUB" || len(metadata.ChannelIDs) != 2 {
+		t.Fatalf("metadata=%+v", metadata)
+	}
+	if strings.Contains(rr.Body.String(), "base_cpm") || strings.Contains(rr.Body.String(), "audience_capacity") {
+		t.Fatalf("metadata leaks hidden model: %s", rr.Body.String())
 	}
 }
 

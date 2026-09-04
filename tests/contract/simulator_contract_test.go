@@ -19,6 +19,14 @@ func TestOpenAPIAndWorldSchemaLoad(t *testing.T) {
 	if err := doc.Validate(context.Background()); err != nil {
 		t.Fatal(err)
 	}
+	metadataPath := doc.Paths.Find("/v1/world-metadata")
+	if metadataPath == nil || metadataPath.Get == nil {
+		t.Fatal("OpenAPI is missing GET /v1/world-metadata")
+	}
+	metadata := doc.Components.Schemas["WorldMetadata"]
+	if metadata == nil || metadata.Value == nil || len(metadata.Value.Required) != 4 {
+		t.Fatal("WorldMetadata schema is incomplete")
+	}
 	b, err := os.ReadFile(filepath.Join(root, "specs", "001-adaptive-media-planning", "contracts", "world-config.schema.json"))
 	if err != nil {
 		t.Fatal(err)

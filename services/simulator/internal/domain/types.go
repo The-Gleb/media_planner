@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -68,12 +70,24 @@ func (h *Hour) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type ScenarioEvent struct {
+	ChannelID     ChannelID `json:"channel_id"`
+	Metric        string    `json:"metric"`
+	StartIndex    int       `json:"start_index"`
+	DurationHours int       `json:"duration_hours"`
+	Multiplier    float64   `json:"multiplier"`
+}
+
+var scenarioMetrics = map[string]struct{}{"supply": {}, "cpm": {}, "ctr": {}, "cr": {}, "pause": {}}
+
 type SimulationConfig struct {
-	WorldSeed     int64  `json:"world_seed"`
-	CampaignSeed  int64  `json:"campaign_seed"`
-	StartHour     Hour   `json:"start_hour"`
-	DurationHours int    `json:"duration_hours"`
-	TimeZone      string `json:"time_zone"`
+	WorldSeed           int64           `json:"world_seed"`
+	CampaignSeed        int64           `json:"campaign_seed"`
+	StartHour           Hour            `json:"start_hour"`
+	DurationHours       int             `json:"duration_hours"`
+	TimeZone            string          `json:"time_zone"`
+	ScenarioEvents      []ScenarioEvent `json:"scenario_events,omitempty"`
+	DisableRandomEvents bool            `json:"disable_random_events,omitempty"`
 }
 
 func (c SimulationConfig) Validate() error {
@@ -94,6 +108,24 @@ func (c SimulationConfig) Validate() error {
 		add("time_zone", "required")
 	} else if _, err := time.LoadLocation(c.TimeZone); err != nil {
 		add("time_zone", "unknown_time_zone")
+	}
+	for i, event := range c.ScenarioEvents {
+		prefix := "scenario_events[" + strconv.Itoa(i) + "]"
+		if err := event.ChannelID.Validate(); err != nil {
+			add(prefix+".channel_id", "invalid_format")
+		}
+		if _, ok := scenarioMetrics[event.Metric]; !ok {
+			add(prefix+".metric", "unknown_metric")
+		}
+		if event.StartIndex < 0 || event.StartIndex >= c.DurationHours {
+			add(prefix+".start_index", "out_of_range")
+		}
+		if event.DurationHours < 1 || event.StartIndex+event.DurationHours > c.DurationHours {
+			add(prefix+".duration_hours", "out_of_range")
+		}
+		if event.Metric != "pause" && (math.IsNaN(event.Multiplier) || math.IsInf(event.Multiplier, 0) || event.Multiplier < 0) {
+			add(prefix+".multiplier", "must_be_non_negative_finite")
+		}
 	}
 	if result != nil {
 		return result

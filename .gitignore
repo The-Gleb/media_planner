@@ -21,3 +21,22 @@ Thumbs.db
 coverage/
 *.log
 *.log.*
+
+# Node / frontend
+node_modules/
+dist/
+build/
+playwright-report/
+test-results/
+.vite/
+*.tsbuildinfo
+# Python Planner
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/

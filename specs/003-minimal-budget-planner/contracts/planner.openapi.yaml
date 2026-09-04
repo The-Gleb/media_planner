@@ -1,0 +1,563 @@
+openapi: 3.1.2
+info:
+  title: Media Planner Planning API
+  version: 1.0.0
+  description: >-
+    Stateless deterministic planning boundary. Money and counts are decimal strings. Planner does
+    not call Simulator, store campaign state, or produce forecasts in v0.
+servers:
+  - url: http://127.0.0.1:8082
+    description: Local Docker Compose host port
+  - url: http://planner:8080
+    description: Docker Compose service network
+tags:
+  - name: Plans
+  - name: Health
+paths:
+  /v1/plans:
+    post:
+      tags: [Plans]
+      operationId: createMediaPlan
+      summary: Create or reproduce a deterministic plan for a campaign-state snapshot
+      description: >-
+        A fixed-budget request returns the complete full-horizon plan. Updated current state is
+        acknowledged through request_id and state_revision but does not alter v0 allocations.
+        Target-KPI requests are structurally accepted and rejected as unsupported_plan_type.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+            examples:
+              fixedBudget:
+                value:
+                  request_id: 5ca761eb-a701-4c91-9dd7-47c9f709e00d
+                  type: fixed_budget
+                  strategy: uniform
+                  horizon:
+                    from_hour: 0
+                    to_hour: 2
+                  channels: [search_1, social_1]
+                  simulation:
+                    simulation_id: simulation-demo_1
+                    world_seed: '42001'
+                    campaign_seed: '77001'
+                    start_hour: '2026-09-03T06:00:00Z'
+                    time_zone: Europe/Moscow
+                    currency: RUB
+                    world_config_digest: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  market:
+                    status: unavailable
+                  current:
+                    current_hour: 0
+                    state_revision: 0
+                    last_step_id: null
+                    last_observed_at: null
+                    spent: '0.000000'
+                    unique_reach: '0'
+                    clicks: '0'
+                    conversions: '0'
+                    channels:
+                      search_1:
+                        spent: '0.000000'
+                        impressions: '0'
+                        unique_reach: '0'
+                        clicks: '0'
+                        conversions: '0'
+                      social_1:
+                        spent: '0.000000'
+                        impressions: '0'
+                        unique_reach: '0'
+                        clicks: '0'
+                        conversions: '0'
+                  budget: '12.000000'
+                  optimize: unique_reach
+                  target: null
+      responses:
+        '200':
+          description: Complete deterministic fixed-budget plan
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaPlan'
+              examples:
+                uniformTwoByTwo:
+                  value:
+                    request_id: 5ca761eb-a701-4c91-9dd7-47c9f709e00d
+                    state_revision: 0
+                    plan_id: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    feasible: true
+                    type: fixed_budget
+                    strategy: uniform
+                    optimize: unique_reach
+                    currency: RUB
+                    budget: '12.000000'
+                    horizon:
+                      from_hour: 0
+                      to_hour: 2
+                    expected: null
+                    allocations:
+                      - channel_id: search_1
+                        hour: 0
+                        budget_cap: '3.000000'
+                        expected: null
+                      - channel_id: social_1
+                        hour: 0
+                        budget_cap: '3.000000'
+                        expected: null
+                      - channel_id: search_1
+                        hour: 1
+                        budget_cap: '3.000000'
+                        expected: null
+                      - channel_id: social_1
+                        hour: 1
+                        budget_cap: '3.000000'
+                        expected: null
+                    required_budget: null
+                    reason: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /health/live:
+    get:
+      tags: [Health]
+      operationId: getPlannerLiveness
+      summary: Report whether the Planner process can serve HTTP
+      responses:
+        '200':
+          $ref: '#/components/responses/Healthy'
+  /health/ready:
+    get:
+      tags: [Health]
+      operationId: getPlannerReadiness
+      summary: Report whether Planner initialization completed
+      description: Does not contact Simulator or any other service.
+      responses:
+        '200':
+          $ref: '#/components/responses/Healthy'
+        '503':
+          description: Planner is not ready
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  headers:
+    RequestID:
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Request identifier supplied by the client or generated at the boundary.
+  responses:
+    Healthy:
+      description: Healthy
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Health'
+    BadRequest:
+      description: Malformed JSON or request framing
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnsupportedMediaType:
+      description: Request body is not JSON
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnprocessableEntity:
+      description: Invalid request or unsupported plan type
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalError:
+      description: Unexpected internal failure
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    PlanRequest:
+      oneOf:
+        - $ref: '#/components/schemas/FixedBudgetPlanRequest'
+        - $ref: '#/components/schemas/TargetKPIPlanRequest'
+      discriminator:
+        propertyName: type
+        mapping:
+          fixed_budget: '#/components/schemas/FixedBudgetPlanRequest'
+          target_kpi: '#/components/schemas/TargetKPIPlanRequest'
+    FixedBudgetPlanRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - request_id
+        - type
+        - strategy
+        - horizon
+        - channels
+        - simulation
+        - market
+        - current
+        - budget
+        - optimize
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        type:
+          const: fixed_budget
+        strategy:
+          $ref: '#/components/schemas/Strategy'
+        horizon:
+          $ref: '#/components/schemas/Horizon'
+        channels:
+          $ref: '#/components/schemas/Channels'
+        simulation:
+          $ref: '#/components/schemas/SimulationContext'
+        market:
+          $ref: '#/components/schemas/MarketForecast'
+        current:
+          $ref: '#/components/schemas/CampaignState'
+        budget:
+          $ref: '#/components/schemas/Money'
+        optimize:
+          $ref: '#/components/schemas/KPI'
+        target:
+          type: 'null'
+          default: null
+    TargetKPIPlanRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - request_id
+        - type
+        - strategy
+        - horizon
+        - channels
+        - simulation
+        - market
+        - current
+        - target
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        type:
+          const: target_kpi
+        strategy:
+          $ref: '#/components/schemas/Strategy'
+        horizon:
+          $ref: '#/components/schemas/Horizon'
+        channels:
+          $ref: '#/components/schemas/Channels'
+        simulation:
+          $ref: '#/components/schemas/SimulationContext'
+        market:
+          $ref: '#/components/schemas/MarketForecast'
+        current:
+          $ref: '#/components/schemas/CampaignState'
+        budget:
+          type: 'null'
+          default: null
+        optimize:
+          type: 'null'
+          default: null
+        target:
+          $ref: '#/components/schemas/TargetKPI'
+    PlanType:
+      type: string
+      enum: [fixed_budget, target_kpi]
+    KPI:
+      type: string
+      enum: [unique_reach, clicks, conversions]
+    Strategy:
+      type: string
+      enum: [uniform, optimized]
+      description: Uniform exact split or catalog-based saturation-aware water-filling.
+    Horizon:
+      type: object
+      additionalProperties: false
+      required: [from_hour, to_hour]
+      properties:
+        from_hour:
+          type: integer
+          minimum: 0
+          maximum: 2159
+        to_hour:
+          type: integer
+          minimum: 1
+          maximum: 2160
+      description: Half-open relative-hour interval; from_hour must be less than to_hour.
+    Channels:
+      type: array
+      minItems: 1
+      maxItems: 20
+      uniqueItems: true
+      items:
+        $ref: '#/components/schemas/ChannelID'
+    ChannelID:
+      type: string
+      pattern: '^[a-z][a-z0-9_-]{0,63}$'
+    SimulationContext:
+      type: object
+      additionalProperties: false
+      required:
+        - simulation_id
+        - world_seed
+        - campaign_seed
+        - start_hour
+        - time_zone
+        - currency
+        - world_config_digest
+      properties:
+        simulation_id:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'
+        world_seed:
+          $ref: '#/components/schemas/Int64Text'
+        campaign_seed:
+          $ref: '#/components/schemas/Int64Text'
+        start_hour:
+          type: string
+          format: date-time
+          description: Must be aligned to the start of an hour.
+        time_zone:
+          type: string
+          minLength: 1
+          maxLength: 64
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        world_config_digest:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+    MarketForecast:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          const: unavailable
+    CampaignState:
+      type: object
+      additionalProperties: false
+      required:
+        - current_hour
+        - state_revision
+        - last_step_id
+        - last_observed_at
+        - spent
+        - unique_reach
+        - clicks
+        - conversions
+        - channels
+      properties:
+        current_hour:
+          type: integer
+          minimum: 0
+          maximum: 2160
+        state_revision:
+          type: integer
+          minimum: 0
+          maximum: 2160
+        last_step_id:
+          oneOf:
+            - type: string
+              format: uuid
+            - type: 'null'
+        last_observed_at:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+        spent:
+          $ref: '#/components/schemas/Money'
+        unique_reach:
+          $ref: '#/components/schemas/Count'
+        clicks:
+          $ref: '#/components/schemas/Count'
+        conversions:
+          $ref: '#/components/schemas/Count'
+        channels:
+          type: object
+          minProperties: 1
+          maxProperties: 20
+          propertyNames:
+            $ref: '#/components/schemas/ChannelID'
+          additionalProperties:
+            $ref: '#/components/schemas/ChannelState'
+    ChannelState:
+      type: object
+      additionalProperties: false
+      required: [spent, impressions, unique_reach, clicks, conversions]
+      properties:
+        spent:
+          $ref: '#/components/schemas/Money'
+        requests:
+          $ref: '#/components/schemas/Count'
+        impressions:
+          $ref: '#/components/schemas/Count'
+        unique_reach:
+          $ref: '#/components/schemas/Count'
+        clicks:
+          $ref: '#/components/schemas/Count'
+        conversions:
+          $ref: '#/components/schemas/Count'
+    TargetKPI:
+      type: object
+      additionalProperties: false
+      required: [metric, value]
+      properties:
+        metric:
+          $ref: '#/components/schemas/KPI'
+        value:
+          $ref: '#/components/schemas/PositiveCount'
+    MediaPlan:
+      type: object
+      additionalProperties: false
+      required:
+        - request_id
+        - state_revision
+        - plan_id
+        - feasible
+        - type
+        - strategy
+        - optimize
+        - currency
+        - budget
+        - horizon
+        - expected
+        - allocations
+        - required_budget
+        - reason
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        state_revision:
+          type: integer
+          minimum: 0
+          maximum: 2160
+        plan_id:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        feasible:
+          const: true
+        type:
+          const: fixed_budget
+        strategy:
+          $ref: '#/components/schemas/Strategy'
+        optimize:
+          $ref: '#/components/schemas/KPI'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        budget:
+          $ref: '#/components/schemas/Money'
+        horizon:
+          $ref: '#/components/schemas/Horizon'
+        expected:
+          type: 'null'
+        allocations:
+          type: array
+          minItems: 1
+          maxItems: 43200
+          items:
+            $ref: '#/components/schemas/Allocation'
+        required_budget:
+          type: 'null'
+        reason:
+          type: 'null'
+    Allocation:
+      type: object
+      additionalProperties: false
+      required: [channel_id, hour, budget_cap, expected]
+      properties:
+        channel_id:
+          $ref: '#/components/schemas/ChannelID'
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 2159
+        budget_cap:
+          $ref: '#/components/schemas/Money'
+        expected:
+          type: 'null'
+    Money:
+      type: string
+      pattern: '^(0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
+      description: >-
+        Non-negative decimal, maximum 9223372036854.775807. Responses use exactly six fractional
+        digits. Exponential notation and JSON numbers are invalid.
+    Count:
+      type: string
+      pattern: '^(0|[1-9][0-9]*)$'
+    PositiveCount:
+      type: string
+      pattern: '^[1-9][0-9]*$'
+    Int64Text:
+      type: string
+      pattern: '^-?(0|[1-9][0-9]*)$'
+      description: Must be within signed int64 range.
+    Health:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          const: ok
+    Problem:
+      type: object
+      additionalProperties: true
+      required: [type, title, status, code]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+        code:
+          type: string
+          enum:
+            - invalid_json
+            - unsupported_media_type
+            - validation_failed
+            - unsupported_plan_type
+            - internal_error
+            - not_ready
+        trace_id:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, code]
+            properties:
+              field:
+                type: string
+              code:
+                type: string
+              detail:
+                type: string
