@@ -45,7 +45,7 @@ export function CampaignForm({ metadata, draft, errors, busy, hasSession, onChan
         <PlanningFields value={draft.campaign} currency={metadata.currency} errors={errors} disabled={busy} onChange={(campaign) => onChange({ ...draft, campaign })} />
       </fieldset>
 
-      <div className="actions"><button type="submit" disabled={busy || draft.campaign.planType === 'target_kpi'}>{busy ? 'Построение плана…' : hasSession ? 'Перепланировать, сбросить и запустить' : 'Построить план и запустить'}</button></div>
+      <div className="actions"><button type="submit" disabled={busy}>{busy ? 'Построение плана…' : hasSession ? 'Перепланировать, сбросить и запустить' : 'Построить план и запустить'}</button></div>
     </form>
   </section>
 }

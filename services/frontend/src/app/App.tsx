@@ -64,13 +64,13 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
       channels: metadata.channelIds,
       currency: metadata.currency,
       worldConfigDigest: metadata.worldConfigDigest,
-      budget: current.activeDraft.campaign.totalBudget,
-      optimize: current.activeDraft.campaign.optimize,
-      strategy: current.activeDraft.campaign.strategy,
+      budget: current.activePlan.budget,
+      optimize: current.activePlan.optimize,
+      strategy: current.activePlan.strategy,
       facts: committed.facts,
     })
-    const expectedPlanId = current.activeDraft.campaign.strategy === 'uniform' ? current.activePlan.planId : null
-    const round = planning.prepare(request, expectedPlanId)
+    const expectedPlanId = current.activePlan.strategy === 'uniform' ? current.activePlan.planId : null
+    const round = planning.prepare(request, expectedPlanId, current.activePlan)
     dispatch({ type: 'facts-committed', ...committed, pendingRound: round })
     await planning.submit(round)
   }

@@ -26,6 +26,7 @@ def test_documented_uniform_plan(client: TestClient, fixed_request: dict[str, An
         "allocations": body["allocations"],
         "required_budget": None,
         "reason": None,
+        "target": None,
     }
     assert [item["budget_cap"] for item in body["allocations"]] == ["3.000000"] * 4
     assert [(item["hour"], item["channel_id"]) for item in body["allocations"]] == [

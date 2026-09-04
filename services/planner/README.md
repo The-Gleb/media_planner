@@ -1,9 +1,9 @@
 # Planner
 
-Stateless FastAPI service for the deterministic v0 media budget plan. It accepts a complete planning
-snapshot, makes no outbound calls, and returns the full fixed-budget schedule on every round.
-Target-KPI requests are shape-validated and rejected with the RFC 9457 code
-`unsupported_plan_type`.
+Stateless FastAPI service for deterministic media planning. It accepts a complete planning snapshot,
+makes no outbound calls, and supports fixed-budget schedules plus initial target-KPI budget estimates.
+Target planning uses only public catalog ranges, searches in one-ruble quanta and returns either an
+executable plan or a structured `target_exceeds_capacity` result.
 
 ## Exact allocation
 
@@ -19,6 +19,17 @@ observed saturation, and water-fills the remaining budget over the remaining hor
 reach/click/conversion gain—regardless of whether the run is ahead of or behind its initial KPI
 trajectory. State changes produce a new plan ID; largest-remainder conversion keeps the full
 schedule's micro-unit sum exact. Planner never calls Simulator or reads the seeded hidden world.
+
+## Target-KPI planning
+
+At state revision zero, `target_kpi` with strategy `optimized` repeatedly solves the existing
+fixed-budget allocation problem and binary-searches the smallest whole-ruble budget whose benchmark
+forecast reaches the requested reach, click or conversion target. The response includes aggregate
+expected impressions, non-deduplicated reach, clicks and conversions. These are catalog estimates,
+not guarantees for a hidden Simulator seed.
+
+Once the target plan is approved, the dashboard freezes its calculated budget and uses ordinary
+fixed-budget replanning for every committed hour. Planner never raises the approved campaign budget.
 
 ## Local development
 

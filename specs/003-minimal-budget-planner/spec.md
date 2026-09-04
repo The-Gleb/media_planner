@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Add a minimal planner that accepts a total budget, horizon, KPI and strategy, distributes the budget evenly by hour and channel, receives observed Simulator facts after every hour, and returns the same deterministic plan. Show live and final cumulative reach, clicks and conversions. Display target-KPI mode but do not implement it yet."
+**Input**: User description: "Add fixed-budget planning and target-KPI planning. For a target KPI, estimate the least one-ruble-quantized budget that reaches the public-catalog benchmark forecast, or return a structured capacity diagnosis. After approval, execute both modes through the same fixed-budget feedback loop without automatically increasing spend."
 
 ## Clarifications
 
@@ -98,23 +98,25 @@ the totals remain unchanged and are labeled final.
 
 ---
 
-### User Story 4 - See Future Target-KPI Mode (Priority: P4)
+### User Story 4 - Estimate Budget for a Target KPI (Priority: P1)
 
-The planning form shows that campaigns will support both fixed-budget planning and target-KPI
-planning. Target-KPI mode identifies the same three KPI choices and a target value, but is clearly
-marked unavailable in this version and cannot start a campaign.
+The user selects target-KPI planning, a reach/click/conversion target and a horizon. The Planner uses
+the optimized public-catalog model to return the least one-ruble-quantized budget whose benchmark
+forecast reaches the target. If catalog capacity cannot reach it, the result contains no executable
+allocations and recommends the maximum achievable target.
 
-**Why this priority**: Showing the intended workflow makes the product direction understandable
-without implying that unimplemented optimization or forecasts are usable.
+**Why this priority**: This implements case planning type B and prevents users from approving a KPI
+without first checking its modeled budget and capacity feasibility.
 
-**Independent Test**: Inspect the planning-mode control, select or focus target-KPI mode, and verify
-that it is labeled unavailable, explains the limitation, and cannot submit a planning request.
+**Independent Test**: Request 50,000 clicks over 336 hours in the default eight-channel catalog and
+receive a deterministic executable plan; request an impossible target and receive `feasible=false`
+without resetting or advancing Simulator.
 
 **Acceptance Scenarios**:
 
-1. **Given** the planning form, **When** the user reviews available modes, **Then** fixed-budget and target-KPI modes are both identifiable.
-2. **Given** target-KPI mode, **When** the user attempts to use it, **Then** the interface states that it is not implemented and does not create or execute a plan.
-3. **Given** an unsupported target-KPI request reaches the planning boundary, **When** it is evaluated, **Then** it is rejected with an explicit unsupported-plan-type reason rather than treated as fixed-budget mode.
+1. **Given** an achievable target and initial campaign state, **When** target planning completes, **Then** the response contains the target, forecast, required budget and exact full-horizon allocations.
+2. **Given** an unreachable target, **When** target planning completes, **Then** the response is a non-executable capacity diagnosis and Simulator is unchanged.
+3. **Given** an executable target plan is approved, **When** campaign execution starts, **Then** its calculated budget is fixed and all later planning rounds use the existing fixed-budget feedback loop.
 
 ### Edge Cases
 
@@ -151,10 +153,10 @@ that it is labeled unavailable, explains the limitation, and cannot submit a pla
   with user-facing labels for reach, clicks, and conversions.
 - **FR-004**: The strategy control MUST identify uniform allocation as the only supported v0
   strategy and MUST NOT imply that it uses forecasts or observed performance.
-- **FR-005**: Target-KPI mode and its KPI/value inputs MUST be identifiable as unavailable in v0 and
-  MUST NOT create or execute a plan.
-- **FR-006**: A target-KPI request received outside the interface MUST be rejected with a distinct,
-  machine-identifiable unsupported-plan-type reason.
+- **FR-005**: Target-KPI mode MUST accept a positive reach, click or conversion target and MUST use
+  the optimized public-catalog strategy at initial state revision zero.
+- **FR-006**: Target-KPI planning MUST return either an executable plan with a one-ruble-quantized
+  required budget and benchmark forecast, or a non-executable `target_exceeds_capacity` diagnosis.
 - **FR-007**: A fixed-budget plan MUST contain exactly one allocation for every Cartesian pair of
   hour in the horizon and available channel.
 - **FR-008**: Uniform allocation MUST divide the total budget across all allocations at the
@@ -162,8 +164,8 @@ that it is labeled unavailable, explains the limitation, and cannot submit a pla
 - **FR-009**: Any indivisible smallest-unit remainder MUST be distributed in stable hour-then-channel
   order so equivalent requests produce equivalent plans.
 - **FR-010**: Each allocation MUST identify its channel, hour and non-negative budget cap.
-- **FR-011**: The v0 plan MUST NOT invent expected reach, clicks, conversions, impressions, spend or
-  feasibility evidence from a market forecast. Expected outcomes MUST be explicitly unavailable.
+- **FR-011**: Fixed-budget v0 responses MUST keep expected outcomes explicitly unavailable. Target-KPI
+  responses MUST label expected outcomes as deterministic public-catalog benchmark estimates.
 - **FR-012**: Valid fixed-budget plans MUST be marked feasible; invalid requests MUST return no
   executable allocations and MUST identify the validation reason.
 - **FR-013**: The planning process MUST accept current campaign totals and per-channel totals for
@@ -256,8 +258,8 @@ that it is labeled unavailable, explains the limitation, and cannot submit a pla
   clicks and conversions match the exact sums of committed observations in 100% of cases.
 - **SC-006**: A complete campaign executes exactly one planned action per channel per hour and never
   executes outside its configured horizon.
-- **SC-007**: Users cannot mistake target-KPI mode for available functionality: every attempt to use
-  it results in an explicit unavailable status and zero campaign executions.
+- **SC-007**: Achievable target requests produce an exact executable plan, while infeasible target
+  requests produce zero Simulator mutations and an actionable capacity diagnosis.
 - **SC-008**: A planner outage or rejected observation causes zero duplicate hours and zero duplicate
   contributions to cumulative KPIs after retry.
 - **SC-009**: Across manual and automatic acceptance runs, at most one campaign is active and the
@@ -284,8 +286,8 @@ that it is labeled unavailable, explains the limitation, and cannot submit a pla
 - Uniform allocation ignores the selected KPI and observed results. Optimized allocation uses the
   selected KPI and public range midpoints but its forecast values remain internal and are not exposed
   as product forecasts in this iteration.
-- Forecast creation, learning, adaptive redistribution, unused-budget recovery, deduplicated
-  cross-channel reach and target-KPI optimization are outside this feature.
+- Learned forecasts, unused-budget recovery, deduplicated cross-channel reach, probabilistic service
+  levels and automatic post-launch budget increases are outside this feature.
 - The current campaign limits of up to 2,160 hours and 20 channels remain applicable.
 - Parallel campaign execution and overlapping hourly steps are outside v0 scope.
 - Until Simulator gains a package-purchase action, `sms` is represented internally by an effective

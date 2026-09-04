@@ -217,6 +217,15 @@ outcome. Paths are repository-relative.
 - [X] T100 Reconcile feature specification, service documentation and checked-in API contracts for the extension
 - [X] T101 Run complete Planner, Simulator, frontend, browser and Compose contract/integration validation for the extension
 
+## Phase 9: Target-KPI Planning Extension
+
+- [X] T102 Extract aggregate benchmark forecasting from optimized allocation
+- [X] T103 Implement whole-ruble inverse budget search and capacity diagnosis
+- [X] T104 Extend Planner DTOs, endpoint and OpenAPI with executable/infeasible target results
+- [X] T105 Enable target-KPI form submission and result decoding in the dashboard
+- [X] T106 Freeze the calculated budget and reuse fixed-budget hourly replanning after launch
+- [X] T107 Add target solver, contract, codec, form and request-builder tests
+
 ---
 
 ## Dependencies & Execution Order

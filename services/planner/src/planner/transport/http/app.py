@@ -1,3 +1,4 @@
+import math
 from collections.abc import Awaitable, Callable
 from contextvars import ContextVar
 from typing import Any
@@ -11,16 +12,22 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 
-from planner.application.planning import create_fixed_budget_plan
+from planner.application.planning import create_fixed_budget_plan, create_target_kpi_plan
 from planner.config import Settings
-from planner.domain.models import Horizon
-from planner.domain.values import micros_to_money, money_to_micros
+from planner.domain.models import Horizon, Strategy
+from planner.domain.optimized import Forecast
+from planner.domain.values import count_to_int, micros_to_money, money_to_micros
 from planner.transport.http.dto import (
     AllocationDTO,
+    ExpectedOutcomeDTO,
     FixedBudgetPlanRequestDTO,
     HealthDTO,
+    InfeasibilityReasonDTO,
+    InfeasibleTargetKPIPlanDTO,
     MediaPlanDTO,
     PlanRequestDTO,
+    PlanResultDTO,
+    TargetKPIPlanDTO,
     TargetKPIPlanRequestDTO,
 )
 from planner.transport.http.problem import FieldError, problem
@@ -32,7 +39,8 @@ app = FastAPI(
     version=settings.service_version,
     description=(
         "Stateless deterministic planning boundary. Money and counts are decimal strings. "
-        "Planner does not call Simulator, store campaign state, or produce forecasts in v0."
+        "Planner does not call Simulator or store campaign state. Target plans expose a "
+        "public-catalog benchmark forecast."
     ),
     servers=[
         {"url": "http://127.0.0.1:8082", "description": "Local Docker Compose host port"},
@@ -79,8 +87,12 @@ def build_openapi() -> dict[str, Any]:
         "HorizonDTO": "Horizon",
         "MarketForecastDTO": "MarketForecast",
         "MediaPlanDTO": "MediaPlan",
+        "ExpectedOutcomeDTO": "ExpectedOutcome",
+        "InfeasibilityReasonDTO": "InfeasibilityReason",
+        "InfeasibleTargetKPIPlanDTO": "InfeasibleTargetKPIPlan",
         "SimulationContextDTO": "SimulationContext",
         "TargetKPIDTO": "TargetKPI",
+        "TargetKPIPlanDTO": "TargetKPIPlan",
         "TargetKPIPlanRequestDTO": "TargetKPIPlanRequest",
     }
     components = schema["components"]["schemas"]
@@ -308,20 +320,118 @@ _PROBLEM_RESPONSES: dict[int | str, dict[str, object]] = {
 
 @app.post(
     "/v1/plans",
-    response_model=MediaPlanDTO,
+    response_model=PlanResultDTO,
     operation_id="createMediaPlan",
     tags=["Plans"],
     responses=_PROBLEM_RESPONSES,
 )
-async def create_plan(request: PlanRequestDTO) -> MediaPlanDTO | JSONResponse:
+async def create_plan(
+    request: PlanRequestDTO,
+) -> MediaPlanDTO | TargetKPIPlanDTO | InfeasibleTargetKPIPlanDTO | JSONResponse:
     if isinstance(request, TargetKPIPlanRequestDTO):
-        return problem(
-            status=422,
-            code="unsupported_plan_type",
-            title="Plan type is not supported",
-            detail="Target KPI planning is visible for future use but is not implemented in v0.",
-            trace_id=trace_context.get(),
-            instance="/v1/plans",
+        if (
+            request.current.state_revision != 0
+            or request.current.current_hour != request.horizon.from_hour
+        ):
+            return problem(
+                status=422,
+                code="validation_failed",
+                title="Request validation failed",
+                detail="Target KPI planning is available only before campaign execution.",
+                trace_id=trace_context.get(),
+                instance="/v1/plans",
+                errors=[
+                    {
+                        "field": "current.state_revision",
+                        "code": "initial_state_required",
+                        "detail": "Target planning requires revision zero.",
+                    }
+                ],
+            )
+        if request.strategy is not Strategy.OPTIMIZED:
+            return problem(
+                status=422,
+                code="validation_failed",
+                title="Request validation failed",
+                detail="Target KPI planning requires the optimized strategy.",
+                trace_id=trace_context.get(),
+                instance="/v1/plans",
+                errors=[
+                    {
+                        "field": "strategy",
+                        "code": "optimized_required",
+                        "detail": "Select the optimized strategy.",
+                    }
+                ],
+            )
+        try:
+            plan, solution = create_target_kpi_plan(
+                target_value=count_to_int(request.target.value, positive=True),
+                target_metric=request.target.metric.value,
+                horizon=Horizon(request.horizon.from_hour, request.horizon.to_hour),
+                channels=request.channels,
+                simulation=request.simulation.model_dump(mode="json"),
+                strategy=request.strategy.value,
+            )
+        except ValueError as exc:
+            return problem(
+                status=422,
+                code="validation_failed",
+                title="Request validation failed",
+                detail=str(exc),
+                trace_id=trace_context.get(),
+                instance="/v1/plans",
+            )
+        expected = _expected_outcome(solution.expected)
+        if plan is None or solution.required_budget_micros is None:
+            maximum = str(solution.max_achievable)
+            return InfeasibleTargetKPIPlanDTO(
+                request_id=request.request_id,
+                state_revision=0,
+                plan_id=None,
+                feasible=False,
+                type="target_kpi",
+                strategy=Strategy.OPTIMIZED,
+                optimize=request.target.metric,
+                currency=request.simulation.currency,
+                budget=None,
+                horizon=request.horizon,
+                expected=expected,
+                allocations=[],
+                required_budget=None,
+                reason=InfeasibilityReasonDTO(
+                    code="target_exceeds_capacity",
+                    detail="The target exceeds benchmark capacity for the selected horizon and channels.",
+                    max_achievable=maximum,
+                    recommended_target=maximum,
+                ),
+                target=request.target,
+            )
+        budget = micros_to_money(solution.required_budget_micros)
+        return TargetKPIPlanDTO(
+            request_id=request.request_id,
+            state_revision=0,
+            plan_id=plan.plan_id,
+            feasible=True,
+            type="target_kpi",
+            strategy=Strategy.OPTIMIZED,
+            optimize=request.target.metric,
+            currency=request.simulation.currency,
+            budget=budget,
+            horizon=request.horizon,
+            expected=expected,
+            allocations=[
+                AllocationDTO(
+                    channel_id=allocation.channel_id,
+                    hour=allocation.hour,
+                    budget_cap=micros_to_money(allocation.budget_micros),
+                    expected=None,
+                )
+                for allocation in plan.allocations
+            ],
+            required_budget=budget,
+            reason=None,
+            target=request.target,
         )
     if not isinstance(request, FixedBudgetPlanRequestDTO):
         raise TypeError("validated request has an unknown plan type")
@@ -359,6 +469,17 @@ async def create_plan(request: PlanRequestDTO) -> MediaPlanDTO | JSONResponse:
         ],
         required_budget=None,
         reason=None,
+        target=None,
+    )
+
+
+def _expected_outcome(forecast: Forecast) -> ExpectedOutcomeDTO:
+    return ExpectedOutcomeDTO(
+        spend=micros_to_money(forecast.spend_micros),
+        impressions=str(max(0, math.floor(forecast.impressions))),
+        unique_reach=str(max(0, math.floor(forecast.unique_reach))),
+        clicks=str(max(0, math.floor(forecast.clicks))),
+        conversions=str(max(0, math.floor(forecast.conversions))),
     )
 
 

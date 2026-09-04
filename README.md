@@ -24,5 +24,11 @@ The default deterministic world contains eight channels (`social_1..3`, `program
 strategies, finish one run, select the other strategy and reset: execution remains sequential while
 the dashboard retains both result summaries.
 
+Target-KPI mode implements planning type B at campaign creation: it binary-searches the least
+whole-ruble budget whose public-catalog benchmark forecast reaches the requested reach, clicks or
+conversions. An unreachable target returns a capacity diagnosis without resetting Simulator. A
+reachable target freezes the calculated budget and then reuses the ordinary fixed-budget hourly
+replanning loop, so execution never increases approved spend automatically.
+
 See `services/simulator/README.md`, `services/planner/README.md`, `services/frontend/README.md`, and
 `specs/003-minimal-budget-planner/quickstart.md` for development, failure handling, and validation details.

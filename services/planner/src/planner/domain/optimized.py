@@ -23,6 +23,15 @@ class ObservedChannel:
     conversions: int = 0
 
 
+@dataclass(frozen=True, slots=True)
+class Forecast:
+    spend_micros: int
+    impressions: float
+    unique_reach: float
+    clicks: float
+    conversions: float
+
+
 def _observed(current: Mapping[str, object] | None, channel_id: str) -> ObservedChannel:
     if current is None:
         return ObservedChannel()
@@ -82,17 +91,17 @@ def _calibrate(
     )
 
 
-def _campaign_kpi(
+def _campaign_forecast(
     channel: ChannelBenchmark,
     observed: ObservedChannel,
     daily_budget: float,
     days: int,
-    metric: str,
-) -> float:
+) -> Forecast:
     reach = min(float(observed.unique_reach), channel.audience_capacity)
     impressions_total = float(observed.impressions)
     clicks_total = 0.0
     conversions_total = 0.0
+    spend_total = 0.0
     for _ in range(days):
         saturation = min(reach / channel.audience_capacity, 1.0)
         depth = max(
@@ -108,16 +117,65 @@ def _campaign_kpi(
             0.0,
         )
         clicks = impressions * channel.ctr * fatigue
+        spend_total += impressions * cpm / 1_000.0
         reach = min(reach + impressions * new_probability, channel.audience_capacity)
         impressions_total += impressions
         clicks_total += clicks
         conversions_total += clicks * channel.cr
+    return Forecast(
+        spend_micros=max(0, round(spend_total * 1_000_000)),
+        impressions=impressions_total - observed.impressions,
+        unique_reach=reach,
+        clicks=clicks_total,
+        conversions=conversions_total,
+    )
+
+
+def _campaign_kpi(
+    channel: ChannelBenchmark,
+    observed: ObservedChannel,
+    daily_budget: float,
+    days: int,
+    metric: str,
+) -> float:
+    forecast = _campaign_forecast(channel, observed, daily_budget, days)
     return (
-        reach
+        forecast.unique_reach
         if metric == "unique_reach"
-        else clicks_total
+        else forecast.clicks
         if metric == "clicks"
-        else conversions_total
+        else forecast.conversions
+    )
+
+
+def forecast_allocations(
+    allocations: tuple[Allocation, ...],
+    horizon: Horizon,
+    channel_ids: list[str],
+) -> Forecast:
+    """Forecast an initial plan from public catalog benchmarks only."""
+    catalog = load_catalog()
+    ordered_ids = sorted(channel_ids)
+    days = max(1, math.ceil(horizon.duration / 24))
+    totals_micros = {channel_id: 0 for channel_id in ordered_ids}
+    for allocation in allocations:
+        totals_micros[allocation.channel_id] += allocation.budget_micros
+
+    forecasts = [
+        _campaign_forecast(
+            catalog[channel_id],
+            ObservedChannel(),
+            totals_micros[channel_id] / 1_000_000 / days,
+            days,
+        )
+        for channel_id in ordered_ids
+    ]
+    return Forecast(
+        spend_micros=sum(item.spend_micros for item in forecasts),
+        impressions=sum(item.impressions for item in forecasts),
+        unique_reach=sum(item.unique_reach for item in forecasts),
+        clicks=sum(item.clicks for item in forecasts),
+        conversions=sum(item.conversions for item in forecasts),
     )
 
 

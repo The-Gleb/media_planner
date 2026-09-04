@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: >-
     Stateless deterministic planning boundary. Money and counts are decimal strings. Planner does
-    not call Simulator, store campaign state, or produce forecasts in v0.
+    not call Simulator or store campaign state. Target-KPI plans include a public-catalog benchmark
+    forecast and a one-ruble-quantized required budget.
 servers:
   - url: http://127.0.0.1:8082
     description: Local Docker Compose host port
@@ -20,9 +21,9 @@ paths:
       operationId: createMediaPlan
       summary: Create or reproduce a deterministic plan for a campaign-state snapshot
       description: >-
-        A fixed-budget request returns the complete full-horizon plan. Updated current state is
-        acknowledged through request_id and state_revision but does not alter v0 allocations.
-        Target-KPI requests are structurally accepted and rejected as unsupported_plan_type.
+        A fixed-budget request returns the complete full-horizon plan. A target-KPI request at the
+        initial campaign revision returns either an executable plan with a calculated budget or a
+        structured capacity diagnosis. Target planning requires the optimized strategy.
       requestBody:
         required: true
         content:
@@ -76,14 +77,17 @@ paths:
                   target: null
       responses:
         '200':
-          description: Complete deterministic fixed-budget plan
+          description: Executable plan or a target-capacity diagnosis
           headers:
             X-Request-ID:
               $ref: '#/components/headers/RequestID'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MediaPlan'
+                oneOf:
+                  - $ref: '#/components/schemas/MediaPlan'
+                  - $ref: '#/components/schemas/TargetKPIPlan'
+                  - $ref: '#/components/schemas/InfeasibleTargetKPIPlan'
               examples:
                 uniformTwoByTwo:
                   value:
@@ -119,6 +123,7 @@ paths:
                         expected: null
                     required_budget: null
                     reason: null
+                    target: null
         '400':
           $ref: '#/components/responses/BadRequest'
         '415':
@@ -443,6 +448,7 @@ components:
         - allocations
         - required_budget
         - reason
+        - target
       properties:
         request_id:
           type: string
@@ -481,6 +487,118 @@ components:
           type: 'null'
         reason:
           type: 'null'
+        target:
+          type: 'null'
+    ExpectedOutcome:
+      type: object
+      additionalProperties: false
+      required: [spend, impressions, unique_reach, clicks, conversions]
+      properties:
+        spend:
+          $ref: '#/components/schemas/Money'
+        impressions:
+          $ref: '#/components/schemas/Count'
+        unique_reach:
+          $ref: '#/components/schemas/Count'
+        clicks:
+          $ref: '#/components/schemas/Count'
+        conversions:
+          $ref: '#/components/schemas/Count'
+    InfeasibilityReason:
+      type: object
+      additionalProperties: false
+      required: [code, detail, max_achievable, recommended_target]
+      properties:
+        code:
+          const: target_exceeds_capacity
+        detail:
+          type: string
+        max_achievable:
+          $ref: '#/components/schemas/Count'
+        recommended_target:
+          $ref: '#/components/schemas/Count'
+    TargetKPIPlan:
+      type: object
+      additionalProperties: false
+      required: [request_id, state_revision, plan_id, feasible, type, strategy, optimize, currency, budget, horizon, expected, allocations, required_budget, reason, target]
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        state_revision:
+          const: 0
+        plan_id:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        feasible:
+          const: true
+        type:
+          const: target_kpi
+        strategy:
+          const: optimized
+        optimize:
+          $ref: '#/components/schemas/KPI'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        budget:
+          $ref: '#/components/schemas/Money'
+        horizon:
+          $ref: '#/components/schemas/Horizon'
+        expected:
+          $ref: '#/components/schemas/ExpectedOutcome'
+        allocations:
+          type: array
+          minItems: 1
+          maxItems: 43200
+          items:
+            $ref: '#/components/schemas/Allocation'
+        required_budget:
+          $ref: '#/components/schemas/Money'
+        reason:
+          type: 'null'
+        target:
+          $ref: '#/components/schemas/TargetKPI'
+    InfeasibleTargetKPIPlan:
+      type: object
+      additionalProperties: false
+      required: [request_id, state_revision, plan_id, feasible, type, strategy, optimize, currency, budget, horizon, expected, allocations, required_budget, reason, target]
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        state_revision:
+          const: 0
+        plan_id:
+          type: 'null'
+        feasible:
+          const: false
+        type:
+          const: target_kpi
+        strategy:
+          const: optimized
+        optimize:
+          $ref: '#/components/schemas/KPI'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        budget:
+          type: 'null'
+        horizon:
+          $ref: '#/components/schemas/Horizon'
+        expected:
+          $ref: '#/components/schemas/ExpectedOutcome'
+        allocations:
+          type: array
+          maxItems: 0
+          items:
+            $ref: '#/components/schemas/Allocation'
+        required_budget:
+          type: 'null'
+        reason:
+          $ref: '#/components/schemas/InfeasibilityReason'
+        target:
+          $ref: '#/components/schemas/TargetKPI'
     Allocation:
       type: object
       additionalProperties: false

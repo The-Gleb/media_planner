@@ -249,6 +249,21 @@ class AllocationDTO(StrictModel):
     expected: None
 
 
+class ExpectedOutcomeDTO(StrictModel):
+    spend: MoneyText
+    impressions: CountText
+    unique_reach: CountText
+    clicks: CountText
+    conversions: CountText
+
+
+class InfeasibilityReasonDTO(StrictModel):
+    code: Literal["target_exceeds_capacity"]
+    detail: str
+    max_achievable: CountText
+    recommended_target: CountText
+
+
 class MediaPlanDTO(StrictModel):
     request_id: UUID
     state_revision: StrictInt = Field(ge=0, le=2160)
@@ -264,6 +279,46 @@ class MediaPlanDTO(StrictModel):
     allocations: list[AllocationDTO] = Field(min_length=1, max_length=43_200)
     required_budget: None
     reason: None
+    target: None
+
+
+class TargetKPIPlanDTO(StrictModel):
+    request_id: UUID
+    state_revision: Literal[0]
+    plan_id: PlanID
+    feasible: Literal[True]
+    type: Literal["target_kpi"]
+    strategy: Literal[Strategy.OPTIMIZED]
+    optimize: KPI
+    currency: Currency
+    budget: MoneyText
+    horizon: HorizonDTO
+    expected: ExpectedOutcomeDTO
+    allocations: list[AllocationDTO] = Field(min_length=1, max_length=43_200)
+    required_budget: MoneyText
+    reason: None
+    target: TargetKPIDTO
+
+
+class InfeasibleTargetKPIPlanDTO(StrictModel):
+    request_id: UUID
+    state_revision: Literal[0]
+    plan_id: None
+    feasible: Literal[False]
+    type: Literal["target_kpi"]
+    strategy: Literal[Strategy.OPTIMIZED]
+    optimize: KPI
+    currency: Currency
+    budget: None
+    horizon: HorizonDTO
+    expected: ExpectedOutcomeDTO
+    allocations: list[AllocationDTO] = Field(max_length=0)
+    required_budget: None
+    reason: InfeasibilityReasonDTO
+    target: TargetKPIDTO
+
+
+PlanResultDTO = MediaPlanDTO | TargetKPIPlanDTO | InfeasibleTargetKPIPlanDTO
 
 
 class HealthDTO(StrictModel):

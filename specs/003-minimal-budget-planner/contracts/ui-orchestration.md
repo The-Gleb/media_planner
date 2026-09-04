@@ -22,25 +22,26 @@ The existing form keeps the separate Simulation section:
 
 The Campaign section replaces manual per-channel hourly caps with:
 
-- planning mode: “Фиксированный бюджет” and “Целевой KPI — пока недоступно”;
+- planning mode: “Фиксированный бюджет” and “Целевой KPI”;
 - total campaign budget and currency;
 - duration in hours, defining Planner horizon `[0, duration)`;
 - KPI: “Охват (`unique_reach`)”, “Клики (`clicks`)”, or “Конверсии (`conversions`)”;
 - strategy: “Равномерно (`uniform`)”.
 
-Target-KPI mode remains keyboard-focusable and explains its status, but submitting it is prevented.
-Only Planner creates channel/hour caps; the UI never presents manual and planned caps as competing
-inputs.
+Target-KPI mode accepts a positive target, fixes strategy `optimized` and explains that its calculated
+budget is a public-catalog estimate. Only Planner creates channel/hour caps; the UI never presents
+manual and planned caps as competing inputs.
 
 ## Initial Plan and Reset Transaction
 
 On submit:
 
 1. Validate Simulation and Campaign drafts locally.
-2. Build zero CampaignState for all Simulator metadata channels and request a fixed-budget plan.
-3. Validate Planner response correlation, exact budget sum, horizon and channel/hour coverage.
-4. Create/reset Simulator with the same start and duration.
-5. On success, atomically install the Simulator session and ActivePlan and clear old history, actual
+2. Build zero CampaignState and request either a fixed-budget plan or an initial target-KPI estimate.
+3. For an infeasible target, show the capacity diagnosis and do not reset Simulator.
+4. For an executable result, validate correlation, exact budget sum, horizon and channel/hour coverage.
+5. Create/reset Simulator with the same start and duration.
+6. On success, atomically install the Simulator session and ActivePlan and clear old history, actual
    totals and pending operations.
 
 Planner failure never calls Simulator. Simulator failure never replaces the current active plan/run;
@@ -51,10 +52,11 @@ the side-effect-free candidate plan may be discarded and the user's draft remain
 After successful creation the dashboard shows:
 
 - total budget and currency;
-- fixed-budget mode, selected KPI and uniform strategy;
+- source mode, selected KPI and strategy;
+- for target mode, the original target, calculated budget and benchmark forecast;
 - relative horizon and allocation count;
 - plan ID prefix for traceability;
-- “Прогноз недоступен” rather than zero expected metrics;
+- “Прогноз недоступен” for fixed-budget v0; a labeled public-catalog forecast for target mode;
 - an exact allocation table with hour rows and channel columns.
 
 The table uses bounded pagination (24 hours per page by default) so a 2,160-hour plan does not mount
@@ -71,7 +73,8 @@ For relative hour `h = duration_hours - remaining_hours`:
 4. Validate step ID, expected RFC3339 observed hour, next hour, remaining count and channel coverage.
 5. In one state transition append the raw result, advance the Simulator session and increment exact
    campaign/per-channel actual state.
-6. Freeze a PlanningRound for the new `state_revision` and request a new plan.
+6. Freeze a PlanningRound for the new `state_revision` and request a fixed-budget plan using the
+   originally entered or target-derived approved budget.
 7. Accept only a response with matching request ID, revision, horizon, budget and complete allocation
    schedule. Require the previous plan ID only for uniform; optimized receives a state-derived ID.
 8. Enable the next step, or mark the campaign finished.

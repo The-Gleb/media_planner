@@ -5,7 +5,7 @@ import { userError } from '../../app/messages'
 import { zeroCampaignFacts } from '../../domain/campaignFacts'
 import type { WorldMetadata } from '../../domain/types'
 import { activatePlan } from '../planning/activePlan'
-import { buildPlanRequest } from '../planning/planRequest'
+import { buildPlanRequest, buildTargetPlanRequest } from '../planning/planRequest'
 import { campaignReducer, createCampaignState, type CampaignAction } from './campaignState'
 import { validateDraft } from './validation'
 
@@ -29,23 +29,27 @@ export function useCampaignController(metadata: WorldMetadata) {
     const errors = validateDraft(current.draft, metadata)
     if (Object.keys(errors).length) { dispatch({ type: 'invalid', errors }); return }
     const launch = structuredClone(current.draft)
-    if (launch.campaign.planType !== 'fixed_budget') {
-      dispatch({ type: 'failed', error: 'Планирование по целевой метрике пока недоступно.' })
-      return
-    }
     dispatch({ type: 'begin' })
     try {
       const { simulation, campaign } = launch
       const facts = zeroCampaignFacts(metadata.channelIds)
       const requestId = crypto.randomUUID()
-      const request = buildPlanRequest({
-        simulation, durationHours: Number(campaign.durationHours), channels: metadata.channelIds,
-        currency: metadata.currency, worldConfigDigest: metadata.worldConfigDigest,
-        budget: campaign.totalBudget, optimize: campaign.optimize, strategy: campaign.strategy,
-        facts, requestId,
-      })
-      const plan = await plannerClient.plan(request)
+      const common = { simulation, durationHours: Number(campaign.durationHours), channels: metadata.channelIds,
+        currency: metadata.currency, worldConfigDigest: metadata.worldConfigDigest, facts, requestId }
+      const request = campaign.planType === 'fixed_budget'
+        ? buildPlanRequest({ ...common, budget: campaign.totalBudget, optimize: campaign.optimize, strategy: campaign.strategy })
+        : buildTargetPlanRequest({ ...common, targetMetric: campaign.targetMetric, targetValue: campaign.targetValue })
+      const result = await plannerClient.plan(request)
+      if (!result.feasible) {
+        dispatch({ type: 'failed', error: `Цель недостижима в заданных условиях. Максимальный прогноз: ${result.reason.maxAchievable}; рекомендуемая цель: ${result.reason.recommendedTarget}.` })
+        return
+      }
+      const plan = result
       const activePlan = activatePlan(plan, requestId, 0, metadata.channelIds, undefined, request)
+      const activeLaunch = structuredClone(launch)
+      activeLaunch.campaign.totalBudget = plan.budget
+      activeLaunch.campaign.optimize = plan.optimize
+      activeLaunch.campaign.strategy = plan.strategy
       const prior = ref.current.session
       const currentETag = prior?.simulationId === simulation.simulationId ? prior.etag : null
       const response = await simulatorClient.putSimulation(simulation.simulationId, {
@@ -59,7 +63,7 @@ export function useCampaignController(metadata: WorldMetadata) {
           multiplier: simulation.scenario.metric === 'pause' ? 0 : Number(simulation.scenario.multiplier),
         }] : [],
       }, currentETag)
-      dispatch({ type: 'created', session: response.data, activeDraft: launch, activePlan, facts })
+      dispatch({ type: 'created', session: response.data, activeDraft: activeLaunch, activePlan, facts })
     } catch (error) {
       const fieldErrors = error instanceof SimulatorProblemError
         ? Object.fromEntries((error.problem.errors ?? []).map((entry) => [apiFieldPaths[entry.field] ?? entry.field, entry.detail ?? entry.code]))
