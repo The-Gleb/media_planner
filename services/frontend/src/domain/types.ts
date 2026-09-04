@@ -10,6 +10,10 @@ export const METRICS = [
   'conversions',
   'spend',
   'ecpm',
+  'ctr',
+  'cr',
+  'cpc',
+  'cpa',
 ] as const
 export type MetricKey = (typeof METRICS)[number]
 

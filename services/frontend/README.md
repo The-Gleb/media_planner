@@ -23,6 +23,11 @@ root.
 - Simulator v0 holds one in-memory campaign. A different active or finished ID causes
   `active_limit`; the dashboard never deletes an unknown campaign automatically.
 - Browser history is tab-memory only. Refresh may clear charts while the Simulator campaign remains.
+- Automatic execution is presented as a time-lapse. It advances only after the Simulator result and
+  the corresponding Planner round are committed; the delay between hours is UI pacing and can be
+  changed or paused without altering simulation determinism.
+- Live analytics includes a timezone-aware stacked chart of hourly spend by channel for each local
+  campaign day; the current-day view follows the time-lapse automatically.
 - Stopping or rebuilding the frontend does not reset, delete or advance Simulator state.
 - Money is retained as decimal text and aggregated in integer micro-units; aggregate unique reach is
   explicitly a non-deduplicated channel sum.

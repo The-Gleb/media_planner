@@ -8,8 +8,8 @@ import { MetricHistory } from './MetricHistory'
 describe('MetricHistory', () => {
   it('exposes every metric and an exact inspector', async () => {
     const item = result(); item.aggregate = aggregateObservations(item.observations)
-    render(<MetricHistory history={[item]} channelIds={['search_1', 'social_1']} currency="RUB" running={false} />)
-    expect(screen.getAllByRole('tab')).toHaveLength(7)
+    render(<MetricHistory history={[item]} channelIds={['search_1', 'social_1']} currency="RUB" timeZone="Europe/Moscow" running={false} />)
+    expect(screen.getAllByRole('tab')).toHaveLength(11)
     expect(screen.getByLabelText('Ряд')).toBeVisible()
     await userEvent.click(screen.getByRole('tab', { name: /Новый охват/ }))
     expect(screen.getByText('Итого (без дедупликации)', { exact: false })).toBeInTheDocument()
