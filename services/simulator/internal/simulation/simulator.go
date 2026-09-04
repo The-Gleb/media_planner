@@ -41,9 +41,18 @@ func (e *Engine) Reset(cfg domain.SimulationConfig) error {
 	for _, c := range e.model.Model.Channels {
 		configByID[c.ID] = c
 	}
+	for i, event := range cfg.ScenarioEvents {
+		if _, ok := configByID[event.ChannelID]; !ok {
+			return domain.NewError(domain.CodeValidation, "simulation config is invalid").WithField("scenario_events["+strconv.Itoa(i)+"].channel_id", "unknown_channel")
+		}
+	}
 	for _, c := range world.Channels {
 		states[c.ID] = runtimeState{}
-		events[c.ID] = generateEvents(configByID[c.ID], cfg.CampaignSeed, cfg.DurationHours)
+		schedule := []EventSchedule{}
+		if !cfg.DisableRandomEvents {
+			schedule = generateEvents(configByID[c.ID], cfg.CampaignSeed, cfg.DurationHours)
+		}
+		events[c.ID] = append(schedule, explicitEvents(c.ID, cfg.ScenarioEvents)...)
 	}
 	e.mu.Lock()
 	defer e.mu.Unlock()

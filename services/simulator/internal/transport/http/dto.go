@@ -7,12 +7,22 @@ import (
 	"media-planner/services/simulator/internal/domain"
 )
 
+type scenarioEventDTO struct {
+	ChannelID     domain.ChannelID `json:"channel_id"`
+	Metric        string           `json:"metric"`
+	StartIndex    int              `json:"start_index"`
+	DurationHours int              `json:"duration_hours"`
+	Multiplier    float64          `json:"multiplier"`
+}
+
 type simulationConfigDTO struct {
-	WorldSeed     string      `json:"world_seed"`
-	CampaignSeed  string      `json:"campaign_seed"`
-	StartHour     domain.Hour `json:"start_hour"`
-	DurationHours int         `json:"duration_hours"`
-	TimeZone      string      `json:"time_zone"`
+	WorldSeed           string             `json:"world_seed"`
+	CampaignSeed        string             `json:"campaign_seed"`
+	StartHour           domain.Hour        `json:"start_hour"`
+	DurationHours       int                `json:"duration_hours"`
+	TimeZone            string             `json:"time_zone"`
+	ScenarioEvents      []scenarioEventDTO `json:"scenario_events,omitempty"`
+	DisableRandomEvents bool               `json:"disable_random_events,omitempty"`
 }
 
 func (d simulationConfigDTO) domain() (domain.SimulationConfig, error) {
@@ -24,7 +34,11 @@ func (d simulationConfigDTO) domain() (domain.SimulationConfig, error) {
 	if err != nil {
 		return domain.SimulationConfig{}, domain.NewError(domain.CodeValidation, "invalid campaign_seed").WithField("campaign_seed", "invalid_int64")
 	}
-	cfg := domain.SimulationConfig{WorldSeed: world, CampaignSeed: campaign, StartHour: d.StartHour, DurationHours: d.DurationHours, TimeZone: d.TimeZone}
+	events := make([]domain.ScenarioEvent, 0, len(d.ScenarioEvents))
+	for _, e := range d.ScenarioEvents {
+		events = append(events, domain.ScenarioEvent{ChannelID: e.ChannelID, Metric: e.Metric, StartIndex: e.StartIndex, DurationHours: e.DurationHours, Multiplier: e.Multiplier})
+	}
+	cfg := domain.SimulationConfig{WorldSeed: world, CampaignSeed: campaign, StartHour: d.StartHour, DurationHours: d.DurationHours, TimeZone: d.TimeZone, ScenarioEvents: events, DisableRandomEvents: d.DisableRandomEvents}
 	if err := cfg.Validate(); err != nil {
 		return domain.SimulationConfig{}, err
 	}

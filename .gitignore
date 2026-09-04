@@ -21,3 +21,6 @@ Thumbs.db
 coverage/
 *.log
 *.log.*
+
+# build artefacts
+services/simulator/bin/

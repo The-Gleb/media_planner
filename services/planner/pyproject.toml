@@ -1,0 +1,70 @@
+[project]
+name = "mediaplan"
+version = "0.1.0"
+description = "MediaPlan Optimizer: планировщик медиаплана и сервис почасового исполнения поверх Go-симулятора"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "numpy>=1.26",
+    "plotly>=7.0.0",
+    "pydantic>=2.7",
+    "streamlit>=1.63.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "matplotlib>=3.11.1",
+    "pandas>=3.0.5",
+    "nbformat>=5.11.1",
+    "nbconvert>=7.17.1",
+    "ipykernel>=7.3.0",
+    "pandas-stubs>=3.0.5.260730",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mediaplan"]
+
+[tool.ruff]
+fix = true
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "EM", "FBT", "TRY003", "D1", "D203", "D213", "G004", "FA", "COM812", "ISC001",
+    "CPY001",
+    "RUF001", "RUF002", "RUF003",
+    "T201",                        # print в CLI-скриптах — норма
+]
+
+[tool.ruff.lint.isort]
+no-lines-before = ["standard-library", "local-folder"]
+lines-after-imports = 2
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*.py" = ["S101", "S311", "INP001", "PLR2004"]
+"src/mediaplan/app.py" = ["PLR0915", "C901", "PLR0913", "PLR0917"]  # streamlit-страница линейная по природе
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["plotly.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

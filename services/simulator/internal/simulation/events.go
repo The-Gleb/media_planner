@@ -71,6 +71,23 @@ func generateEvents(channel config.ChannelModelConfig, campaignSeed int64, durat
 	return result
 }
 
+// explicitEvents converts planner-supplied scenario events for one channel into schedules.
+// Unknown metrics are rejected by domain validation before this point.
+func explicitEvents(channelID domain.ChannelID, events []domain.ScenarioEvent) []EventSchedule {
+	result := make([]EventSchedule, 0, len(events))
+	for _, event := range events {
+		if event.ChannelID != channelID {
+			continue
+		}
+		schedule := EventSchedule{ChannelID: channelID, Kind: eventShock, Metric: metric(event.Metric), StartIndex: event.StartIndex, DurationHours: event.DurationHours, Multiplier: event.Multiplier}
+		if schedule.Metric == metricPause {
+			schedule.Multiplier = 0
+		}
+		result = append(result, schedule)
+	}
+	return result
+}
+
 func evaluateEvents(events []EventSchedule, index int) eventFactors {
 	f := eventFactors{Supply: 1, CPM: 1, CTR: 1, CR: 1}
 	for _, event := range events {
