@@ -15,7 +15,7 @@
 **Require:** параметры канала $\theta = (\mathrm{ctr}, \mathrm{cr}, \mathrm{cpm}, C, \mathrm{profile}, A, \tau, g, \alpha, \alpha_f, \rho, \rho_f)$, накопленные охват $R$ и показы $I$, бюджет часа $b$, час суток $h$\
 **Ensure:** показы $n$, новый охват $r$, клики $k$, конверсии $v$, расход $s$; обновлённые $R, I$
 
-1: $z \leftarrow \mathrm{clamp}\big((R/A - \tau)/(1-\tau),\,0,\,1\big)$\
+1: $z \leftarrow \mathrm{clip}\big((R/A - \tau)/(1-\tau),\,0,\,1\big)$\
 2: $e \leftarrow \max\big(I/\max(R,1) - 1,\,0\big)$\
 3: $p \leftarrow \mathrm{cpm}\cdot(1 + g z^2)$\
 4: $n \leftarrow \min\big(C\cdot\mathrm{profile}[h],\; 1000\,b/p\big)$\
@@ -158,6 +158,7 @@ adaptive  Algorithm 5 каждый час                        → качес�
 
 | Символ | Смысл |
 |---|---|
+| $\mathrm{clip}(x, a, b)$ | обрезка: $x$, если $a \le x \le b$, иначе ближайшая граница |
 | $R$, $I$ | накопленные уникальный охват и показы канала |
 | $A$, $\tau$ | размер аудитории и порог начала насыщения |
 | $C$, $\mathrm{profile}[h]$ | дневной спрос в запросах и его доля в час суток $h$, $\sum_h \mathrm{profile}[h] = 1$ |
