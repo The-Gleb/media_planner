@@ -691,6 +691,49 @@ components:
           $ref: '#/components/schemas/Count'
         spent:
           $ref: '#/components/schemas/Money'
+    DailyFacts:
+      type: object
+      additionalProperties: false
+      required:
+        - day
+        - hours
+        - requests
+        - impressions
+        - unique_reach
+        - clicks
+        - conversions
+        - spent
+        - reach_before
+        - impressions_before
+      description: >-
+        One campaign day of a channel plus its cumulative unique reach and impressions at the start
+        of the day. Planner learns CTR fatigue, price growth and reach decay from how the day's
+        rates relate to that saturation state.
+      properties:
+        day:
+          type: integer
+          minimum: 0
+          maximum: 89
+        hours:
+          type: integer
+          minimum: 1
+          maximum: 24
+        requests:
+          $ref: '#/components/schemas/Count'
+        impressions:
+          $ref: '#/components/schemas/Count'
+        unique_reach:
+          $ref: '#/components/schemas/Count'
+        clicks:
+          $ref: '#/components/schemas/Count'
+        conversions:
+          $ref: '#/components/schemas/Count'
+        spent:
+          $ref: '#/components/schemas/Money'
+        reach_before:
+          $ref: '#/components/schemas/Count'
+        impressions_before:
+          $ref: '#/components/schemas/Count'
     PastCampaignChannel:
       type: object
       additionalProperties: false
@@ -703,6 +746,12 @@ components:
           description: Exactly one bin per hour of day, ordered 0..23.
           items:
             $ref: '#/components/schemas/HourBin'
+        daily:
+          type: array
+          maxItems: 90
+          description: Optional daily rows ascending by day; without them saturation stays at the catalog.
+          items:
+            $ref: '#/components/schemas/DailyFacts'
     PastCampaign:
       type: object
       additionalProperties: false
