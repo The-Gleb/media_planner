@@ -1091,7 +1091,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default="0,3",
         help="numbers of earlier campaigns the planner learns from; 0 is the catalog alone",
     )
-    parser.add_argument("--history-mode", choices=(*MODES, "uniform"), default="uniform")
+    parser.add_argument(
+        "--history-mode",
+        choices=(*MODES, "uniform"),
+        default="frozen",
+        help="how warm-up campaigns were planned and executed; frozen = optimized plans held",
+    )
     parser.add_argument(
         "--history-budget-factors",
         default="0.6,1.0,1.4",

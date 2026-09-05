@@ -24,7 +24,10 @@ recent hours but no approved plan, so Planner maximises the remaining KPI as bef
 Both modes run on the same `world_seed`, `campaign_seed` and controlled shock, so the paired
 difference is attributable to hourly replanning alone. History warm-up plays `--history-levels`
 earlier campaigns on the same world seed (other campaign seeds, budgets cycled through
-`--history-budget-factors`, random market events on unless `--history-no-random-events`), turns
+`--history-budget-factors`, random market events on unless `--history-no-random-events`, planned
+by `--history-mode`: `frozen` by default, i.e. optimized plans executed as approved, because such
+campaigns buy the strong channels deep enough for the saturation parameters to be learned; `uniform`
+warm-ups leave them at the catalog and the plan keeps a +15–20 % bias on generous markets), turns
 their observable facts into the planner's `history` request field and caches them per world in
 `history/world-<seed>.json`. Planner is called through its HTTP contract
 in-process (FastAPI test client); Simulator runs as the real Go binary, one process per worker,
