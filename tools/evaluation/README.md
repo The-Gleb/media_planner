@@ -9,11 +9,17 @@ warm history), and whether execution replans every hour (adaptive) or keeps the 
 ```text
 approved optimized plan (revision 0)
               │
-      ┌───────┴───────┐
-   frozen           adaptive
- approved caps    every committed hour → Planner → next caps
-   every hour
+      ┌───────┼──────────────────┐
+   frozen   adaptive          adaptive_max
+ approved   every hour → Planner  every hour → Planner
+   caps     tracks the approved   maximises remaining KPI
+            plan (recent window,  (earlier behaviour,
+            approved target)      cumulative calibration)
 ```
+
+`adaptive` sends the last 72 committed hours (`current.recent_hours`) and the approved plan
+(`approved`: KPI target and channel budgets) with every replanning request; `adaptive_max` sends the
+recent hours but no approved plan, so Planner maximises the remaining KPI as before.
 
 Both modes run on the same `world_seed`, `campaign_seed` and controlled shock, so the paired
 difference is attributable to hourly replanning alone. History warm-up plays `--history-levels`
