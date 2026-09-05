@@ -35,5 +35,5 @@ replanning loop, so execution never increases approved spend automatically.
 
 See `services/simulator/README.md`, `services/planner/README.md`, `services/frontend/README.md`, and
 `specs/003-minimal-budget-planner/quickstart.md` for development, failure handling, and validation details.
-The implemented formulas and optimization invariants are documented in
-`docs/mathematical-model.md`.
+How the planner thinks, learns from campaign history and keeps a campaign on plan is explained
+in `docs/how-planner-works.md`; the formula-to-code reference is `docs/mathematical-model.md`.
