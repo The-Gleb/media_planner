@@ -5,13 +5,8 @@ import pytest
 from planner.application.planning import create_fixed_budget_plan
 from planner.domain.catalog import load_catalog
 from planner.domain.models import Horizon
-from planner.domain.optimized import (
-    ObservedChannel,
-    allocate_optimized,
-    forecast_allocations,
-    forecast_hourly,
-    forecast_plan,
-)
+from planner.domain.optimized import allocate_optimized, forecast_allocations, forecast_plan
+from planner.domain.response import ObservedChannel, forecast_hourly
 
 SIMULATION: dict[str, object] = {
     "simulation_id": "forecast",

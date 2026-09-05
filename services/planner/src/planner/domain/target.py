@@ -1,6 +1,8 @@
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 
+from planner.domain.history import PastCampaign
 from planner.domain.models import Allocation, Forecast, Horizon
 from planner.domain.optimized import (
     allocate_prepared,
@@ -31,6 +33,7 @@ def solve_target_budget(
     horizon: Horizon,
     channel_ids: list[str],
     simulation: dict[str, object],
+    history: Sequence[PastCampaign] = (),
     quantum_micros: int = MICROS_PER_UNIT,
 ) -> TargetBudgetSolution:
     """Find the least quantum-sized budget whose benchmark forecast reaches target."""
@@ -46,6 +49,7 @@ def solve_target_budget(
         metric,
         current=None,
         simulation=simulation,
+        history=history,
     )
 
     def solve(budget_micros: int) -> tuple[tuple[Allocation, ...], Forecast]:
@@ -55,7 +59,7 @@ def solve_target_budget(
         allocations = allocate_prepared(prepared, budget_micros)
         result = (
             allocations,
-            forecast_allocations(allocations, horizon, channel_ids, simulation),
+            forecast_allocations(allocations, horizon, channel_ids, simulation, history),
         )
         cache[budget_micros] = result
         return result

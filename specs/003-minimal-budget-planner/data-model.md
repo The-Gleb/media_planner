@@ -149,6 +149,9 @@ Cross-field invariants:
 - `current.current_hour` is within `[from_hour, to_hour]`.
 - `current.state_revision = current.current_hour - from_hour`.
 - `current.channels` has exactly the same keys as `channels`.
+- `history` (optional, oldest first) lists finished campaigns on the same market as 24 hour-of-day
+  bins per channel of observable facts only: hours, requests, impressions, unique reach, clicks,
+  conversions, spend. It sharpens the catalog prior for optimized plans and enters their `plan_id`.
 - `simulation.currency` governs every monetary value.
 - `duration × channel_count <= 43,200`.
 

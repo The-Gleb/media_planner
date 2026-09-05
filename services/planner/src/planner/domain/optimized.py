@@ -6,6 +6,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from planner.domain.catalog import ChannelBenchmark, load_catalog
+from planner.domain.history import PastCampaign, channel_history, channel_prior
 from planner.domain.models import (
     ZERO_FORECAST,
     Allocation,
@@ -14,6 +15,13 @@ from planner.domain.models import (
     PlanForecast,
     sum_forecasts,
 )
+from planner.domain.response import (
+    ObservedChannel,
+    _forecast_step,
+    _hour_weights,
+    _initial_state,
+    forecast_hourly,
+)
 from planner.domain.values import MAX_MICROS, money_to_micros
 
 CURVE_POINTS = 128
@@ -21,27 +29,7 @@ MODEL_MAX_STEPS = 240
 WEIGHT_SCALE = 10**15
 CTR_PRIOR_IMPRESSIONS = 1_000.0
 CR_PRIOR_CLICKS = 50.0
-CR_FATIGUE_RATIO = 0.5
 MIN_MARGINAL_KPI_PER_RUBLE = 1e-12
-
-
-@dataclass(frozen=True, slots=True)
-class ObservedChannel:
-    spent_micros: int = 0
-    requests: int = 0
-    impressions: int = 0
-    unique_reach: int = 0
-    clicks: int = 0
-    conversions: int = 0
-
-    def as_forecast(self) -> Forecast:
-        return Forecast(
-            spend_micros=self.spent_micros,
-            impressions=float(self.impressions),
-            unique_reach=float(self.unique_reach),
-            clicks=float(self.clicks),
-            conversions=float(self.conversions),
-        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,14 +61,6 @@ class _SlopeBlock:
     @property
     def slope(self) -> float:
         return self.gain * 1_000_000 / self.cost
-
-
-@dataclass(slots=True)
-class _SaturationState:
-    """Cumulative reach and impressions that drive the saturation mechanics."""
-
-    reach: float
-    impressions_total: float
 
 
 def _observed(current: Mapping[str, object] | None, channel_id: str) -> ObservedChannel:
@@ -158,15 +138,6 @@ def _calibrate(
     )
 
 
-def _hour_weights(
-    channel: ChannelBenchmark, horizon: Horizon, start_clock_hour: int
-) -> list[float]:
-    return [
-        channel.hourly_profile[(start_clock_hour + hour) % 24]
-        for hour in range(horizon.from_hour, horizon.to_hour)
-    ]
-
-
 def _model_buckets(weights: Sequence[float]) -> list[float]:
     """Bound forecast cost while retaining exact hourly steps for short campaigns."""
     if len(weights) <= MODEL_MAX_STEPS:
@@ -184,55 +155,6 @@ def _channel_capacity_micros(
     maximum_cpm = channel.cpm * (1.0 + channel.price_growth)
     units = supply * maximum_cpm / 1_000.0
     return min(MAX_MICROS, max(0, math.ceil(units * 1_000_000)))
-
-
-def _initial_state(channel: ChannelBenchmark, observed: ObservedChannel) -> _SaturationState:
-    return _SaturationState(
-        reach=min(float(observed.unique_reach), channel.audience_capacity),
-        impressions_total=float(observed.impressions),
-    )
-
-
-def _forecast_step(
-    channel: ChannelBenchmark,
-    state: _SaturationState,
-    budget: float,
-    weight: float,
-) -> Forecast:
-    """Advance the saturation state by one period and return that period's expectation.
-
-    ``weight`` is the share of daily supply available in the period; ``budget`` is in
-    whole currency units. The returned ``unique_reach`` is the new reach of the period.
-    """
-    saturation = min(state.reach / channel.audience_capacity, 1.0)
-    depth = max(
-        (saturation - channel.saturation_threshold) / (1.0 - channel.saturation_threshold),
-        0.0,
-    )
-    frequency = max(state.impressions_total / max(state.reach, 1.0), 1.0)
-    excess_frequency = max(frequency - 1.0, 0.0)
-    cpm = channel.cpm * (1.0 + channel.price_growth * depth**2)
-    supply = channel.daily_capacity * weight
-    impressions = min(supply, budget * 1_000.0 / cpm)
-    fatigue_exponent = channel.ctr_fatigue * depth + channel.frequency_fatigue * excess_frequency
-    ctr = channel.ctr * math.exp(-fatigue_exponent)
-    cr = channel.cr * math.exp(-CR_FATIGUE_RATIO * fatigue_exponent)
-    new_probability = max(
-        (1.0 - depth) ** channel.reach_decay
-        * math.exp(-channel.frequency_reach_decay * excess_frequency),
-        0.0,
-    )
-    clicks = impressions * ctr
-    new_reach = min(impressions * new_probability, channel.audience_capacity - state.reach)
-    state.reach += new_reach
-    state.impressions_total += impressions
-    return Forecast(
-        spend_micros=max(0, round(impressions * cpm / 1_000.0 * 1_000_000)),
-        impressions=impressions,
-        unique_reach=new_reach,
-        clicks=clicks,
-        conversions=clicks * cr,
-    )
 
 
 def _campaign_forecast(
@@ -258,24 +180,6 @@ def _campaign_forecast(
     ]
     total = sum_forecasts(steps)
     return replace(total, unique_reach=state.reach)
-
-
-def forecast_hourly(
-    channel: ChannelBenchmark,
-    observed: ObservedChannel,
-    budgets_micros: Sequence[int],
-    future: Horizon,
-    start_clock_hour: int,
-) -> list[Forecast]:
-    """Exact hourly forecast for the given per-hour caps starting from the observed state."""
-    weights = _hour_weights(channel, future, start_clock_hour)
-    if len(weights) != len(budgets_micros):
-        raise ValueError("one budget cap per future hour is required")
-    state = _initial_state(channel, observed)
-    return [
-        _forecast_step(channel, state, budget_micros / 1_000_000, weight)
-        for budget_micros, weight in zip(budgets_micros, weights, strict=True)
-    ]
 
 
 def _campaign_kpi(
@@ -424,6 +328,7 @@ def forecast_plan(
     channel_ids: Sequence[str],
     current: Mapping[str, object] | None = None,
     simulation: Mapping[str, object] | None = None,
+    history: Sequence[PastCampaign] = (),
 ) -> PlanForecast | None:
     """Hourly benchmark trajectory for the future caps of a plan.
 
@@ -450,7 +355,8 @@ def forecast_plan(
         totals.append(observed.as_forecast())
         if future_from >= horizon.to_hour:
             continue
-        channel = _calibrate(catalog[channel_id], observed, elapsed, start_clock_hour)
+        prior = channel_prior(catalog[channel_id], channel_history(history, channel_id))
+        channel = _calibrate(prior, observed, elapsed, start_clock_hour)
         future = Horizon(future_from, horizon.to_hour)
         budgets = [caps[channel_id].get(hour, 0) for hour in range(future_from, horizon.to_hour)]
         steps = forecast_hourly(channel, observed, budgets, future, start_clock_hour)
@@ -465,9 +371,10 @@ def forecast_allocations(
     horizon: Horizon,
     channel_ids: list[str],
     simulation: Mapping[str, object] | None = None,
+    history: Sequence[PastCampaign] = (),
 ) -> Forecast:
-    """Forecast an initial plan from public catalog benchmarks only."""
-    forecast = forecast_plan(allocations, horizon, channel_ids, None, simulation)
+    """Forecast an initial plan from the public catalog sharpened by campaign history."""
+    forecast = forecast_plan(allocations, horizon, channel_ids, None, simulation, history)
     if forecast is None:
         raise ValueError("every channel must exist in the public catalog")
     return forecast.total
@@ -496,8 +403,9 @@ def allocate_optimized(
     metric: str,
     current: Mapping[str, object] | None = None,
     simulation: Mapping[str, object] | None = None,
+    history: Sequence[PastCampaign] = (),
 ) -> tuple[Allocation, ...]:
-    prepared = prepare_optimized(horizon, channel_ids, metric, current, simulation)
+    prepared = prepare_optimized(horizon, channel_ids, metric, current, simulation, history)
     return allocate_prepared(prepared, budget_micros)
 
 
@@ -507,6 +415,7 @@ def prepare_optimized(
     metric: str,
     current: Mapping[str, object] | None = None,
     simulation: Mapping[str, object] | None = None,
+    history: Sequence[PastCampaign] = (),
 ) -> PreparedOptimization:
     catalog = load_catalog()
     ordered_ids = sorted(channel_ids)
@@ -514,7 +423,12 @@ def prepare_optimized(
     start_clock_hour = _start_clock_hour(simulation)
     observations = [_observed(current, channel_id) for channel_id in ordered_ids]
     channels = [
-        _calibrate(catalog[channel_id], observations[index], elapsed, start_clock_hour)
+        _calibrate(
+            channel_prior(catalog[channel_id], channel_history(history, channel_id)),
+            observations[index],
+            elapsed,
+            start_clock_hour,
+        )
         for index, channel_id in enumerate(ordered_ids)
     ]
 

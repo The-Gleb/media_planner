@@ -1,7 +1,10 @@
-# Frozen-vs-adaptive evaluation harness
+# Evaluation harness: history, frozen and adaptive
 
-`evaluate.py` measures the case metric headlessly: MAPE of cumulative spend and of the main KPI
-against the approved plan trajectory, for the same approved plan executed in two modes.
+`evaluate.py` measures the case metric headlessly: deviation of cumulative spend and of the main
+KPI from the approved plan trajectory. It varies two factors independently on identical seeds and
+shocks: how much campaign history the planner had when the plan was approved (cold catalog versus
+warm history), and whether execution replans every hour (adaptive) or keeps the approved caps
+(frozen).
 
 ```text
 approved optimized plan (revision 0)
@@ -13,7 +16,11 @@ approved optimized plan (revision 0)
 ```
 
 Both modes run on the same `world_seed`, `campaign_seed` and controlled shock, so the paired
-difference is attributable to hourly replanning alone. Planner is called through its HTTP contract
+difference is attributable to hourly replanning alone. History warm-up plays `--history-levels`
+earlier campaigns on the same world seed (other campaign seeds, budgets cycled through
+`--history-budget-factors`, random market events on unless `--history-no-random-events`), turns
+their observable facts into the planner's `history` request field and caches them per world in
+`history/world-<seed>.json`. Planner is called through its HTTP contract
 in-process (FastAPI test client); Simulator runs as the real Go binary, one process per worker,
 because one Simulator process holds one simulation resource. Random market drift and shocks are
 disabled unless `--random-events` is given.
@@ -45,18 +52,28 @@ uv run --group dev python ../../tools/evaluation/evaluate.py \
   --out ../../tools/evaluation/results
 ```
 
-Useful flags: `--scenarios none,ctr_drop`, `--modes adaptive`, `--replan-every 6`,
+Useful flags: `--history-levels 0,1,3`, `--history-mode uniform|frozen|adaptive` (how warm-up
+campaigns were executed), `--scenarios none,ctr_drop`, `--modes adaptive`, `--replan-every 6`,
 `--simulator-url http://127.0.0.1:8080` and `--planner-url http://127.0.0.1:8082` to evaluate the
 Compose deployment instead of spawning processes.
 
 ## Output
 
-- `summary.md` — per scenario and mode: p50/p90 MAPE of spend and KPI, signed final deviation,
-  share of runs within the 20 % threshold, share of budget moved away from approved caps; plus the
-  paired adaptive-minus-frozen comparison.
-- `runs.json` — one record per run with all metrics and per-channel spend.
+- `summary.md` — per history level, scenario and mode: signed final deviation of spend and KPI
+  (the case metric, threshold 20 % on its absolute value), share of runs within the threshold,
+  trajectory error of spend and KPI, share of budget moved away from approved caps; plus paired
+  cold-versus-warm and frozen-versus-adaptive comparisons.
+- `runs.json` — one record per run with all metrics, per-channel spend and per-channel facts.
 - `trajectories/<run>.csv` — hourly cumulative plan and fact for spend and KPI, for charts.
-- `approved-plan.json` — the Planner response that was approved, including hourly expectations.
+- `approved/world-<seed>-h<level>.json` — the approved Planner response per world and history
+  level, including hourly expectations.
+- `history/world-<seed>.json` — the warm-up campaigns as the planner received them.
+- `dataset/hourly.csv` — one row per channel-hour of every simulated campaign (warm-up and
+  evaluated): cap, requests, impressions, unique reach, clicks, conversions, spend, hour of day,
+  weekday and the cumulative impressions, reach and spend before the hour. This is the training
+  set for offline response models; split by `world_seed`, never by shuffled rows.
 
-Metric definitions follow `docs/mathematical-model.md`, section 13: `APE_t = |fact_t − plan_t| /
-plan_t` over hours with a positive plan, MAPE is their mean, final deviation is signed.
+Metric definitions follow `docs/mathematical-model.md`, section 13. Final deviation is
+`(fact_T − plan_T) / plan_T` at the last hour. Trajectory error is the mean of `|fact_t − plan_t| /
+plan_t` over hours after the first `--trajectory-skip-hours` (default 24), because the cumulative
+plan is close to zero at the start and a few stochastic conversions would dominate the mean.

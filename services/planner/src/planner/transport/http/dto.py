@@ -190,6 +190,63 @@ class TargetKPIDTO(StrictModel):
     value: PositiveCountText
 
 
+class HourBinDTO(StrictModel):
+    """Facts of one channel over the past-campaign hours sharing this hour of local day."""
+
+    hour: StrictInt = Field(ge=0, le=23)
+    hours: StrictInt = Field(ge=0, le=90)
+    requests: CountText
+    impressions: CountText
+    unique_reach: CountText
+    clicks: CountText
+    conversions: CountText
+    spent: MoneyText
+
+    @model_validator(mode="after")
+    def validate_funnel(self) -> HourBinDTO:
+        impressions = count_to_int(self.impressions)
+        clicks = count_to_int(self.clicks)
+        if clicks > impressions or count_to_int(self.conversions) > clicks:
+            raise ValueError(
+                "clicks cannot exceed impressions and conversions cannot exceed clicks"
+            )
+        if count_to_int(self.unique_reach) > impressions:
+            raise ValueError("unique reach cannot exceed impressions")
+        if self.hours == 0 and any(
+            (
+                count_to_int(self.requests),
+                impressions,
+                money_to_micros(self.spent),
+            )
+        ):
+            raise ValueError("a bin without observed hours cannot carry facts")
+        return self
+
+
+class PastCampaignChannelDTO(StrictModel):
+    bins: list[HourBinDTO] = Field(min_length=24, max_length=24)
+
+    @model_validator(mode="after")
+    def validate_bins(self) -> PastCampaignChannelDTO:
+        if [item.hour for item in self.bins] != list(range(24)):
+            raise ValueError("bins must cover hours 0..23 exactly once in order")
+        return self
+
+
+class PastCampaignDTO(StrictModel):
+    """Observable outcome of one finished campaign on the same market, oldest first."""
+
+    horizon_hours: StrictInt = Field(ge=1, le=2160)
+    channels: dict[ChannelID, PastCampaignChannelDTO] = Field(min_length=1, max_length=20)
+
+    @model_validator(mode="after")
+    def validate_hours(self) -> PastCampaignDTO:
+        for channel_id, channel in self.channels.items():
+            if sum(item.hours for item in channel.bins) > self.horizon_hours:
+                raise ValueError(f"channel {channel_id} observed more hours than the horizon")
+        return self
+
+
 class RequestBase(StrictModel):
     request_id: UUID
     strategy: Strategy
@@ -200,6 +257,7 @@ class RequestBase(StrictModel):
     simulation: SimulationContextDTO
     market: MarketForecastDTO
     current: CampaignStateDTO
+    history: list[PastCampaignDTO] = Field(default_factory=list, max_length=50)
 
     @model_validator(mode="after")
     def validate_relationships(self) -> RequestBase:

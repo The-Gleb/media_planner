@@ -4,6 +4,7 @@ import re
 from collections.abc import Mapping, Sequence
 
 from planner.domain.catalog import load_catalog
+from planner.domain.history import PastCampaign
 from planner.domain.models import KPI, Horizon, MediaPlan, Strategy
 from planner.domain.optimized import allocate_optimized, forecast_plan
 from planner.domain.target import TargetBudgetSolution, solve_target_budget
@@ -12,8 +13,33 @@ from planner.domain.values import MAX_MICROS
 
 _CHANNEL_RE = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
 
-FINGERPRINT_VERSION = "fixed-budget-v1"
-TARGET_FINGERPRINT_VERSION = "target-kpi-v2"
+FINGERPRINT_VERSION = "fixed-budget-v2"
+TARGET_FINGERPRINT_VERSION = "target-kpi-v3"
+
+
+def history_payload(history: Sequence[PastCampaign]) -> list[dict[str, object]]:
+    """Canonical, JSON-serialisable form of the history for plan fingerprints."""
+    return [
+        {
+            "horizon_hours": campaign.horizon_hours,
+            "channels": {
+                channel_id: [
+                    [
+                        item.hours,
+                        item.requests,
+                        item.impressions,
+                        item.unique_reach,
+                        item.clicks,
+                        item.conversions,
+                        item.spent_micros,
+                    ]
+                    for item in channel.bins
+                ]
+                for channel_id, channel in sorted(campaign.channels.items())
+            },
+        }
+        for campaign in history
+    ]
 
 
 def plan_fingerprint(defining_inputs: Mapping[str, object]) -> str:
@@ -35,6 +61,7 @@ def create_fixed_budget_plan(
     optimize: str,
     strategy: str = "uniform",
     current: Mapping[str, object] | None = None,
+    history: Sequence[PastCampaign] = (),
 ) -> MediaPlan:
     if not 0 <= budget_micros <= MAX_MICROS:
         raise ValueError("budget must fit the signed int64 micro-unit range")
@@ -64,11 +91,13 @@ def create_fixed_budget_plan(
     }
     if strategy == Strategy.OPTIMIZED.value and current is not None:
         defining["current"] = dict(current)
+    if strategy == Strategy.OPTIMIZED.value and history:
+        defining["history"] = history_payload(history)
     allocations = (
         allocate_uniformly(budget_micros, horizon, ordered_channels)
         if strategy == Strategy.UNIFORM.value
         else allocate_optimized(
-            budget_micros, horizon, ordered_channels, optimize, current, simulation
+            budget_micros, horizon, ordered_channels, optimize, current, simulation, history
         )
     )
     return MediaPlan(
@@ -77,7 +106,9 @@ def create_fixed_budget_plan(
         allocations=allocations,
         unallocated_budget_micros=budget_micros
         - sum(allocation.budget_micros for allocation in allocations),
-        forecast=forecast_plan(allocations, horizon, ordered_channels, current, simulation),
+        forecast=forecast_plan(
+            allocations, horizon, ordered_channels, current, simulation, history
+        ),
     )
 
 
@@ -89,6 +120,7 @@ def create_target_kpi_plan(
     channels: Sequence[str],
     simulation: Mapping[str, object],
     strategy: str,
+    history: Sequence[PastCampaign] = (),
 ) -> tuple[MediaPlan | None, TargetBudgetSolution]:
     if target_value <= 0:
         raise ValueError("target must be positive")
@@ -112,6 +144,7 @@ def create_target_kpi_plan(
         horizon=horizon,
         channel_ids=ordered_channels,
         simulation=dict(simulation),
+        history=history,
     )
     if not solution.feasible or solution.required_budget_micros is None:
         return None, solution
@@ -124,6 +157,7 @@ def create_target_kpi_plan(
         "horizon": {"from_hour": horizon.from_hour, "to_hour": horizon.to_hour},
         "channels": ordered_channels,
         "simulation": dict(simulation),
+        "history": history_payload(history),
     }
     return (
         MediaPlan(

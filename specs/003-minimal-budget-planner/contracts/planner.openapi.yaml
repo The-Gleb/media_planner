@@ -237,6 +237,14 @@ components:
           $ref: '#/components/schemas/MarketForecast'
         current:
           $ref: '#/components/schemas/CampaignState'
+        history:
+          description: >-
+            Observable outcomes of earlier campaigns on the same market, oldest first. Optional;
+            an empty list means the public catalog benchmark alone.
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/PastCampaign'
         budget:
           $ref: '#/components/schemas/Money'
         optimize:
@@ -275,6 +283,14 @@ components:
           $ref: '#/components/schemas/MarketForecast'
         current:
           $ref: '#/components/schemas/CampaignState'
+        history:
+          description: >-
+            Observable outcomes of earlier campaigns on the same market, oldest first. Optional;
+            an empty list means the public catalog benchmark alone.
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/PastCampaign'
         budget:
           type: 'null'
           default: null
@@ -632,6 +648,63 @@ components:
           $ref: '#/components/schemas/InfeasibilityReason'
         target:
           $ref: '#/components/schemas/TargetKPI'
+    HourBin:
+      type: object
+      additionalProperties: false
+      required: [hour, hours, requests, impressions, unique_reach, clicks, conversions, spent]
+      description: >-
+        Facts of one channel accumulated over all past-campaign hours that fell into this hour of
+        local day. Only fields a campaign can observe are allowed; hidden world parameters are
+        rejected by additionalProperties: false.
+      properties:
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        hours:
+          type: integer
+          minimum: 0
+          maximum: 90
+          description: Number of campaign hours aggregated into the bin.
+        requests:
+          $ref: '#/components/schemas/Count'
+        impressions:
+          $ref: '#/components/schemas/Count'
+        unique_reach:
+          $ref: '#/components/schemas/Count'
+        clicks:
+          $ref: '#/components/schemas/Count'
+        conversions:
+          $ref: '#/components/schemas/Count'
+        spent:
+          $ref: '#/components/schemas/Money'
+    PastCampaignChannel:
+      type: object
+      additionalProperties: false
+      required: [bins]
+      properties:
+        bins:
+          type: array
+          minItems: 24
+          maxItems: 24
+          description: Exactly one bin per hour of day, ordered 0..23.
+          items:
+            $ref: '#/components/schemas/HourBin'
+    PastCampaign:
+      type: object
+      additionalProperties: false
+      required: [horizon_hours, channels]
+      properties:
+        horizon_hours:
+          type: integer
+          minimum: 1
+          maximum: 2160
+        channels:
+          type: object
+          minProperties: 1
+          maxProperties: 20
+          additionalProperties:
+            $ref: '#/components/schemas/PastCampaignChannel'
     Allocation:
       type: object
       additionalProperties: false

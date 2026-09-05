@@ -226,3 +226,74 @@ def test_replan_keeps_committed_hours_without_expectations(
     future_spend = sum(money_to_micros(item["expected"]["spend"]) for item in future)
     assert money_to_micros(body["expected"]["spend"]) == 2_000_000_000 + future_spend
     assert int(body["expected"]["conversions"]) >= 3
+
+
+def _history_entry(channels: list[str], hours: int = 336) -> dict[str, Any]:
+    per_bin = hours // 24
+    bins = [
+        {
+            "hour": hour,
+            "hours": per_bin,
+            "requests": str(per_bin * 20_000),
+            "impressions": str(per_bin * 4_000),
+            "unique_reach": str(per_bin * 3_000),
+            "clicks": str(per_bin * 60),
+            "conversions": str(per_bin * 3),
+            "spent": f"{per_bin * 400}.000000",
+        }
+        for hour in range(24)
+    ]
+    return {"horizon_hours": hours, "channels": {channel: {"bins": bins} for channel in channels}}
+
+
+def test_history_changes_optimized_plan_and_fingerprint(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    channels = ["programmatic", "social_1"]
+    zero = next(iter(fixed_request["current"]["channels"].values()))
+    fixed_request["strategy"] = "optimized"
+    fixed_request["optimize"] = "conversions"
+    fixed_request["channels"] = channels
+    fixed_request["horizon"] = {"from_hour": 0, "to_hour": 72}
+    fixed_request["current"]["channels"] = {channel: dict(zero) for channel in channels}
+    fixed_request["budget"] = "300000.000000"
+    cold = client.post("/v1/plans", json=fixed_request).json()
+
+    fixed_request["history"] = [_history_entry(["social_1"])]
+    warm_response = client.post("/v1/plans", json=fixed_request)
+    assert warm_response.status_code == 200, warm_response.text
+    warm = warm_response.json()
+    assert warm["plan_id"] != cold["plan_id"]
+    assert warm["allocations"] != cold["allocations"]
+    assert warm["expected"] != cold["expected"]
+
+
+def test_history_does_not_change_uniform_plan_id(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    cold = client.post("/v1/plans", json=fixed_request).json()
+    fixed_request["history"] = [_history_entry(["social_1"])]
+    warm = client.post("/v1/plans", json=fixed_request).json()
+    assert warm["plan_id"] == cold["plan_id"]
+    assert warm["allocations"] == cold["allocations"]
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda entry: entry["channels"]["social_1"]["bins"].pop(),
+        lambda entry: entry["channels"]["social_1"]["bins"][3].__setitem__("hour", 4),
+        lambda entry: entry["channels"]["social_1"]["bins"][0].__setitem__("clicks", "999999"),
+        lambda entry: entry.__setitem__("horizon_hours", 24),
+        lambda entry: entry.__setitem__("hidden_cpm", "1.0"),
+    ],
+)
+def test_invalid_history_is_rejected(
+    client: TestClient, fixed_request: dict[str, Any], mutate: Any
+) -> None:
+    entry = _history_entry(["social_1"])
+    mutate(entry)
+    fixed_request["history"] = [entry]
+    response = client.post("/v1/plans", json=fixed_request)
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation_failed"

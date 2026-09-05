@@ -1,12 +1,14 @@
+import pytest
+
 from planner.domain.catalog import load_catalog
 from planner.domain.models import Horizon
 from planner.domain.optimized import (
-    ObservedChannel,
     _campaign_forecast,
     _channel_capacity_micros,
     _response_segments,
     allocate_optimized,
 )
+from planner.domain.response import ObservedChannel
 
 
 def test_optimized_plan_is_exact_complete_and_deterministic() -> None:
@@ -83,7 +85,8 @@ def test_public_response_rates_saturate_with_channel_budget() -> None:
 
     assert high.spend_micros * low.impressions > low.spend_micros * high.impressions
     assert high.clicks / high.impressions < low.clicks / low.impressions
-    assert high.conversions / high.clicks < low.conversions / low.clicks
+    # sim-v0 applies fatigue to CTR only, so the benchmark keeps CR flat.
+    assert high.conversions / high.clicks == pytest.approx(low.conversions / low.clicks)
 
 
 def test_response_segments_have_non_increasing_non_negative_marginal_gain() -> None:

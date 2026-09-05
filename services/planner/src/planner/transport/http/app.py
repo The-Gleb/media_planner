@@ -14,6 +14,7 @@ from starlette.responses import Response
 
 from planner.application.planning import create_fixed_budget_plan, create_target_kpi_plan
 from planner.config import Settings
+from planner.domain.history import HourBin, PastCampaign, PastCampaignChannel
 from planner.domain.models import Forecast, Horizon, MediaPlan, Strategy
 from planner.domain.values import count_to_int, micros_to_money, money_to_micros
 from planner.transport.http.dto import (
@@ -25,6 +26,7 @@ from planner.transport.http.dto import (
     InfeasibilityReasonDTO,
     InfeasibleTargetKPIPlanDTO,
     MediaPlanDTO,
+    PastCampaignDTO,
     PlanRequestDTO,
     PlanResultDTO,
     TargetKPIPlanDTO,
@@ -86,6 +88,9 @@ def build_openapi() -> dict[str, Any]:
         "HealthDTO": "Health",
         "HorizonDTO": "Horizon",
         "MarketForecastDTO": "MarketForecast",
+        "HourBinDTO": "HourBin",
+        "PastCampaignChannelDTO": "PastCampaignChannel",
+        "PastCampaignDTO": "PastCampaign",
         "MediaPlanDTO": "MediaPlan",
         "ExpectedOutcomeDTO": "ExpectedOutcome",
         "HourlyExpectedDTO": "HourlyExpected",
@@ -373,6 +378,7 @@ async def create_plan(
                 channels=request.channels,
                 simulation=request.simulation.model_dump(mode="json"),
                 strategy=request.strategy.value,
+                history=_history(request.history),
             )
         except ValueError as exc:
             return problem(
@@ -440,6 +446,7 @@ async def create_plan(
         current=request.current.model_dump(mode="json"),
         optimize=request.optimize.value,
         strategy=request.strategy.value,
+        history=_history(request.history),
     )
     return MediaPlanDTO(
         request_id=request.request_id,
@@ -458,6 +465,32 @@ async def create_plan(
         required_budget=None,
         reason=None,
         target=None,
+    )
+
+
+def _history(history: list[PastCampaignDTO]) -> tuple[PastCampaign, ...]:
+    return tuple(
+        PastCampaign(
+            horizon_hours=campaign.horizon_hours,
+            channels={
+                channel_id: PastCampaignChannel(
+                    bins=tuple(
+                        HourBin(
+                            hours=item.hours,
+                            requests=count_to_int(item.requests),
+                            impressions=count_to_int(item.impressions),
+                            unique_reach=count_to_int(item.unique_reach),
+                            clicks=count_to_int(item.clicks),
+                            conversions=count_to_int(item.conversions),
+                            spent_micros=money_to_micros(item.spent),
+                        )
+                        for item in channel.bins
+                    )
+                )
+                for channel_id, channel in campaign.channels.items()
+            },
+        )
+        for campaign in history
     )
 
 

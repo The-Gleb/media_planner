@@ -1,20 +1,22 @@
-"""Frozen-versus-adaptive evaluation harness for the Media Planner.
+"""Frozen-versus-adaptive and cold-versus-warm evaluation harness for the Media Planner.
 
-The harness reproduces the dashboard loop headlessly: it approves one optimized plan at revision
-zero, then executes it in the Simulator either with frozen caps (the approved schedule is never
-changed) or adaptively (every committed hour is fed back to Planner and the returned caps are used
-for the next hour). Both modes run on identical world and campaign seeds and identical controlled
-shocks, so the only difference between them is the hourly replanning.
+The harness reproduces the dashboard loop headlessly. For every world seed it can first play a
+number of earlier campaigns ("warm-up") whose observable facts become the planner's history; it
+then approves one optimized plan and executes it in the Simulator either with frozen caps (the
+approved schedule is never changed) or adaptively (every committed hour is fed back to Planner and
+the returned caps are used for the next hour). All variants of one cell run on identical world and
+campaign seeds and identical controlled shocks, so paired differences are attributable to the
+single factor that changed: hourly replanning, or history.
 
-Planner is exercised through its HTTP boundary in-process (FastAPI test client) to keep the run
-fast; Simulator runs as the real Go binary, one process per worker, because a Simulator process
-holds a single simulation resource.
+Planner is exercised through its HTTP contract in-process (FastAPI test client); Simulator runs as
+the real Go binary, one process per worker, because a Simulator process holds a single simulation
+resource. Every simulated hour is also appended to a training dataset (one row per channel-hour
+with the cap and the cumulative state before the hour) for offline response models.
 
 Example:
-
     cd services/planner
-    uv run --group dev python ../../tools/evaluation/evaluate.py \
-        --world-seeds 1-5 --campaign-seeds 1,2 --workers 4 --out ../../tools/evaluation/results
+    uv run --group dev python ../../tools/evaluation/evaluate.py \\
+        --world-seeds 1-5 --history-levels 0,3 --workers 4 --out ../../tools/evaluation/results
 """
 
 from __future__ import annotations
@@ -30,12 +32,14 @@ import time
 import uuid
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
+from datetime import datetime
 from decimal import Decimal
 from multiprocessing import Process
 from pathlib import Path
 from typing import Any
 from urllib import error as urlerror
 from urllib import request as urlrequest
+from zoneinfo import ZoneInfo
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SIMULATOR_BIN = REPO_ROOT / "services/simulator/bin/simulator"
@@ -44,6 +48,30 @@ MICROS = 1_000_000
 SCENARIOS = ("none", "ctr_drop", "cpm_spike", "supply_drop", "pause")
 MODES = ("frozen", "adaptive")
 SHOCK_MULTIPLIERS = {"ctr_drop": 0.6, "cpm_spike": 1.6, "supply_drop": 0.5}
+FACT_KEYS = ("requests", "impressions", "unique_reach", "clicks", "conversions")
+HISTORY_SEED_BASE = 1000
+DATASET_COLUMNS = (
+    "kind",
+    "world_seed",
+    "campaign_seed",
+    "history_level",
+    "scenario",
+    "mode",
+    "channel_id",
+    "hour_index",
+    "hour_of_day",
+    "weekday",
+    "cap",
+    "requests",
+    "impressions",
+    "unique_reach",
+    "clicks",
+    "conversions",
+    "spend",
+    "cum_impressions_before",
+    "cum_reach_before",
+    "cum_spend_before",
+)
 
 
 # --------------------------------------------------------------------------------------
@@ -74,18 +102,25 @@ class Brief:
     replan_every: int
     pause_hours: int
     random_events: bool
+    trajectory_skip_hours: int
+    history_mode: str
+    history_random_events: bool
+    history_budget_factors: tuple[float, ...]
 
 
 @dataclass(frozen=True)
 class RunSpec:
     world_seed: int
     campaign_seed: int
+    history: int
     scenario: str
     mode: str
 
     @property
     def run_id(self) -> str:
-        return f"w{self.world_seed}-c{self.campaign_seed}-{self.scenario}-{self.mode}"
+        return (
+            f"w{self.world_seed}-c{self.campaign_seed}-h{self.history}-{self.scenario}-{self.mode}"
+        )
 
 
 @dataclass
@@ -93,6 +128,7 @@ class RunResult:
     run_id: str
     world_seed: int
     campaign_seed: int
+    history: int
     scenario: str
     mode: str
     shocked_channel: str | None
@@ -219,9 +255,12 @@ class PlannerClient:
 class PlanView:
     """Caps and hourly expectations of one Planner response, indexed by hour and channel."""
 
-    def __init__(self, body: dict[str, Any], channels: Sequence[str], optimize: str) -> None:
+    def __init__(
+        self, body: dict[str, Any], channels: Sequence[str], optimize: str, budget_micros: int
+    ) -> None:
         self.plan_id: str = body["plan_id"]
         self.channels = list(channels)
+        self.budget_micros = budget_micros
         self.caps: dict[int, dict[str, int]] = {}
         self.expected_spend: dict[int, int] = {}
         self.expected_kpi: dict[int, float] = {}
@@ -269,8 +308,13 @@ class PlanView:
 # --------------------------------------------------------------------------------------
 
 
-def mape(plan: Sequence[float], fact: Sequence[float]) -> float:
-    errors = [abs(f - p) / p for p, f in zip(plan, fact, strict=True) if p > 0]
+def trajectory_error(plan: Sequence[float], fact: Sequence[float], skip_hours: int) -> float:
+    """Mean |fact − plan| / plan over the cumulative trajectory after the warm-up hours."""
+    errors = [
+        abs(f - p) / p
+        for hour, (p, f) in enumerate(zip(plan, fact, strict=True))
+        if hour >= skip_hours and p > 0
+    ]
     return sum(errors) / len(errors) if errors else 0.0
 
 
@@ -290,9 +334,18 @@ def quantile(values: Sequence[float], q: float) -> float:
     return ordered[low] + (ordered[high] - ordered[low]) * (position - low)
 
 
+def _median(values: Iterable[float]) -> float:
+    items = list(values)
+    return statistics.median(items) if items else float("nan")
+
+
 # --------------------------------------------------------------------------------------
-# Campaign execution
+# Requests
 # --------------------------------------------------------------------------------------
+
+
+def zero_facts(channels: Sequence[str]) -> dict[str, dict[str, int]]:
+    return {c: dict.fromkeys(("spent", *FACT_KEYS), 0) for c in channels}
 
 
 def scenario_events(
@@ -323,6 +376,20 @@ def scenario_events(
     ]
 
 
+def simulation_context(
+    brief: Brief, metadata: dict[str, Any], simulation_id: str, world_seed: int, campaign_seed: int
+) -> dict[str, Any]:
+    return {
+        "simulation_id": simulation_id,
+        "world_seed": str(world_seed),
+        "campaign_seed": str(campaign_seed),
+        "start_hour": brief.start_hour,
+        "time_zone": brief.time_zone,
+        "currency": metadata["currency"],
+        "world_config_digest": metadata["world_config_digest"],
+    }
+
+
 def plan_request(
     brief: Brief,
     simulation: dict[str, Any],
@@ -331,6 +398,9 @@ def plan_request(
     current_hour: int,
     last_step_id: str | None,
     last_observed_at: str | None,
+    history: Sequence[dict[str, Any]],
+    strategy: str = "optimized",
+    budget_micros: int | None = None,
 ) -> dict[str, Any]:
     totals = {
         key: sum(facts[c][key] for c in channels)
@@ -339,7 +409,7 @@ def plan_request(
     return {
         "request_id": str(uuid.uuid4()),
         "type": "fixed_budget",
-        "strategy": "optimized",
+        "strategy": strategy,
         "horizon": {"from_hour": 0, "to_hour": brief.duration_hours},
         "channels": list(channels),
         "simulation": simulation,
@@ -356,61 +426,76 @@ def plan_request(
             "channels": {
                 c: {
                     "spent": money(facts[c]["spent"]),
-                    "requests": str(facts[c]["requests"]),
-                    "impressions": str(facts[c]["impressions"]),
-                    "unique_reach": str(facts[c]["unique_reach"]),
-                    "clicks": str(facts[c]["clicks"]),
-                    "conversions": str(facts[c]["conversions"]),
+                    **{key: str(facts[c][key]) for key in FACT_KEYS},
                 }
                 for c in channels
             },
         },
-        "budget": money(brief.budget_micros),
+        "history": list(history),
+        "budget": money(brief.budget_micros if budget_micros is None else budget_micros),
         "optimize": brief.optimize,
         "target": None,
     }
 
 
-def run_campaign(
-    spec: RunSpec,
+# --------------------------------------------------------------------------------------
+# Campaign execution
+# --------------------------------------------------------------------------------------
+
+
+@dataclass
+class Execution:
+    """Everything one simulated campaign produced."""
+
+    plan_spend: list[float]
+    plan_kpi: list[float]
+    fact_spend: list[float]
+    fact_kpi: list[float]
+    facts: dict[str, dict[str, int]]
+    bins: dict[str, list[dict[str, int]]]
+    replans: int
+    reallocated: int
+
+
+def _local(observed_hour: str, time_zone: str) -> datetime:
+    return datetime.fromisoformat(observed_hour.replace("Z", "+00:00")).astimezone(
+        ZoneInfo(time_zone)
+    )
+
+
+def execute_campaign(
+    *,
     brief: Brief,
     channels: Sequence[str],
-    metadata: dict[str, Any],
     simulator: SimulatorClient,
     planner: PlannerClient,
     approved: PlanView,
-    trajectories_dir: Path,
-) -> RunResult:
-    started = time.perf_counter()
+    simulation: dict[str, Any],
+    world_seed: int,
+    campaign_seed: int,
+    events: list[dict[str, Any]],
+    random_events: bool,
+    adaptive: bool,
+    history: Sequence[dict[str, Any]],
+    dataset: Any,
+    dataset_tags: Mapping[str, object],
+) -> Execution:
     duration = brief.duration_hours
-    simulation = {
-        "simulation_id": simulator.simulation_id,
-        "world_seed": str(spec.world_seed),
-        "campaign_seed": str(spec.campaign_seed),
-        "start_hour": brief.start_hour,
-        "time_zone": brief.time_zone,
-        "currency": metadata["currency"],
-        "world_config_digest": metadata["world_config_digest"],
-    }
-    shocked = approved.top_channel if spec.scenario != "none" else None
-    events = scenario_events(spec.scenario, approved.top_channel, duration, brief.pause_hours)
     reset_payload: dict[str, Any] = {
-        "world_seed": str(spec.world_seed),
-        "campaign_seed": str(spec.campaign_seed),
+        "world_seed": str(world_seed),
+        "campaign_seed": str(campaign_seed),
         "start_hour": brief.start_hour,
         "duration_hours": duration,
         "time_zone": brief.time_zone,
-        "disable_random_events": not brief.random_events,
+        "disable_random_events": not random_events,
     }
     if events:
         reset_payload["scenario_events"] = events
     simulator.reset(reset_payload)
 
-    facts = {
-        c: dict.fromkeys(
-            ("spent", "requests", "impressions", "unique_reach", "clicks", "conversions"), 0
-        )
-        for c in channels
+    facts = zero_facts(channels)
+    bins = {
+        c: [dict.fromkeys(("hours", "spent", *FACT_KEYS), 0) for _ in range(24)] for c in channels
     }
     plan_spend, plan_kpi = approved.cumulative(duration)
     fact_spend: list[float] = []
@@ -423,15 +508,38 @@ def run_campaign(
         for c in channels:
             reallocated += abs(current.caps[hour][c] - approved.caps[hour][c])
         response = simulator.step(actions)
+        local = _local(response["observed_hour"], brief.time_zone)
         for observation in response["observations"]:
-            record = facts[observation["channel_id"]]
-            record["spent"] += to_micros(observation["spend"])
-            for key in ("requests", "impressions", "unique_reach", "clicks", "conversions"):
+            channel_id = observation["channel_id"]
+            record = facts[channel_id]
+            spend = to_micros(observation["spend"])
+            if dataset is not None:
+                dataset.writerow(
+                    [
+                        *dataset_tags.values(),
+                        channel_id,
+                        hour,
+                        local.hour,
+                        local.weekday(),
+                        money(current.caps[hour][channel_id]),
+                        *(observation[key] for key in FACT_KEYS),
+                        observation["spend"],
+                        record["impressions"],
+                        record["unique_reach"],
+                        money(record["spent"]),
+                    ]
+                )
+            record["spent"] += spend
+            hour_bin = bins[channel_id][local.hour]
+            hour_bin["hours"] += 1
+            hour_bin["spent"] += spend
+            for key in FACT_KEYS:
                 record[key] += int(observation[key])
+                hour_bin[key] += int(observation[key])
         fact_spend.append(sum(facts[c]["spent"] for c in channels) / MICROS)
         fact_kpi.append(float(sum(facts[c][brief.optimize] for c in channels)))
         next_hour = hour + 1
-        if spec.mode == "adaptive" and next_hour < duration and next_hour % brief.replan_every == 0:
+        if adaptive and next_hour < duration and next_hour % brief.replan_every == 0:
             body = plan_request(
                 brief,
                 simulation,
@@ -440,9 +548,171 @@ def run_campaign(
                 next_hour,
                 response["step_id"],
                 response["observed_hour"],
+                history,
+                budget_micros=approved.budget_micros,
             )
-            current = PlanView(planner.plan(body), channels, brief.optimize)
+            current = PlanView(planner.plan(body), channels, brief.optimize, approved.budget_micros)
             replans += 1
+    return Execution(plan_spend, plan_kpi, fact_spend, fact_kpi, facts, bins, replans, reallocated)
+
+
+def past_campaign(execution: Execution, horizon_hours: int) -> dict[str, Any]:
+    """Planner `history` entry built from what a finished campaign observed."""
+    return {
+        "horizon_hours": horizon_hours,
+        "channels": {
+            channel_id: {
+                "bins": [
+                    {
+                        "hour": hour,
+                        "hours": item["hours"],
+                        **{key: str(item[key]) for key in FACT_KEYS},
+                        "spent": money(item["spent"]),
+                    }
+                    for hour, item in enumerate(channel_bins)
+                ]
+            }
+            for channel_id, channel_bins in execution.bins.items()
+        },
+    }
+
+
+# --------------------------------------------------------------------------------------
+# History warm-up
+# --------------------------------------------------------------------------------------
+
+
+def load_or_generate_history(
+    *,
+    world_seed: int,
+    count: int,
+    brief: Brief,
+    channels: Sequence[str],
+    metadata: dict[str, Any],
+    simulator: SimulatorClient,
+    planner: PlannerClient,
+    out_dir: Path,
+    dataset: Any,
+) -> list[dict[str, Any]]:
+    """Earlier campaigns on the same world, oldest first, cached per world seed."""
+    if count <= 0:
+        return []
+    path = out_dir / "history" / f"world-{world_seed}.json"
+    if path.exists():
+        cached = json.loads(path.read_text())
+        if len(cached) >= count:
+            return list(cached[-count:])
+    history: list[dict[str, Any]] = []
+    for index in range(count):
+        campaign_seed = HISTORY_SEED_BASE + index
+        factor = brief.history_budget_factors[index % len(brief.history_budget_factors)]
+        budget = int(brief.budget_micros * factor)
+        simulation = simulation_context(
+            brief, metadata, simulator.simulation_id, world_seed, campaign_seed
+        )
+        body = plan_request(
+            brief,
+            simulation,
+            channels,
+            zero_facts(channels),
+            0,
+            None,
+            None,
+            history,
+            strategy="uniform" if brief.history_mode == "uniform" else "optimized",
+            budget_micros=budget,
+        )
+        plan = PlanView(planner.plan(body), channels, brief.optimize, budget)
+        execution = execute_campaign(
+            brief=brief,
+            channels=channels,
+            simulator=simulator,
+            planner=planner,
+            approved=plan,
+            simulation=simulation,
+            world_seed=world_seed,
+            campaign_seed=campaign_seed,
+            events=[],
+            random_events=brief.history_random_events,
+            adaptive=brief.history_mode == "adaptive",
+            history=history,
+            dataset=dataset,
+            dataset_tags={
+                "kind": "history",
+                "world_seed": world_seed,
+                "campaign_seed": campaign_seed,
+                "history_level": index,
+                "scenario": "none",
+                "mode": brief.history_mode,
+            },
+        )
+        history.append(past_campaign(execution, brief.duration_hours))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(history))
+    return history
+
+
+# --------------------------------------------------------------------------------------
+# Evaluated run
+# --------------------------------------------------------------------------------------
+
+
+def approve_plan(
+    planner: PlannerClient,
+    brief: Brief,
+    channels: Sequence[str],
+    metadata: dict[str, Any],
+    history: Sequence[dict[str, Any]],
+) -> tuple[PlanView, dict[str, Any]]:
+    simulation = simulation_context(brief, metadata, "eval-approval", 0, 0)
+    body = planner.plan(
+        plan_request(brief, simulation, channels, zero_facts(channels), 0, None, None, history)
+    )
+    return PlanView(body, channels, brief.optimize, brief.budget_micros), body
+
+
+def run_campaign(
+    spec: RunSpec,
+    brief: Brief,
+    channels: Sequence[str],
+    metadata: dict[str, Any],
+    simulator: SimulatorClient,
+    planner: PlannerClient,
+    approved: PlanView,
+    history: Sequence[dict[str, Any]],
+    trajectories_dir: Path,
+    dataset: Any,
+) -> RunResult:
+    started = time.perf_counter()
+    duration = brief.duration_hours
+    simulation = simulation_context(
+        brief, metadata, simulator.simulation_id, spec.world_seed, spec.campaign_seed
+    )
+    shocked = approved.top_channel if spec.scenario != "none" else None
+    events = scenario_events(spec.scenario, approved.top_channel, duration, brief.pause_hours)
+    execution = execute_campaign(
+        brief=brief,
+        channels=channels,
+        simulator=simulator,
+        planner=planner,
+        approved=approved,
+        simulation=simulation,
+        world_seed=spec.world_seed,
+        campaign_seed=spec.campaign_seed,
+        events=events,
+        random_events=brief.random_events,
+        adaptive=spec.mode == "adaptive",
+        history=history,
+        dataset=dataset,
+        dataset_tags={
+            "kind": "eval",
+            "world_seed": spec.world_seed,
+            "campaign_seed": spec.campaign_seed,
+            "history_level": spec.history,
+            "scenario": spec.scenario,
+            "mode": spec.mode,
+        },
+    )
 
     trajectories_dir.mkdir(parents=True, exist_ok=True)
     with (trajectories_dir / f"{spec.run_id}.csv").open("w", newline="") as handle:
@@ -452,41 +722,47 @@ def run_campaign(
             writer.writerow(
                 [
                     hour,
-                    f"{plan_spend[hour]:.2f}",
-                    f"{fact_spend[hour]:.2f}",
-                    f"{plan_kpi[hour]:.3f}",
-                    f"{fact_kpi[hour]:.0f}",
+                    f"{execution.plan_spend[hour]:.2f}",
+                    f"{execution.fact_spend[hour]:.2f}",
+                    f"{execution.plan_kpi[hour]:.3f}",
+                    f"{execution.fact_kpi[hour]:.0f}",
                 ]
             )
 
     budget = brief.budget_micros / MICROS
-    final_spend = abs(final_dev(plan_spend, fact_spend))
-    final_kpi = abs(final_dev(plan_kpi, fact_kpi))
+    dev_spend = final_dev(execution.plan_spend, execution.fact_spend)
+    dev_kpi = final_dev(execution.plan_kpi, execution.fact_kpi)
+    skip = brief.trajectory_skip_hours
     return RunResult(
         run_id=spec.run_id,
         world_seed=spec.world_seed,
         campaign_seed=spec.campaign_seed,
+        history=spec.history,
         scenario=spec.scenario,
         mode=spec.mode,
         shocked_channel=shocked,
         budget=budget,
-        plan_spend=plan_spend[-1],
-        plan_kpi=plan_kpi[-1],
-        fact_spend=fact_spend[-1],
-        fact_kpi=fact_kpi[-1],
-        mape_spend=mape(plan_spend, fact_spend),
-        mape_kpi=mape(plan_kpi, fact_kpi),
-        final_ape_spend=final_spend,
-        final_ape_kpi=final_kpi,
-        final_dev_spend=final_dev(plan_spend, fact_spend),
-        final_dev_kpi=final_dev(plan_kpi, fact_kpi),
-        within_20=final_spend <= 0.2 and final_kpi <= 0.2,
-        budget_utilization=fact_spend[-1] / budget if budget else 0.0,
-        reallocated_share=reallocated / brief.budget_micros if brief.budget_micros else 0.0,
-        replans=replans,
+        plan_spend=execution.plan_spend[-1],
+        plan_kpi=execution.plan_kpi[-1],
+        fact_spend=execution.fact_spend[-1],
+        fact_kpi=execution.fact_kpi[-1],
+        mape_spend=trajectory_error(execution.plan_spend, execution.fact_spend, skip),
+        mape_kpi=trajectory_error(execution.plan_kpi, execution.fact_kpi, skip),
+        final_ape_spend=abs(dev_spend),
+        final_ape_kpi=abs(dev_kpi),
+        final_dev_spend=dev_spend,
+        final_dev_kpi=dev_kpi,
+        within_20=abs(dev_spend) <= 0.2 and abs(dev_kpi) <= 0.2,
+        budget_utilization=execution.fact_spend[-1] / budget if budget else 0.0,
+        reallocated_share=execution.reallocated / brief.budget_micros
+        if brief.budget_micros
+        else 0.0,
+        replans=execution.replans,
         seconds=time.perf_counter() - started,
-        channel_spend={c: facts[c]["spent"] / MICROS for c in channels},
-        channel_facts={c: {k: v for k, v in facts[c].items() if k != "spent"} for c in channels},
+        channel_spend={c: execution.facts[c]["spent"] / MICROS for c in channels},
+        channel_facts={
+            c: {k: v for k, v in execution.facts[c].items() if k != "spent"} for c in channels
+        },
     )
 
 
@@ -519,28 +795,6 @@ def wait_ready(client: SimulatorClient, timeout: float = 15.0) -> None:
     raise RuntimeError(f"simulator at {client.base_url} did not become ready")
 
 
-def approve_plan(
-    planner: PlannerClient, brief: Brief, channels: Sequence[str], metadata: dict[str, Any]
-) -> tuple[PlanView, dict[str, Any]]:
-    simulation = {
-        "simulation_id": "eval-approval",
-        "world_seed": "0",
-        "campaign_seed": "0",
-        "start_hour": brief.start_hour,
-        "time_zone": brief.time_zone,
-        "currency": metadata["currency"],
-        "world_config_digest": metadata["world_config_digest"],
-    }
-    facts = {
-        c: dict.fromkeys(
-            ("spent", "requests", "impressions", "unique_reach", "clicks", "conversions"), 0
-        )
-        for c in channels
-    }
-    body = planner.plan(plan_request(brief, simulation, channels, facts, 0, None, None))
-    return PlanView(body, channels, brief.optimize), body
-
-
 def worker_main(
     index: int,
     specs: list[RunSpec],
@@ -557,14 +811,40 @@ def worker_main(
     simulator = SimulatorClient(
         args_dict["simulator_url"] or f"http://127.0.0.1:{port}", f"eval-worker-{index}"
     )
+    (out_dir / "dataset").mkdir(parents=True, exist_ok=True)
     try:
         wait_ready(simulator)
         metadata = simulator.metadata()
         channels = sorted(metadata["channel_ids"])
         planner = PlannerClient(args_dict["planner_url"])
-        approved, _ = approve_plan(planner, brief, channels, metadata)
-        with (out_dir / f"worker-{index}.jsonl").open("w") as handle:
+        approved_cache: dict[tuple[int, int], tuple[PlanView, list[dict[str, Any]]]] = {}
+        with (
+            (out_dir / f"worker-{index}.jsonl").open("w") as results_handle,
+            (out_dir / "dataset" / f"worker-{index}.csv").open("w", newline="") as dataset_handle,
+        ):
+            dataset = csv.writer(dataset_handle)
             for position, spec in enumerate(specs, start=1):
+                key = (spec.world_seed, spec.history)
+                if key not in approved_cache:
+                    history = load_or_generate_history(
+                        world_seed=spec.world_seed,
+                        count=spec.history,
+                        brief=brief,
+                        channels=channels,
+                        metadata=metadata,
+                        simulator=simulator,
+                        planner=planner,
+                        out_dir=out_dir,
+                        dataset=dataset,
+                    )
+                    approved, body = approve_plan(planner, brief, channels, metadata, history)
+                    approved_cache[key] = (approved, history)
+                    plans_dir = out_dir / "approved"
+                    plans_dir.mkdir(parents=True, exist_ok=True)
+                    (plans_dir / f"world-{spec.world_seed}-h{spec.history}.json").write_text(
+                        json.dumps(body)
+                    )
+                approved, history = approved_cache[key]
                 result = run_campaign(
                     spec,
                     brief,
@@ -573,14 +853,17 @@ def worker_main(
                     simulator,
                     planner,
                     approved,
+                    history,
                     out_dir / "trajectories",
+                    dataset,
                 )
-                handle.write(json.dumps(asdict(result)) + "\n")
-                handle.flush()
+                results_handle.write(json.dumps(asdict(result)) + "\n")
+                results_handle.flush()
+                dataset_handle.flush()
                 print(
                     f"[worker {index}] {position}/{len(specs)} {spec.run_id}: "
-                    f"MAPE spend {result.mape_spend:.1%} kpi {result.mape_kpi:.1%} "
-                    f"final kpi {result.final_dev_kpi:+.1%} ({result.seconds:.0f}s)",
+                    f"final spend {result.final_dev_spend:+.1%} kpi {result.final_dev_kpi:+.1%} "
+                    f"traj kpi {result.mape_kpi:.1%} ({result.seconds:.0f}s)",
                     file=sys.stderr,
                     flush=True,
                 )
@@ -595,75 +878,110 @@ def worker_main(
 # --------------------------------------------------------------------------------------
 
 
-def _median(values: Iterable[float]) -> float:
-    items = list(values)
-    return statistics.median(items) if items else float("nan")
+def _group(results: list[RunResult], **match: object) -> list[RunResult]:
+    return [r for r in results if all(getattr(r, key) == value for key, value in match.items())]
 
 
-def summarize(results: list[RunResult], brief: Brief, approved_body: dict[str, Any] | None) -> str:
+def summarize(results: list[RunResult], brief: Brief) -> str:
+    levels = sorted({r.history for r in results})
     lines: list[str] = []
-    lines.append("# Frozen vs adaptive evaluation\n")
+    lines.append("# Media Planner evaluation: history, frozen and adaptive\n")
     lines.append(
         f"Budget {brief.budget_micros / MICROS:,.0f}, horizon {brief.duration_hours} h, "
         f"KPI `{brief.optimize}`, replan every {brief.replan_every} h, "
-        f"random market events {'on' if brief.random_events else 'off'}, {len(results)} runs.\n"
+        f"random market events {'on' if brief.random_events else 'off'}, history levels "
+        f"{', '.join(map(str, levels))} ({brief.history_mode} warm-up campaigns), "
+        f"{len(results)} runs.\n"
     )
-    if approved_body is not None:
-        expected = approved_body["expected"]
-        lines.append(
-            f"Approved plan: expected spend {float(expected['spend']):,.0f}, "
-            f"expected {brief.optimize} {int(expected[brief.optimize]):,}.\n"
-        )
-    lines.append("## Per scenario and mode\n")
+    lines.append("## Per history level, scenario and mode\n")
     lines.append(
-        "| Scenario | Mode | Runs | MAPE spend p50 | MAPE spend p90 | MAPE KPI p50 | MAPE KPI p90 "
-        "| Final dev spend p50 | Final dev KPI p50 | Within 20% | Reallocated p50 |"
+        "| History | Scenario | Mode | Runs | Final dev spend p50 | Final dev KPI p50 "
+        "| |Final dev KPI| p90 | Within 20% | Trajectory error spend p50 "
+        "| Trajectory error KPI p50 | Reallocated p50 |"
     )
-    lines.append("|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
-    for scenario in SCENARIOS:
-        for mode in MODES:
-            group = [r for r in results if r.scenario == scenario and r.mode == mode]
-            if not group:
+    lines.append("|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+    for level in levels:
+        for scenario in SCENARIOS:
+            for mode in MODES:
+                group = _group(results, history=level, scenario=scenario, mode=mode)
+                if not group:
+                    continue
+                lines.append(
+                    f"| {level} | {scenario} | {mode} | {len(group)} "
+                    f"| {_median(r.final_dev_spend for r in group):+.1%} "
+                    f"| {_median(r.final_dev_kpi for r in group):+.1%} "
+                    f"| {quantile([r.final_ape_kpi for r in group], 0.9):.1%} "
+                    f"| {sum(r.within_20 for r in group) / len(group):.0%} "
+                    f"| {quantile([r.mape_spend for r in group], 0.5):.1%} "
+                    f"| {quantile([r.mape_kpi for r in group], 0.5):.1%} "
+                    f"| {_median(r.reallocated_share for r in group):.1%} |"
+                )
+
+    by_key = {(r.history, r.scenario, r.world_seed, r.campaign_seed, r.mode): r for r in results}
+
+    lines.append("\n## Cold vs warm (same seeds, shock and mode; warm − cold)\n")
+    lines.append(
+        "| Warm history | Scenario | Mode | Pairs | Δ |final dev KPI| p50 | Δ |final dev spend| p50 "
+        "| Warm closer at the end (KPI) | Warm within 20% | Cold within 20% |"
+    )
+    lines.append("|---:|---|---|---:|---:|---:|---:|---:|---:|")
+    if 0 in levels:
+        for level in levels:
+            if level == 0:
                 continue
-            lines.append(
-                f"| {scenario} | {mode} | {len(group)} "
-                f"| {quantile([r.mape_spend for r in group], 0.5):.1%} "
-                f"| {quantile([r.mape_spend for r in group], 0.9):.1%} "
-                f"| {quantile([r.mape_kpi for r in group], 0.5):.1%} "
-                f"| {quantile([r.mape_kpi for r in group], 0.9):.1%} "
-                f"| {_median(r.final_dev_spend for r in group):+.1%} "
-                f"| {_median(r.final_dev_kpi for r in group):+.1%} "
-                f"| {sum(r.within_20 for r in group) / len(group):.0%} "
-                f"| {_median(r.reallocated_share for r in group):.1%} |"
-            )
-    lines.append("\n## Paired comparison (same seeds and shock)\n")
+            for scenario in SCENARIOS:
+                for mode in MODES:
+                    pairs = [
+                        (by_key[(0, scenario, r.world_seed, r.campaign_seed, mode)], r)
+                        for r in _group(results, history=level, scenario=scenario, mode=mode)
+                        if (0, scenario, r.world_seed, r.campaign_seed, mode) in by_key
+                    ]
+                    if not pairs:
+                        continue
+                    delta_kpi = [w.final_ape_kpi - c.final_ape_kpi for c, w in pairs]
+                    delta_spend = [w.final_ape_spend - c.final_ape_spend for c, w in pairs]
+                    lines.append(
+                        f"| {level} | {scenario} | {mode} | {len(pairs)} "
+                        f"| {_median(delta_kpi):+.1%} | {_median(delta_spend):+.1%} "
+                        f"| {sum(d < 0 for d in delta_kpi) / len(pairs):.0%} "
+                        f"| {sum(w.within_20 for _, w in pairs) / len(pairs):.0%} "
+                        f"| {sum(c.within_20 for c, _ in pairs) / len(pairs):.0%} |"
+                    )
+
+    lines.append("\n## Frozen vs adaptive (same seeds, shock and history; adaptive − frozen)\n")
     lines.append(
-        "| Scenario | Pairs | Δ MAPE KPI p50 (adaptive − frozen) | Δ MAPE spend p50 "
-        "| Adaptive closer on KPI | Adaptive closer on spend |"
+        "| History | Scenario | Pairs | Δ |final dev KPI| p50 | Δ |final dev spend| p50 "
+        "| Adaptive closer at the end (KPI) | Δ trajectory error KPI p50 "
+        "| Adaptive closer on trajectory (KPI) |"
     )
-    lines.append("|---|---:|---:|---:|---:|---:|")
-    by_key = {(r.scenario, r.world_seed, r.campaign_seed, r.mode): r for r in results}
-    for scenario in SCENARIOS:
-        pairs = [
-            (by_key[(scenario, r.world_seed, r.campaign_seed, "frozen")], r)
-            for r in results
-            if r.scenario == scenario
-            and r.mode == "adaptive"
-            and (scenario, r.world_seed, r.campaign_seed, "frozen") in by_key
-        ]
-        if not pairs:
-            continue
-        delta_kpi = [a.mape_kpi - f.mape_kpi for f, a in pairs]
-        delta_spend = [a.mape_spend - f.mape_spend for f, a in pairs]
-        lines.append(
-            f"| {scenario} | {len(pairs)} | {_median(delta_kpi):+.1%} | {_median(delta_spend):+.1%} "
-            f"| {sum(d < 0 for d in delta_kpi) / len(pairs):.0%} "
-            f"| {sum(d < 0 for d in delta_spend) / len(pairs):.0%} |"
-        )
+    lines.append("|---:|---|---:|---:|---:|---:|---:|---:|")
+    for level in levels:
+        for scenario in SCENARIOS:
+            pairs = [
+                (by_key[(level, scenario, r.world_seed, r.campaign_seed, "frozen")], r)
+                for r in _group(results, history=level, scenario=scenario, mode="adaptive")
+                if (level, scenario, r.world_seed, r.campaign_seed, "frozen") in by_key
+            ]
+            if not pairs:
+                continue
+            delta_final_kpi = [a.final_ape_kpi - f.final_ape_kpi for f, a in pairs]
+            delta_final_spend = [a.final_ape_spend - f.final_ape_spend for f, a in pairs]
+            delta_traj_kpi = [a.mape_kpi - f.mape_kpi for f, a in pairs]
+            lines.append(
+                f"| {level} | {scenario} | {len(pairs)} | {_median(delta_final_kpi):+.1%} "
+                f"| {_median(delta_final_spend):+.1%} "
+                f"| {sum(d < 0 for d in delta_final_kpi) / len(pairs):.0%} "
+                f"| {_median(delta_traj_kpi):+.1%} "
+                f"| {sum(d < 0 for d in delta_traj_kpi) / len(pairs):.0%} |"
+            )
     lines.append(
-        "\nMAPE is the mean absolute percentage error of the cumulative fact against the cumulative "
-        "approved-plan trajectory over all hours; final dev is the signed deviation at the end of "
-        "the campaign; reallocated is the share of the budget moved away from approved caps."
+        "\nFinal dev is the signed deviation of the cumulative fact from the approved plan at the end "
+        "of the campaign, (fact − plan) / plan; the case threshold of 20% applies to its absolute "
+        "value for spend and KPI at once (column Within 20%). Trajectory error is the mean of "
+        f"|fact_t − plan_t| / plan_t over hours after the first {brief.trajectory_skip_hours} h. "
+        "History N means the plan was built with the observable facts of N earlier campaigns on "
+        "the same world seed; 0 is the public catalog alone. Reallocated is the share of the "
+        "budget moved away from approved caps."
     )
     return "\n".join(lines) + "\n"
 
@@ -675,8 +993,8 @@ def summarize(results: list[RunResult], brief: Brief, approved_body: dict[str, A
 
 def parse_int_list(text: str) -> list[int]:
     values: list[int] = []
-    for part in text.split(","):
-        part = part.strip()
+    for raw in text.split(","):
+        part = raw.strip()
         if not part:
             continue
         if "-" in part:
@@ -703,25 +1021,41 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--scenarios", default=",".join(SCENARIOS))
     parser.add_argument("--modes", default=",".join(MODES))
     parser.add_argument(
-        "--replan-every", type=int, default=1, help="hours between adaptive replans"
+        "--history-levels",
+        default="0,3",
+        help="numbers of earlier campaigns the planner learns from; 0 is the catalog alone",
     )
+    parser.add_argument("--history-mode", choices=(*MODES, "uniform"), default="uniform")
+    parser.add_argument(
+        "--history-budget-factors",
+        default="0.6,1.0,1.4",
+        help="budget multipliers cycled over warm-up campaigns",
+    )
+    parser.add_argument(
+        "--history-no-random-events",
+        action="store_true",
+        help="disable random drift and shocks in warm-up campaigns (on by default)",
+    )
+    parser.add_argument("--replan-every", type=int, default=1, help="hours between replans")
     parser.add_argument("--pause-hours", type=int, default=72)
+    parser.add_argument(
+        "--trajectory-skip-hours",
+        type=int,
+        default=24,
+        help="hours excluded from the trajectory error while the cumulative plan is still tiny",
+    )
     parser.add_argument(
         "--random-events", action="store_true", help="keep Simulator random drift and shocks"
     )
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--simulator-bin", default=str(DEFAULT_SIMULATOR_BIN))
     parser.add_argument("--world-config", default=str(DEFAULT_WORLD_CONFIG))
+    parser.add_argument("--simulator-port", type=int, default=18080)
     parser.add_argument(
-        "--simulator-port", type=int, default=18080, help="first port for spawned Simulators"
+        "--simulator-url", default=None, help="running Simulator instead of spawning (1 worker)"
     )
     parser.add_argument(
-        "--simulator-url",
-        default=None,
-        help="use a running Simulator instead of spawning (forces --workers 1)",
-    )
-    parser.add_argument(
-        "--planner-url", default=None, help="use a running Planner instead of the in-process app"
+        "--planner-url", default=None, help="running Planner instead of the in-process app"
     )
     parser.add_argument("--out", default=str(REPO_ROOT / "tools/evaluation/results"))
     return parser.parse_args(argv)
@@ -739,16 +1073,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         replan_every=args.replan_every,
         pause_hours=args.pause_hours,
         random_events=args.random_events,
+        trajectory_skip_hours=args.trajectory_skip_hours,
+        history_mode=args.history_mode,
+        history_random_events=not args.history_no_random_events,
+        history_budget_factors=tuple(float(x) for x in args.history_budget_factors.split(",")),
     )
     scenarios = [s for s in args.scenarios.split(",") if s]
     modes = [m for m in args.modes.split(",") if m]
     unknown = [s for s in scenarios if s not in SCENARIOS] + [m for m in modes if m not in MODES]
     if unknown:
         raise SystemExit(f"unknown scenario or mode: {unknown}")
+    worlds = parse_int_list(args.world_seeds)
     specs = [
-        RunSpec(world, campaign, scenario, mode)
+        RunSpec(world, campaign, level, scenario, mode)
+        for level in parse_int_list(args.history_levels)
         for scenario in scenarios
-        for world in parse_int_list(args.world_seeds)
+        for world in worlds
         for campaign in parse_int_list(args.campaign_seeds)
         for mode in modes
     ]
@@ -763,15 +1103,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     if workers == 1:
         worker_main(0, specs, brief, args_dict, out_dir)
     else:
-        # Adaptive runs are ~30x slower than frozen ones; deal them out first so that every
-        # worker receives an equal share of the slow runs.
-        balanced = sorted(specs, key=lambda item: item.mode != "adaptive")
-        processes = [
-            Process(
-                target=worker_main,
-                args=(index, balanced[index::workers], brief, args_dict, out_dir),
+        # Keep every world seed on one worker so its warm-up history is generated once, and
+        # deal adaptive runs (30x slower than frozen) first so that workers finish together.
+        buckets: list[list[RunSpec]] = [[] for _ in range(workers)]
+        for position, world in enumerate(sorted(worlds)):
+            buckets[position % workers].extend(
+                sorted(
+                    (s for s in specs if s.world_seed == world), key=lambda s: s.mode != "adaptive"
+                )
             )
-            for index in range(workers)
+        processes = [
+            Process(target=worker_main, args=(index, bucket, brief, args_dict, out_dir))
+            for index, bucket in enumerate(buckets)
+            if bucket
         ]
         for process in processes:
             process.start()
@@ -785,29 +1129,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     for path in sorted(out_dir.glob("worker-*.jsonl")):
         with path.open() as handle:
             results.extend(RunResult(**json.loads(line)) for line in handle if line.strip())
-    results.sort(key=lambda r: (SCENARIOS.index(r.scenario), r.world_seed, r.campaign_seed, r.mode))
+    results.sort(
+        key=lambda r: (
+            r.history,
+            SCENARIOS.index(r.scenario),
+            r.world_seed,
+            r.campaign_seed,
+            r.mode,
+        )
+    )
     with (out_dir / "runs.json").open("w") as handle:
         json.dump([asdict(r) for r in results], handle, indent=2)
-
-    approved_body: dict[str, Any] | None = None
-    if not args.simulator_url:
-        planner = PlannerClient(args.planner_url)
-        probe = start_simulator(
-            Path(args.simulator_bin), Path(args.world_config), args.simulator_port
-        )
-        try:
-            client = SimulatorClient(f"http://127.0.0.1:{args.simulator_port}")
-            wait_ready(client)
-            metadata = client.metadata()
-            _, approved_body = approve_plan(
-                planner, brief, sorted(metadata["channel_ids"]), metadata
-            )
-            with (out_dir / "approved-plan.json").open("w") as handle:
-                json.dump(approved_body, handle)
-        finally:
-            probe.terminate()
-            probe.wait(timeout=5)
-    summary = summarize(results, brief, approved_body)
+    with (out_dir / "dataset" / "hourly.csv").open("w", newline="") as merged:
+        writer = csv.writer(merged)
+        writer.writerow(DATASET_COLUMNS)
+        for part in sorted((out_dir / "dataset").glob("worker-*.csv")):
+            with part.open() as handle:
+                for row in csv.reader(handle):
+                    writer.writerow(row)
+            part.unlink()
+    summary = summarize(results, brief)
     (out_dir / "summary.md").write_text(summary)
     print(summary)
     print(f"done in {time.perf_counter() - started:.0f}s", file=sys.stderr)

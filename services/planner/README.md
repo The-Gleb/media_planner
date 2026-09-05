@@ -29,6 +29,14 @@ cumulative sum of hourly expectations is the approved plan trajectory used for p
 committed hours carry `expected: null`. The frozen-versus-adaptive evaluation harness lives in
 `tools/evaluation/`.
 
+Optimized plans accept an optional `history`: finished campaigns on the same market as 24
+hour-of-day bins per channel of observable facts (hours, requests, impressions, unique reach, clicks,
+conversions, spend), oldest first. Planner turns them into a recency-weighted prior for CTR, CR, CPM,
+daily supply and the hourly supply profile, correcting each campaign's rates for the saturation it
+ran under, and then applies the ordinary current-campaign calibration on top. The first campaign on a
+market plans from public benchmarks; every next one plans from what that market actually showed.
+History enters the optimized `plan_id` and never changes uniform plans.
+
 The optimized conservation invariant is `actual spend + future caps + unallocated_budget = approved
 budget`. The explicit reserve prevents a very large budget from being dumped into a saturated channel.
 State changes produce a new plan ID; largest-remainder conversion keeps all allocated micro-units
