@@ -7,10 +7,19 @@ interface Props {
   onStep: () => void
   onRun: () => void
   onStop: () => void
+  playbackDelayMs: number
+  onPlaybackDelayChange: (delayMs: number) => void
   blocked?: boolean
 }
 
-export function StepControls({ session, status, onStep, onRun, onStop, blocked = false }: Props) {
+const SPEEDS = [
+  { delayMs: 1000, label: '1 час/сек' },
+  { delayMs: 500, label: '2 часа/сек' },
+  { delayMs: 200, label: '5 часов/сек' },
+  { delayMs: 0, label: 'Без задержки' },
+] as const
+
+export function StepControls({ session, status, onStep, onRun, onStop, playbackDelayMs, onPlaybackDelayChange, blocked = false }: Props) {
   const runRef = useRef<HTMLButtonElement>(null)
   const statusRef = useRef<HTMLSpanElement>(null)
   const previous = useRef(status)
@@ -24,10 +33,18 @@ export function StepControls({ session, status, onStep, onRun, onStop, blocked =
     }
     previous.current = status
   }, [status, session.status])
-  return <div className="actions" aria-label="Управление симуляцией">
-    <button type="button" onClick={onStep} disabled={busy || finished || blocked}>Один час</button>
-    <button ref={runRef} type="button" onClick={onRun} disabled={busy || finished || blocked}>До конца</button>
-    <button type="button" className="danger" onClick={onStop} disabled={!running || status === 'stopping'}>Остановить</button>
-    <span ref={statusRef} tabIndex={-1} className="muted">{status === 'stepping' ? 'Выполняется час…' : status === 'running' ? 'Автоматический прогон…' : status === 'stopping' ? 'Остановка после текущего часа…' : status === 'stopped' ? 'Прогон остановлен' : finished ? 'Кампания завершена' : 'Готово к запуску'}</span>
+  return <div className="timelapse-controls">
+    <div className="playback-speed field">
+      <label htmlFor="playback-speed">Скорость таймлапса</label>
+      <select id="playback-speed" value={playbackDelayMs} onChange={(event) => onPlaybackDelayChange(Number(event.target.value))} disabled={finished || blocked}>
+        {SPEEDS.map((speed) => <option key={speed.delayMs} value={speed.delayMs}>{speed.label}</option>)}
+      </select>
+    </div>
+    <div className="actions" aria-label="Управление симуляцией">
+      <button type="button" className="secondary" onClick={onStep} disabled={busy || finished || blocked}>Один час</button>
+      <button ref={runRef} type="button" onClick={onRun} disabled={busy || finished || blocked}>{status === 'stopped' ? 'Продолжить таймлапс' : 'Запустить таймлапс'}</button>
+      <button type="button" className="danger" onClick={onStop} disabled={!running || status === 'stopping'}>Пауза</button>
+    </div>
+    <span ref={statusRef} tabIndex={-1} className="playback-status muted">{status === 'stepping' ? 'Выполняется один час…' : status === 'running' ? 'Кампания идёт в ускоренном времени' : status === 'stopping' ? 'Пауза после текущего часа…' : status === 'stopped' ? 'Таймлапс на паузе' : finished ? 'Кампания завершена' : 'Готово к запуску'}</span>
   </div>
 }

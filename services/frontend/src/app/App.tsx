@@ -37,6 +37,8 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
   const { state, dispatch, getState, createOrReset } = campaign
   const planning = usePlanningController(metadata.channelIds, dispatch)
   const [execution, setExecution] = useState<ExecutionStatus>('idle')
+  const [playbackDelayMs, setPlaybackDelayMs] = useState(500)
+  const playbackDelayRef = useRef(playbackDelayMs)
   const stopRef = useRef(false)
   const pendingStepRef = useRef<PendingStep | null>(null)
 
@@ -62,13 +64,13 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
       channels: metadata.channelIds,
       currency: metadata.currency,
       worldConfigDigest: metadata.worldConfigDigest,
-      budget: current.activeDraft.campaign.totalBudget,
-      optimize: current.activeDraft.campaign.optimize,
-      strategy: current.activeDraft.campaign.strategy,
+      budget: current.activePlan.budget,
+      optimize: current.activePlan.optimize,
+      strategy: current.activePlan.strategy,
       facts: committed.facts,
     })
-    const expectedPlanId = current.activeDraft.campaign.strategy === 'uniform' ? current.activePlan.planId : null
-    const round = planning.prepare(request, expectedPlanId)
+    const expectedPlanId = current.activePlan.strategy === 'uniform' ? current.activePlan.planId : null
+    const round = planning.prepare(request, expectedPlanId, current.activePlan)
     dispatch({ type: 'facts-committed', ...committed, pendingRound: round })
     await planning.submit(round)
   }
@@ -102,6 +104,10 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
         submit: (session, pending) => submitPendingStep(simulatorClient, session, pending),
         commit: commitAndReplan,
         shouldStop: () => stopRef.current,
+        waitBeforeNext: async () => {
+          const delay = playbackDelayRef.current
+          if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay))
+        },
       })
       setExecution(outcome === 'stopped' ? 'stopped' : 'idle')
     } catch (error) { fail(error, 'Автоматический прогон') }
@@ -123,9 +129,9 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
       <PlanSummary plan={state.activePlan} />
       <AllocationTable plan={state.activePlan} currentHour={state.facts.currentHour} />
       <CampaignSummary session={state.session} activeDraft={state.activeDraft} />
-      <section className="card stack" aria-labelledby="control-title"><h2 id="control-title">Ход кампании</h2><RunProgress session={state.session} status={execution} /><StepControls session={state.session} status={execution} blocked={blocked} onStep={() => void oneHour()} onRun={() => void runToEnd()} onStop={() => { stopRef.current = true; setExecution('stopping') }} /></section>
+      <section className="card stack timelapse-player" aria-labelledby="control-title"><div className="status-line"><div><p className="eyebrow">TIMELAPSE</p><h2 id="control-title">Ход кампании</h2></div><span className="status-badge" data-tone={execution === 'running' ? 'ok' : undefined}>{execution === 'running' ? 'В эфире' : state.session.status === 'finished' ? 'Завершена' : 'Ожидает'}</span></div><RunProgress session={state.session} status={execution} /><StepControls session={state.session} status={execution} blocked={blocked} playbackDelayMs={playbackDelayMs} onPlaybackDelayChange={(delay) => { playbackDelayRef.current = delay; setPlaybackDelayMs(delay) }} onStep={() => void oneHour()} onRun={() => void runToEnd()} onStop={() => { stopRef.current = true; setExecution('stopping') }} /></section>
+      {state.history.length > 0 && <Suspense fallback={<section className="card" aria-busy="true">Подготовка графика…</section>}><MetricHistory history={state.history} channelIds={state.session.channelIds} currency={state.session.currency} timeZone={state.session.timeZone} running={execution === 'running' || execution === 'stopping'} /></Suspense>}
       {state.history.length > 0 && <LatestObservations result={state.history.at(-1)!} currency={state.session.currency} />}
-      {state.history.length > 0 && <Suspense fallback={<section className="card" aria-busy="true">Подготовка графика…</section>}><MetricHistory history={state.history} channelIds={state.session.channelIds} currency={state.session.currency} running={execution === 'running' || execution === 'stopping'} /></Suspense>}
     </>}
   </>
 }

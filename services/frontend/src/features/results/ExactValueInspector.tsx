@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { HourlyResult, MetricKey } from '../../domain/types'
 import { metricLabels } from '../../app/messages'
-import { exactMetricValue } from './metricSeries'
+import { exactMetricValue, metricUnit } from './metricSeries'
 
 export function ExactValueInspector({ history, channelIds, metric, currency }: { history: HourlyResult[]; channelIds: string[]; metric: MetricKey; currency: string }) {
   const last = history.at(-1)
@@ -14,7 +14,7 @@ function ExactForm({ history, channelIds, metric, currency }: { history: HourlyR
   const [series, setSeries] = useState('aggregate')
   const result = history.find((item) => item.observedHour === hour) ?? history.at(-1)!
   const value = exactMetricValue(result, series, metric)
-  const unit = metric === 'spend' || metric === 'ecpm' ? currency : 'шт.'
+  const unit = metricUnit(metric, currency)
   return <div className="inspector-grid">
     <div className="field"><label htmlFor="inspect-hour">Час</label><select id="inspect-hour" value={hour} onChange={(event) => setHour(event.target.value)}>{history.map((item) => <option key={item.observedHour}>{item.observedHour}</option>)}</select></div>
     <div className="field"><label htmlFor="inspect-series">Ряд</label><select id="inspect-series" value={series} onChange={(event) => setSeries(event.target.value)}><option value="aggregate">Итого</option>{channelIds.map((id) => <option key={id}>{id}</option>)}</select></div>

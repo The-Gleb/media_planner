@@ -91,6 +91,9 @@ deltas changes the required full-plan semantics. Incremental fact events require
 
 ## Forecast and Target-KPI Fields
 
+> Superseded for target-KPI creation by “Target-KPI Inversion Extension” below. Fixed-budget v0
+> responses continue to use null expected fields.
+
 **Decision**: Requests carry `market: {status: "unavailable"}` and MediaPlan/allocation expected fields
 are `null`. Target-KPI requests receive an RFC 9457 `unsupported_plan_type` problem.
 
@@ -147,3 +150,17 @@ rounds. This is acceptable only as a measured prototype limitation.
 
 **Alternatives considered**: Conditional/delta responses are a future optimization that changes v0
 semantics. Accumulating all responses multiplies memory without audit value.
+
+## Target-KPI Inversion Extension
+
+**Decision**: Implement planning type B only at initial state revision zero. Use the existing
+catalog-optimized fixed-budget solver as the forward function and binary-search the least whole-ruble
+budget whose deterministic benchmark forecast reaches the target.
+
+**Rationale**: This reuses one allocation policy for both planning modes. Once approved, the derived
+budget becomes immutable execution input and every later round uses the existing fixed-budget
+feedback loop, preventing silent spend increases.
+
+**Alternatives considered**: Re-solving the required total budget after every observed hour was
+rejected because it lets model changes increase financial commitment without a new approval. Treating
+capacity failure as HTTP validation failure was rejected because infeasibility is a valid domain result.

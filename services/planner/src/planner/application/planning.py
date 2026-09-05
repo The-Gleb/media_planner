@@ -3,14 +3,17 @@ import json
 import re
 from collections.abc import Mapping, Sequence
 
+from planner.domain.catalog import load_catalog
 from planner.domain.models import KPI, Horizon, MediaPlan, Strategy
 from planner.domain.optimized import allocate_optimized
+from planner.domain.target import TargetBudgetSolution, solve_target_budget
 from planner.domain.uniform import allocate_uniformly
 from planner.domain.values import MAX_MICROS
 
 _CHANNEL_RE = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
 
 FINGERPRINT_VERSION = "fixed-budget-v0"
+TARGET_FINGERPRINT_VERSION = "target-kpi-v1"
 
 
 def plan_fingerprint(defining_inputs: Mapping[str, object]) -> str:
@@ -72,4 +75,58 @@ def create_fixed_budget_plan(
         plan_id=plan_fingerprint(defining),
         horizon=horizon,
         allocations=allocations,
+    )
+
+
+def create_target_kpi_plan(
+    *,
+    target_value: int,
+    target_metric: str,
+    horizon: Horizon,
+    channels: Sequence[str],
+    simulation: Mapping[str, object],
+    strategy: str,
+) -> tuple[MediaPlan | None, TargetBudgetSolution]:
+    if target_value <= 0:
+        raise ValueError("target must be positive")
+    if target_metric not in {item.value for item in KPI}:
+        raise ValueError("unsupported target KPI")
+    if strategy != Strategy.OPTIMIZED.value:
+        raise ValueError("target KPI planning requires optimized strategy")
+    if not 0 <= horizon.from_hour < horizon.to_hour <= 2160:
+        raise ValueError("horizon must be a non-empty subset of [0, 2160)")
+    if not 1 <= len(channels) <= 20 or len(set(channels)) != len(channels):
+        raise ValueError("between 1 and 20 unique channels are required")
+    ordered_channels = sorted(channels)
+    catalog = load_catalog()
+    unknown = [channel for channel in ordered_channels if channel not in catalog]
+    if unknown:
+        raise ValueError(f"unknown catalog channel: {unknown[0]}")
+
+    solution = solve_target_budget(
+        target_value=target_value,
+        metric=target_metric,
+        horizon=horizon,
+        channel_ids=ordered_channels,
+        simulation=dict(simulation),
+    )
+    if not solution.feasible or solution.required_budget_micros is None:
+        return None, solution
+    defining: dict[str, object] = {
+        "version": TARGET_FINGERPRINT_VERSION,
+        "type": "target_kpi",
+        "strategy": strategy,
+        "target": {"metric": target_metric, "value": target_value},
+        "required_budget_micros": solution.required_budget_micros,
+        "horizon": {"from_hour": horizon.from_hour, "to_hour": horizon.to_hour},
+        "channels": ordered_channels,
+        "simulation": dict(simulation),
+    }
+    return (
+        MediaPlan(
+            plan_id=plan_fingerprint(defining),
+            horizon=horizon,
+            allocations=solution.allocations,
+        ),
+        solution,
     )

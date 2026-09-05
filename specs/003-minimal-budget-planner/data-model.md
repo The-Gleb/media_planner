@@ -30,10 +30,10 @@ integers and rejects non-canonical, signed-negative or fractional values.
 
 | Entity | Values | v0 behavior |
 |---|---|---|
-| `PlanType` | `fixed_budget`, `target_kpi` | Only `fixed_budget` executes |
+| `PlanType` | `fixed_budget`, `target_kpi` | Target mode derives an approved budget before execution |
 | `KPI` | `unique_reach`, `clicks`, `conversions` | Recorded; does not influence uniform v0 allocation |
 | `Strategy` | `uniform` | Only supported strategy |
-| `MarketStatus` | `unavailable` | Makes absence of forecast explicit |
+| `MarketStatus` | `unavailable` | No runtime market feed; target mode uses a local public-catalog benchmark |
 | `PlanningStatus` | `idle`, `initial_planning`, `resetting_simulation`, `ready`, `stepping`, `replanning`, `replan_failed`, `finished`, `error` | Dashboard workflow state |
 
 ## SimulationContext (user input + Simulator metadata)
@@ -69,7 +69,7 @@ or exposed by Planner v0.
 | `budget` | MoneyText or null | Required only for fixed budget; total for full horizon |
 | `optimize` | KPI | Required for fixed budget |
 | `strategy` | Strategy | `uniform` in v0 |
-| `target` | TargetKPI or null | Visible but not executable in v0 |
+| `target` | TargetKPI or null | Required for target mode |
 
 This replaces manually entered per-channel hourly budget fields. Those caps are Planner output.
 
@@ -78,7 +78,7 @@ This replaces manually entered per-channel hourly budget fields. Those caps are 
 | Field | Type | Rules |
 |---|---|---|
 | `metric` | KPI | One of three supported KPI identifiers |
-| `value` | CountText | Positive target; accepted by form draft but not submitted in v0 |
+| `value` | CountText | Positive target submitted for initial target planning |
 
 ## MarketForecast
 
@@ -140,8 +140,9 @@ Fixed-budget fields:
 | `optimize` | KPI | Required |
 | `target` | null | Must be null/absent |
 
-Target-KPI fields are reserved as `budget = null`, `optimize = null`, and a required `target`. The
-transport validates their shape then returns `unsupported_plan_type` without allocations.
+Target-KPI requests use `budget = null`, `optimize = null`, strategy `optimized`, initial revision zero
+and a required `target`. The response either supplies the calculated executable budget or a capacity
+diagnosis. Subsequent hourly rounds use fixed-budget requests with that calculated budget.
 
 Cross-field invariants:
 

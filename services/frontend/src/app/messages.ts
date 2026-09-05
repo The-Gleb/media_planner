@@ -6,6 +6,7 @@ export const metricLabels: Record<MetricKey, string> = {
   requests: 'Запросы (requests)', impressions: 'Показы (impressions)',
   unique_reach: 'Новый охват (unique_reach)', clicks: 'Клики (clicks)',
   conversions: 'Конверсии (conversions)', spend: 'Расход (spend)', ecpm: 'eCPM',
+  ctr: 'CTR', cr: 'CR', cpc: 'CPC', cpa: 'CPA',
 }
 
 const problemMessages: Record<string, string> = {

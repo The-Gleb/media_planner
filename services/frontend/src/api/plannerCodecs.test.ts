@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { decodeMediaPlan, validatePlanCoverage } from './plannerCodecs'
+import { decodeMediaPlan, decodePlanResult, validatePlanCoverage } from './plannerCodecs'
 
 const raw = () => ({
   request_id: '00000000-0000-4000-8000-000000000010', state_revision: 0,
@@ -11,7 +11,7 @@ const raw = () => ({
     { channel_id: 'social_1', hour: 0, budget_cap: '3.000000', expected: null },
     { channel_id: 'search_1', hour: 1, budget_cap: '3.000000', expected: null },
     { channel_id: 'social_1', hour: 1, budget_cap: '3.000000', expected: null },
-  ], required_budget: null, reason: null,
+  ], required_budget: null, reason: null, target: null,
 })
 
 describe('planner codecs', () => {
@@ -25,6 +25,16 @@ describe('planner codecs', () => {
     const value = raw()
     value.strategy = 'optimized'
     expect(decodeMediaPlan(value).strategy).toBe('optimized')
+  })
+  it('decodes executable and infeasible target results', () => {
+    const executable = raw() as Record<string, unknown>
+    executable.type = 'target_kpi'; executable.strategy = 'optimized'
+    executable.target = { metric: 'unique_reach', value: '100' }
+    executable.expected = { spend: '12.000000', impressions: '1000', unique_reach: '100', clicks: '10', conversions: '1' }
+    executable.required_budget = '12.000000'
+    expect(decodePlanResult(executable)).toMatchObject({ feasible: true, type: 'target_kpi', requiredBudget: '12.000000' })
+    const infeasible = { ...executable, feasible: false, plan_id: null, budget: null, required_budget: null, allocations: [], reason: { code: 'target_exceeds_capacity', detail: 'capacity', max_achievable: '90', recommended_target: '90' } }
+    expect(decodePlanResult(infeasible)).toMatchObject({ feasible: false, reason: { maxAchievable: '90' } })
   })
   it.each([
     ['noncanonical money', (value: unknown) => { (value as { budget: string }).budget = '12' }],

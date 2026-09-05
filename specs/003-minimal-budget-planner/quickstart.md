@@ -62,14 +62,18 @@ For the documented 12 RUB, two-hour, two-channel example, verify:
 Repeat with budget `0.000001`: exactly one first allocation receives `0.000001`, all others receive
 `0.000000`, and the sum remains exact.
 
-## Validate Unsupported Target Mode
+## Validate Target-KPI Mode
 
-Use the `target_kpi` request shape from the contract. Expected result:
+Use the `target_kpi` request shape from the contract with strategy `optimized`, initial state revision
+zero and a reachable target. Expected result:
 
-- HTTP 422 with `application/problem+json`;
-- `code` equals `unsupported_plan_type`;
-- no allocations are returned;
-- Simulator current hour is unchanged.
+- HTTP 200 with `feasible=true`;
+- `required_budget` equals the executable plan `budget` and is quantized to a whole ruble;
+- the selected expected KPI reaches the target;
+- allocation caps sum exactly to the calculated budget.
+
+Repeat with a target above catalog capacity. The response remains HTTP 200 but has `feasible=false`,
+zero allocations and reason `target_exceeds_capacity`; Simulator remains unchanged.
 
 Malformed money, duplicate channels, invalid horizon/current revision and unexpected fields must
 also produce named validation errors rather than partial plans.
@@ -82,9 +86,9 @@ Open `http://127.0.0.1:8081/` and:
 2. Configure Simulation fields.
 3. In Campaign select fixed budget, enter total budget and duration, choose a KPI and either uniform
    or catalog-optimized strategy.
-4. Confirm target-KPI mode is visible, labeled unavailable and cannot launch.
-5. Launch fixed-budget mode and inspect total budget, plan ID, horizon, allocation table and
-   “Прогноз недоступен”.
+4. Select target-KPI mode, enter a target and confirm the optimized strategy is fixed.
+5. Launch target mode and inspect calculated budget, benchmark forecast, target, horizon and
+   allocation table. For an impossible target, confirm the diagnosis appears and Simulator does not reset.
 6. Confirm manual per-channel budget inputs are absent.
 7. Before the first hour, confirm actual reach, clicks and conversions are zero.
 8. Run one hour. Confirm facts commit, status visibly enters replanning, optimized may change future
