@@ -21,6 +21,14 @@ water-filling buys only segments with positive marginal KPI return. Every hour P
 actual spend and reallocates the remaining useful amount over the remaining horizon—regardless of
 whether the run is ahead of or behind its initial KPI trajectory.
 
+Every plan whose channels exist in the public catalog also carries a benchmark trajectory: each future
+allocation has `expected` hourly spend, impressions, new unique reach, clicks and conversions computed
+by the same saturation model and the same calibration the optimizer uses, and the top-level `expected`
+is the projected campaign total (observed facts plus the forecast of future caps). At revision zero the
+cumulative sum of hourly expectations is the approved plan trajectory used for plan-versus-fact MAPE;
+committed hours carry `expected: null`. The frozen-versus-adaptive evaluation harness lives in
+`tools/evaluation/`.
+
 The optimized conservation invariant is `actual spend + future caps + unallocated_budget = approved
 budget`. The explicit reserve prevents a very large budget from being dumped into a saturated channel.
 State changes produce a new plan ID; largest-remainder conversion keeps all allocated micro-units

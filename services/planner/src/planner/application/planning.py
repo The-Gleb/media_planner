@@ -5,7 +5,7 @@ from collections.abc import Mapping, Sequence
 
 from planner.domain.catalog import load_catalog
 from planner.domain.models import KPI, Horizon, MediaPlan, Strategy
-from planner.domain.optimized import allocate_optimized
+from planner.domain.optimized import allocate_optimized, forecast_plan
 from planner.domain.target import TargetBudgetSolution, solve_target_budget
 from planner.domain.uniform import allocate_uniformly
 from planner.domain.values import MAX_MICROS
@@ -77,6 +77,7 @@ def create_fixed_budget_plan(
         allocations=allocations,
         unallocated_budget_micros=budget_micros
         - sum(allocation.budget_micros for allocation in allocations),
+        forecast=forecast_plan(allocations, horizon, ordered_channels, current, simulation),
     )
 
 
@@ -131,6 +132,9 @@ def create_target_kpi_plan(
             allocations=solution.allocations,
             unallocated_budget_micros=solution.required_budget_micros
             - sum(allocation.budget_micros for allocation in solution.allocations),
+            forecast=forecast_plan(
+                solution.allocations, horizon, ordered_channels, None, simulation
+            ),
         ),
         solution,
     )

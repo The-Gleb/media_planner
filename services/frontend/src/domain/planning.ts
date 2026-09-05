@@ -15,7 +15,8 @@ export interface CampaignFacts {
   channels: Record<ChannelID, ChannelFacts>
 }
 export interface Horizon { fromHour: number; toHour: number }
-export interface Allocation { channelId: ChannelID; hour: number; budgetCap: MoneyText; expected: null }
+export interface HourlyExpected { spend: MoneyText; impressions: string; uniqueReach: string; clicks: string; conversions: string }
+export interface Allocation { channelId: ChannelID; hour: number; budgetCap: MoneyText; expected: HourlyExpected | null }
 export interface TargetKPI { metric: KPI; value: string }
 export interface ExpectedOutcome { spend: MoneyText; impressions: string; uniqueReach: string; clicks: string; conversions: string }
 export interface MediaPlan {

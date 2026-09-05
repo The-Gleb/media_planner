@@ -54,6 +54,10 @@ Int64Text = Annotated[
     StringConstraints(pattern=r"^-?(0|[1-9][0-9]*)$"),
     AfterValidator(_valid_int64),
 ]
+DecimalText = Annotated[
+    str,
+    StringConstraints(pattern=r"^(0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$"),
+]
 ChannelID = Annotated[
     str, StringConstraints(pattern=r"^[a-z][a-z0-9_-]{0,63}$", min_length=1, max_length=64)
 ]
@@ -248,11 +252,21 @@ PlanRequestDTO = Annotated[
 ]
 
 
+class HourlyExpectedDTO(StrictModel):
+    """Benchmark expectation of one channel hour; fractional counts keep trajectories exact."""
+
+    spend: MoneyText
+    impressions: DecimalText
+    unique_reach: DecimalText
+    clicks: DecimalText
+    conversions: DecimalText
+
+
 class AllocationDTO(StrictModel):
     channel_id: ChannelID
     hour: StrictInt = Field(ge=0, le=2159)
     budget_cap: MoneyText
-    expected: None
+    expected: HourlyExpectedDTO | None
 
 
 class ExpectedOutcomeDTO(StrictModel):
@@ -282,7 +296,7 @@ class MediaPlanDTO(StrictModel):
     budget: MoneyText
     unallocated_budget: MoneyText
     horizon: HorizonDTO
-    expected: None
+    expected: ExpectedOutcomeDTO | None
     allocations: list[AllocationDTO] = Field(min_length=1, max_length=43_200)
     required_budget: None
     reason: None

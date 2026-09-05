@@ -54,7 +54,8 @@ For the documented 12 RUB, two-hour, two-channel example, verify:
 - response status is 200;
 - there are four allocations ordered by hour then channel;
 - each cap is `3.000000` and their exact sum is `12.000000`;
-- `expected`, allocation `expected`, `required_budget` and `reason` are null;
+- `required_budget` and `reason` are null; `expected` and allocation `expected` are null because
+  `search_1` is not a catalog channel (catalog channels return hourly expectations);
 - retrying the same request preserves the result; changing actual state preserves uniform but may
   change optimized `plan_id` and future caps;
 - echoed `request_id` and `state_revision` match the latest request.

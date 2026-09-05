@@ -481,7 +481,13 @@ components:
         horizon:
           $ref: '#/components/schemas/Horizon'
         expected:
-          type: 'null'
+          description: >-
+            Projected campaign total: observed cumulative facts plus the benchmark forecast of the
+            future caps. At revision zero this is the approved plan target. Null when a channel is
+            absent from the public catalog.
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/ExpectedOutcome'
         allocations:
           type: array
           minItems: 1
@@ -509,6 +515,24 @@ components:
           $ref: '#/components/schemas/Count'
         conversions:
           $ref: '#/components/schemas/Count'
+    HourlyExpected:
+      type: object
+      additionalProperties: false
+      required: [spend, impressions, unique_reach, clicks, conversions]
+      description: >-
+        Fractional expected counts for one channel hour. Fractions are kept so that hourly values
+        sum exactly to the campaign trajectory; unique_reach counts users first reached in the hour.
+      properties:
+        spend:
+          $ref: '#/components/schemas/Money'
+        impressions:
+          $ref: '#/components/schemas/Decimal'
+        unique_reach:
+          $ref: '#/components/schemas/Decimal'
+        clicks:
+          $ref: '#/components/schemas/Decimal'
+        conversions:
+          $ref: '#/components/schemas/Decimal'
     InfeasibilityReason:
       type: object
       additionalProperties: false
@@ -622,7 +646,17 @@ components:
         budget_cap:
           $ref: '#/components/schemas/Money'
         expected:
-          type: 'null'
+          description: >-
+            Benchmark expectation for this channel hour. Null for hours already committed to
+            Simulator and for channels absent from the public catalog. Summing hourly values over
+            hours yields the planned cumulative trajectory used for plan-versus-fact MAPE.
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/HourlyExpected'
+    Decimal:
+      type: string
+      pattern: '^(0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
+      description: Non-negative decimal count with up to six fractional digits.
     Money:
       type: string
       pattern: '^(0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'

@@ -1,9 +1,8 @@
 import math
 from dataclasses import dataclass
 
-from planner.domain.models import Allocation, Horizon
+from planner.domain.models import Allocation, Forecast, Horizon
 from planner.domain.optimized import (
-    Forecast,
     allocate_prepared,
     forecast_allocations,
     prepare_optimized,

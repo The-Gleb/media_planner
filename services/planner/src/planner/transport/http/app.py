@@ -14,14 +14,14 @@ from starlette.responses import Response
 
 from planner.application.planning import create_fixed_budget_plan, create_target_kpi_plan
 from planner.config import Settings
-from planner.domain.models import Horizon, Strategy
-from planner.domain.optimized import Forecast
+from planner.domain.models import Forecast, Horizon, MediaPlan, Strategy
 from planner.domain.values import count_to_int, micros_to_money, money_to_micros
 from planner.transport.http.dto import (
     AllocationDTO,
     ExpectedOutcomeDTO,
     FixedBudgetPlanRequestDTO,
     HealthDTO,
+    HourlyExpectedDTO,
     InfeasibilityReasonDTO,
     InfeasibleTargetKPIPlanDTO,
     MediaPlanDTO,
@@ -88,6 +88,7 @@ def build_openapi() -> dict[str, Any]:
         "MarketForecastDTO": "MarketForecast",
         "MediaPlanDTO": "MediaPlan",
         "ExpectedOutcomeDTO": "ExpectedOutcome",
+        "HourlyExpectedDTO": "HourlyExpected",
         "InfeasibilityReasonDTO": "InfeasibilityReason",
         "InfeasibleTargetKPIPlanDTO": "InfeasibleTargetKPIPlan",
         "SimulationContextDTO": "SimulationContext",
@@ -422,15 +423,7 @@ async def create_plan(
             unallocated_budget=micros_to_money(plan.unallocated_budget_micros),
             horizon=request.horizon,
             expected=expected,
-            allocations=[
-                AllocationDTO(
-                    channel_id=allocation.channel_id,
-                    hour=allocation.hour,
-                    budget_cap=micros_to_money(allocation.budget_micros),
-                    expected=None,
-                )
-                for allocation in plan.allocations
-            ],
+            allocations=_allocations(plan),
             required_budget=budget,
             reason=None,
             target=request.target,
@@ -460,20 +453,40 @@ async def create_plan(
         budget=micros_to_money(budget_micros),
         unallocated_budget=micros_to_money(plan.unallocated_budget_micros),
         horizon=request.horizon,
-        expected=None,
-        allocations=[
-            AllocationDTO(
-                channel_id=allocation.channel_id,
-                hour=allocation.hour,
-                budget_cap=micros_to_money(allocation.budget_micros),
-                expected=None,
-            )
-            for allocation in plan.allocations
-        ],
+        expected=_expected_outcome(plan.forecast.total) if plan.forecast else None,
+        allocations=_allocations(plan),
         required_budget=None,
         reason=None,
         target=None,
     )
+
+
+def _decimal_text(value: float) -> str:
+    return f"{max(value, 0.0):.6f}"
+
+
+def _allocations(plan: MediaPlan) -> list[AllocationDTO]:
+    hourly = plan.forecast.hourly if plan.forecast is not None else {}
+    result: list[AllocationDTO] = []
+    for allocation in plan.allocations:
+        forecast = hourly.get((allocation.channel_id, allocation.hour))
+        result.append(
+            AllocationDTO(
+                channel_id=allocation.channel_id,
+                hour=allocation.hour,
+                budget_cap=micros_to_money(allocation.budget_micros),
+                expected=None
+                if forecast is None
+                else HourlyExpectedDTO(
+                    spend=micros_to_money(forecast.spend_micros),
+                    impressions=_decimal_text(forecast.impressions),
+                    unique_reach=_decimal_text(forecast.unique_reach),
+                    clicks=_decimal_text(forecast.clicks),
+                    conversions=_decimal_text(forecast.conversions),
+                ),
+            )
+        )
+    return result
 
 
 def _expected_outcome(forecast: Forecast) -> ExpectedOutcomeDTO:

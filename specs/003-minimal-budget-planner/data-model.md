@@ -159,7 +159,7 @@ Cross-field invariants:
 | `channel_id` | ChannelID | One configured channel |
 | `hour` | Hour | One included horizon hour |
 | `budget_cap` | MoneyText | Non-negative exact cap |
-| `expected` | null | Explicitly unavailable in v0 |
+| `expected` | HourlyExpected or null | Benchmark expectation of the channel hour (`spend`, fractional `impressions`, `unique_reach`, `clicks`, `conversions`); null for committed hours and for channels absent from the catalog |
 
 Ordering is ascending `hour`, then lexicographic `channel_id`. Every pair occurs exactly once.
 
@@ -190,7 +190,7 @@ Therefore `sum(cap) = B` and `max(cap) - min(cap) <= 1 micro`.
 | `budget` | MoneyText | Canonical input total |
 | `unallocated_budget` | MoneyText or null | Explicit reserve; zero for uniform, null for infeasible target responses |
 | `horizon` | Horizon | Echoed |
-| `expected` | ExpectedPlan or null | Catalog benchmark for optimized plans; null for uniform |
+| `expected` | ExpectedOutcome or null | Projected campaign total: observed facts plus the forecast of future caps; null only when a channel is absent from the catalog |
 | `allocations` | Allocation[] | Complete deterministic schedule |
 | `required_budget` | null | Reserved for target mode |
 | `reason` | null | Reserved for infeasible future plans |

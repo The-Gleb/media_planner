@@ -27,6 +27,20 @@ describe('planner codecs', () => {
     value.strategy = 'optimized'
     expect(decodeMediaPlan(value).strategy).toBe('optimized')
   })
+  it('decodes hourly and total expectations of a fixed-budget plan', () => {
+    const value = raw() as Record<string, unknown>
+    value.strategy = 'optimized'
+    value.expected = { spend: '12.000000', impressions: '1000', unique_reach: '100', clicks: '10', conversions: '1' }
+    const hourly = { spend: '3.000000', impressions: '250.500000', unique_reach: '25.05', clicks: '2.5', conversions: '0.25' }
+    const allocations = value.allocations as Array<Record<string, unknown>>
+    allocations[2].expected = hourly; allocations[3].expected = hourly
+    const plan = decodeMediaPlan(value)
+    expect(plan.expected).toEqual({ spend: '12.000000', impressions: '1000', uniqueReach: '100', clicks: '10', conversions: '1' })
+    expect(plan.allocations[0].expected).toBeNull()
+    expect(plan.allocations[3].expected).toEqual({ spend: '3.000000', impressions: '250.500000', uniqueReach: '25.05', clicks: '2.5', conversions: '0.25' })
+    allocations[3].expected = { ...hourly, clicks: '-1' }
+    expect(() => decodeMediaPlan(value)).toThrow('invalid_hourly_expected')
+  })
   it('decodes executable and infeasible target results', () => {
     const executable = raw() as Record<string, unknown>
     executable.type = 'target_kpi'; executable.strategy = 'optimized'

@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -68,8 +69,52 @@ class Allocation:
 
 
 @dataclass(frozen=True, slots=True)
+class Forecast:
+    """Benchmark expectation for one allocation slot or for a whole campaign.
+
+    ``unique_reach`` counts users first reached in the covered period, matching the
+    Simulator observation semantics, so hourly values can be summed into a trajectory.
+    """
+
+    spend_micros: int
+    impressions: float
+    unique_reach: float
+    clicks: float
+    conversions: float
+
+
+ZERO_FORECAST = Forecast(0, 0.0, 0.0, 0.0, 0.0)
+
+
+def sum_forecasts(items: list[Forecast]) -> Forecast:
+    return Forecast(
+        spend_micros=sum(item.spend_micros for item in items),
+        impressions=sum(item.impressions for item in items),
+        unique_reach=sum(item.unique_reach for item in items),
+        clicks=sum(item.clicks for item in items),
+        conversions=sum(item.conversions for item in items),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class PlanForecast:
+    """Hourly benchmark trajectory of a plan plus the projected campaign total.
+
+    ``hourly`` is keyed by ``(channel_id, hour)`` and covers only hours that are still
+    ahead of the observed campaign state; already committed hours carry no expectation.
+    ``total`` adds the observed cumulative facts to the future forecast, so at revision
+    zero it is the approved plan target and later it is the projected end-of-campaign
+    outcome.
+    """
+
+    hourly: Mapping[tuple[str, int], Forecast]
+    total: Forecast
+
+
+@dataclass(frozen=True, slots=True)
 class MediaPlan:
     plan_id: str
     horizon: Horizon
     allocations: tuple[Allocation, ...]
     unallocated_budget_micros: int
+    forecast: PlanForecast | None = None

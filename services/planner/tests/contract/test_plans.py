@@ -149,3 +149,80 @@ def test_optimized_strategy_uses_catalog_and_accounts_for_reserve(
         for channel in channels
     }
     assert len(set(totals.values())) > 1
+
+
+def test_catalog_plans_return_hourly_and_total_expectations(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    channels = ["programmatic", "social_1", "sms"]
+    zero = next(iter(fixed_request["current"]["channels"].values()))
+    fixed_request["strategy"] = "optimized"
+    fixed_request["optimize"] = "conversions"
+    fixed_request["channels"] = channels
+    fixed_request["horizon"] = {"from_hour": 0, "to_hour": 48}
+    fixed_request["current"]["channels"] = {channel: dict(zero) for channel in channels}
+    fixed_request["budget"] = "100000.000000"
+
+    body = client.post("/v1/plans", json=fixed_request).json()
+    assert body["expected"] is not None
+    assert set(body["expected"]) == {
+        "spend",
+        "impressions",
+        "unique_reach",
+        "clicks",
+        "conversions",
+    }
+    hourly = [item["expected"] for item in body["allocations"]]
+    assert all(item is not None for item in hourly)
+    for item, allocation in zip(hourly, body["allocations"], strict=True):
+        assert money_to_micros(item["spend"]) <= money_to_micros(allocation["budget_cap"])
+    spend = sum(money_to_micros(item["spend"]) for item in hourly)
+    assert spend == money_to_micros(body["expected"]["spend"])
+    clicks = sum(float(item["clicks"]) for item in hourly)
+    assert int(body["expected"]["clicks"]) == int(clicks)
+
+
+def test_replan_keeps_committed_hours_without_expectations(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    channels = ["programmatic", "social_1"]
+    fixed_request["strategy"] = "optimized"
+    fixed_request["channels"] = channels
+    fixed_request["horizon"] = {"from_hour": 0, "to_hour": 24}
+    fixed_request["budget"] = "10000.000000"
+    fixed_request["current"] = {
+        "current_hour": 6,
+        "state_revision": 6,
+        "last_step_id": "2917c89e-4936-4ddf-b167-90555465cb01",
+        "last_observed_at": "2026-09-03T11:00:00Z",
+        "spent": "2000.000000",
+        "unique_reach": "20000",
+        "clicks": "150",
+        "conversions": "3",
+        "channels": {
+            "programmatic": {
+                "spent": "1500.000000",
+                "requests": "300000",
+                "impressions": "30000",
+                "unique_reach": "15000",
+                "clicks": "100",
+                "conversions": "2",
+            },
+            "social_1": {
+                "spent": "500.000000",
+                "requests": "50000",
+                "impressions": "5000",
+                "unique_reach": "5000",
+                "clicks": "50",
+                "conversions": "1",
+            },
+        },
+    }
+    body = client.post("/v1/plans", json=fixed_request).json()
+    past = [item for item in body["allocations"] if item["hour"] < 6]
+    future = [item for item in body["allocations"] if item["hour"] >= 6]
+    assert len(past) == 12 and all(item["expected"] is None for item in past)
+    assert all(item["expected"] is not None for item in future)
+    future_spend = sum(money_to_micros(item["expected"]["spend"]) for item in future)
+    assert money_to_micros(body["expected"]["spend"]) == 2_000_000_000 + future_spend
+    assert int(body["expected"]["conversions"]) >= 3

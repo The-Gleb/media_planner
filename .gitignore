@@ -40,3 +40,8 @@ __pycache__/
 .hypothesis/
 .coverage
 htmlcov/
+
+# Evaluation harness artifacts (regenerable; keep summary and run metrics)
+tools/evaluation/results/*
+!tools/evaluation/results/summary.md
+!tools/evaluation/results/runs.json
