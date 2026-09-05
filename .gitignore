@@ -45,3 +45,7 @@ htmlcov/
 tools/evaluation/results/*
 !tools/evaluation/results/summary.md
 !tools/evaluation/results/runs.json
+!tools/evaluation/results/trajectories/
+!tools/evaluation/results/history/
+!tools/evaluation/results/analysis.ipynb
+!tools/evaluation/results/figures/
