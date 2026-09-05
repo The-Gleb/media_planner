@@ -228,6 +228,12 @@ class FixedBudgetPlanRequestDTO(RequestBase):
     optimize: KPI
     target: None = None
 
+    @model_validator(mode="after")
+    def validate_budget_balance(self) -> FixedBudgetPlanRequestDTO:
+        if money_to_micros(self.current.spent) > money_to_micros(self.budget):
+            raise ValueError("campaign spent cannot exceed the approved budget")
+        return self
+
 
 class TargetKPIPlanRequestDTO(RequestBase):
     type: Literal["target_kpi"]
@@ -274,6 +280,7 @@ class MediaPlanDTO(StrictModel):
     optimize: KPI
     currency: Currency
     budget: MoneyText
+    unallocated_budget: MoneyText
     horizon: HorizonDTO
     expected: None
     allocations: list[AllocationDTO] = Field(min_length=1, max_length=43_200)
@@ -292,6 +299,7 @@ class TargetKPIPlanDTO(StrictModel):
     optimize: KPI
     currency: Currency
     budget: MoneyText
+    unallocated_budget: MoneyText
     horizon: HorizonDTO
     expected: ExpectedOutcomeDTO
     allocations: list[AllocationDTO] = Field(min_length=1, max_length=43_200)
@@ -310,6 +318,7 @@ class InfeasibleTargetKPIPlanDTO(StrictModel):
     optimize: KPI
     currency: Currency
     budget: None
+    unallocated_budget: None
     horizon: HorizonDTO
     expected: ExpectedOutcomeDTO
     allocations: list[AllocationDTO] = Field(max_length=0)

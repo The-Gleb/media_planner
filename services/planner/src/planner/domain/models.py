@@ -72,3 +72,4 @@ class MediaPlan:
     plan_id: str
     horizon: Horizon
     allocations: tuple[Allocation, ...]
+    unallocated_budget_micros: int

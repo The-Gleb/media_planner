@@ -32,7 +32,7 @@ integers and rejects non-canonical, signed-negative or fractional values.
 |---|---|---|
 | `PlanType` | `fixed_budget`, `target_kpi` | Target mode derives an approved budget before execution |
 | `KPI` | `unique_reach`, `clicks`, `conversions` | Recorded; does not influence uniform v0 allocation |
-| `Strategy` | `uniform` | Only supported strategy |
+| `Strategy` | `uniform`, `optimized` | Exact even split or saturation-aware marginal allocation |
 | `MarketStatus` | `unavailable` | No runtime market feed; target mode uses a local public-catalog benchmark |
 | `PlanningStatus` | `idle`, `initial_planning`, `resetting_simulation`, `ready`, `stepping`, `replanning`, `replan_failed`, `finished`, `error` | Dashboard workflow state |
 
@@ -68,7 +68,7 @@ or exposed by Planner v0.
 | `duration_hours` | integer | Defines horizon `[0, duration_hours)` |
 | `budget` | MoneyText or null | Required only for fixed budget; total for full horizon |
 | `optimize` | KPI | Required for fixed budget |
-| `strategy` | Strategy | `uniform` in v0 |
+| `strategy` | Strategy | User-selectable for fixed budget; `optimized` for target KPI |
 | `target` | TargetKPI or null | Required for target mode |
 
 This replaces manually entered per-channel hourly budget fields. Those caps are Planner output.
@@ -188,8 +188,9 @@ Therefore `sum(cap) = B` and `max(cap) - min(cap) <= 1 micro`.
 | `optimize` | KPI | Echoed selection |
 | `currency` | string | Echoed SimulationContext currency |
 | `budget` | MoneyText | Canonical input total |
+| `unallocated_budget` | MoneyText or null | Explicit reserve; zero for uniform, null for infeasible target responses |
 | `horizon` | Horizon | Echoed |
-| `expected` | null | No forecast |
+| `expected` | ExpectedPlan or null | Catalog benchmark for optimized plans; null for uniform |
 | `allocations` | Allocation[] | Complete deterministic schedule |
 | `required_budget` | null | Reserved for target mode |
 | `reason` | null | Reserved for infeasible future plans |
@@ -197,6 +198,11 @@ Therefore `sum(cap) = B` and `max(cap) - min(cap) <= 1 micro`.
 `plan_id` hashes a versioned canonical representation of PlanType, Strategy, KPI, budget, horizon,
 sorted channels and SimulationContext. Uniform excludes CampaignState and remains stable. Optimized
 also fingerprints CampaignState because every committed observation can change future allocations.
+
+Budget conservation depends on strategy. Uniform satisfies `sum(allocation caps) = budget`.
+Optimized satisfies `actual spent + future allocation caps + unallocated_budget = budget`; completed
+slots reconstruct actual spend for auditability, so equivalently the complete response satisfies
+`sum(allocation caps) + unallocated_budget = budget`.
 
 ## ActivePlan (dashboard state)
 

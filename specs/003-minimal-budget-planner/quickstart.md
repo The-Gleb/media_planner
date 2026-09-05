@@ -70,7 +70,7 @@ zero and a reachable target. Expected result:
 - HTTP 200 with `feasible=true`;
 - `required_budget` equals the executable plan `budget` and is quantized to a whole ruble;
 - the selected expected KPI reaches the target;
-- allocation caps sum exactly to the calculated budget.
+- allocation caps plus `unallocated_budget` sum exactly to the calculated budget.
 
 Repeat with a target above catalog capacity. The response remains HTTP 200 but has `feasible=false`,
 zero allocations and reason `target_exceeds_capacity`; Simulator remains unchanged.
@@ -100,6 +100,11 @@ Open `http://127.0.0.1:8081/` and:
     стратегий”, the second begins from hour zero with the same seeds, and both final rows are shown.
 12. Optionally configure a controlled shock in Simulation before the first run; confirm it is reused
     for the second strategy and cannot be edited between the two sequential runs.
+
+For saturation validation, submit an intentionally excessive fixed budget with `optimized`. Confirm
+that effective spend is distributed only across positive-gain curve segments, the plan summary shows
+a non-zero “Резерв вне каналов”, and `sum(caps) + unallocated_budget = budget`. Repeating the same
+request must produce the same reserve and allocations.
 
 The default world contains eight channels. `sms` currently uses an effective CPM-equivalent because
 the Simulator action contract has not yet introduced package purchases.
@@ -161,8 +166,8 @@ RUN_COMPOSE_TESTS=1 SIMULATOR_BASE_URL=http://127.0.0.1:8080 \
 ```
 
 The automated acceptance set must cover exact allocation properties, OpenAPI compatibility,
-plan-before-reset, step-before-replan, Planner outage/retry, target-mode rejection, cumulative totals,
-final labels and independent frontend lifecycle.
+plan-before-reset, step-before-replan, Planner outage/retry, target feasibility/capacity diagnosis,
+cumulative totals, final labels and independent frontend lifecycle.
 
 ## Validation Record — 2026-09-04
 
@@ -177,6 +182,16 @@ final labels and independent frontend lifecycle.
 - Full-plan performance: 168 × 20 completed in 0.02 s and 2,160 × 20 in 0.17 s on the validation
   host; allocation-count, exact-sum, payload-size, peak-memory and prior-response-retention bounds
   all passed.
+
+## P0 Saturation Validation — 2026-09-05
+
+- Planner: Ruff and strict mypy passed; 103 pytest tests passed, including monotone marginal-curve,
+  CPM/CTR/CR saturation, reserve conservation and excessive-budget anti-dumping coverage.
+- Frontend: typecheck, ESLint, production build and 61 Vitest tests passed, including exact reserve
+  decoding and visible reserve explanation.
+- Numerical smoke case: for a 10,000,000 RUB, 24-hour, eight-channel conversion plan, Planner assigned
+  412,443.216100 RUB to positive-gain segments, retained 9,587,556.783900 RUB, and assigned at most
+  122,021.427124 RUB to any one channel.
 
 ## Measure the Known v0 Limit
 

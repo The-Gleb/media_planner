@@ -6,7 +6,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const MONEY6 = /^(0|[1-9][0-9]*)\.[0-9]{6}$/
 const COUNT = /^(0|[1-9][0-9]*)$/
 const CHANNEL = /^[a-z][a-z0-9_-]{0,63}$/
-const KEYS = ['request_id','state_revision','plan_id','feasible','type','strategy','optimize','currency','budget','horizon','expected','allocations','required_budget','reason','target']
+const KEYS = ['request_id','state_revision','plan_id','feasible','type','strategy','optimize','currency','budget','unallocated_budget','horizon','expected','allocations','required_budget','reason','target']
 const object = (v: unknown, name: string): R => { if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error(`invalid_${name}`); return v as R }
 const exact = (v: R, keys: readonly string[], name: string) => { const got=Object.keys(v).sort(); const want=[...keys].sort(); if(got.length!==want.length||got.some((k,i)=>k!==want[i])) throw new Error(`invalid_${name}_fields`) }
 const integer = (v: unknown, min: number, max: number) => typeof v === 'number' && Number.isSafeInteger(v) && v >= min && v <= max
@@ -26,18 +26,18 @@ export function decodePlanResult(raw: unknown): PlanResult {
     ||!integer(horizon.from_hour,0,2159)||!integer(horizon.to_hour,1,2160)||(horizon.from_hour as number)>=(horizon.to_hour as number)) throw new Error('invalid_plan')
   const common={requestId:value.request_id,stateRevision:value.state_revision as number,type:value.type as MediaPlan['type'],strategy:value.strategy as MediaPlan['strategy'],optimize:value.optimize as KPI,currency:value.currency,horizon:{fromHour:horizon.from_hour as number,toHour:horizon.to_hour as number}}
   if(value.feasible===false){
-    if(value.type!=='target_kpi'||value.strategy!=='optimized'||value.state_revision!==0||value.plan_id!==null||value.budget!==null||value.required_budget!==null||!Array.isArray(value.allocations)||value.allocations.length!==0)throw new Error('invalid_infeasible_plan')
+    if(value.type!=='target_kpi'||value.strategy!=='optimized'||value.state_revision!==0||value.plan_id!==null||value.budget!==null||value.unallocated_budget!==null||value.required_budget!==null||!Array.isArray(value.allocations)||value.allocations.length!==0)throw new Error('invalid_infeasible_plan')
     const reason=object(value.reason,'reason');exact(reason,['code','detail','max_achievable','recommended_target'],'reason');if(reason.code!=='target_exceeds_capacity'||typeof reason.detail!=='string'||!count(reason.max_achievable)||!count(reason.recommended_target))throw new Error('invalid_reason')
-    return {...common,stateRevision:0,planId:null,feasible:false,type:'target_kpi',strategy:'optimized',budget:null,expected:decodeExpected(value.expected),allocations:[],requiredBudget:null,target:decodeTarget(value.target),reason:{code:'target_exceeds_capacity',detail:reason.detail,maxAchievable:reason.max_achievable,recommendedTarget:reason.recommended_target}}
+    return {...common,stateRevision:0,planId:null,feasible:false,type:'target_kpi',strategy:'optimized',budget:null,unallocatedBudget:null,expected:decodeExpected(value.expected),allocations:[],requiredBudget:null,target:decodeTarget(value.target),reason:{code:'target_exceeds_capacity',detail:reason.detail,maxAchievable:reason.max_achievable,recommendedTarget:reason.recommended_target}}
   }
-  if(value.feasible!==true||typeof value.plan_id!=='string'||!/^[a-f0-9]{64}$/.test(value.plan_id)||!money6(value.budget)||value.reason!==null)throw new Error('invalid_plan')
+  if(value.feasible!==true||typeof value.plan_id!=='string'||!/^[a-f0-9]{64}$/.test(value.plan_id)||!money6(value.budget)||!money6(value.unallocated_budget)||value.reason!==null)throw new Error('invalid_plan')
   const allocations=decodeAllocations(value.allocations)
   if(value.type==='fixed_budget'){
     if(value.expected!==null||value.required_budget!==null||value.target!==null)throw new Error('invalid_fixed_plan')
-    return {...common,planId:value.plan_id,feasible:true,type:'fixed_budget',budget:value.budget,expected:null,allocations,requiredBudget:null,reason:null,target:null}
+    return {...common,planId:value.plan_id,feasible:true,type:'fixed_budget',budget:value.budget,unallocatedBudget:value.unallocated_budget,expected:null,allocations,requiredBudget:null,reason:null,target:null}
   }
   if(value.strategy!=='optimized'||!money6(value.required_budget)||value.required_budget!==value.budget)throw new Error('invalid_target_plan')
-  return {...common,planId:value.plan_id,feasible:true,type:'target_kpi',strategy:'optimized',budget:value.budget,expected:decodeExpected(value.expected),allocations,requiredBudget:value.required_budget,reason:null,target:decodeTarget(value.target)}
+  return {...common,planId:value.plan_id,feasible:true,type:'target_kpi',strategy:'optimized',budget:value.budget,unallocatedBudget:value.unallocated_budget,expected:decodeExpected(value.expected),allocations,requiredBudget:value.required_budget,reason:null,target:decodeTarget(value.target)}
 }
 
 export function decodeMediaPlan(raw:unknown):MediaPlan {const result=decodePlanResult(raw);if(!result.feasible)throw new Error('plan_is_infeasible');return result}
@@ -47,5 +47,5 @@ export function validatePlanCoverage(plan: MediaPlan, channelIds: readonly strin
   if(plan.allocations.length!==expectedCount) throw new Error('invalid_plan_coverage')
   let sum=0n,index=0
   for(let hour=plan.horizon.fromHour;hour<plan.horizon.toHour;hour++) for(const channel of sorted){const item=plan.allocations[index++];if(item.hour!==hour||item.channelId!==channel) throw new Error('invalid_plan_coverage');sum+=parseMoney(item.budgetCap)}
-  if(sum!==parseMoney(plan.budget)) throw new Error('invalid_plan_total')
+  if(sum+parseMoney(plan.unallocatedBudget)!==parseMoney(plan.budget)) throw new Error('invalid_plan_total')
 }

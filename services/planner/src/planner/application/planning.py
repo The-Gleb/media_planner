@@ -12,8 +12,8 @@ from planner.domain.values import MAX_MICROS
 
 _CHANNEL_RE = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
 
-FINGERPRINT_VERSION = "fixed-budget-v0"
-TARGET_FINGERPRINT_VERSION = "target-kpi-v1"
+FINGERPRINT_VERSION = "fixed-budget-v1"
+TARGET_FINGERPRINT_VERSION = "target-kpi-v2"
 
 
 def plan_fingerprint(defining_inputs: Mapping[str, object]) -> str:
@@ -75,6 +75,8 @@ def create_fixed_budget_plan(
         plan_id=plan_fingerprint(defining),
         horizon=horizon,
         allocations=allocations,
+        unallocated_budget_micros=budget_micros
+        - sum(allocation.budget_micros for allocation in allocations),
     )
 
 
@@ -127,6 +129,8 @@ def create_target_kpi_plan(
             plan_id=plan_fingerprint(defining),
             horizon=horizon,
             allocations=solution.allocations,
+            unallocated_budget_micros=solution.required_budget_micros
+            - sum(allocation.budget_micros for allocation in solution.allocations),
         ),
         solution,
     )

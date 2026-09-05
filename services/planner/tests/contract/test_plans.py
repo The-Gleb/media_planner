@@ -21,6 +21,7 @@ def test_documented_uniform_plan(client: TestClient, fixed_request: dict[str, An
         "optimize": "unique_reach",
         "currency": "RUB",
         "budget": "12.000000",
+        "unallocated_budget": "0.000000",
         "horizon": {"from_hour": 0, "to_hour": 2},
         "expected": None,
         "allocations": body["allocations"],
@@ -92,6 +93,24 @@ def test_channel_and_campaign_totals_must_be_exact(
     assert response.status_code == 422
 
 
+def test_campaign_spend_cannot_exceed_approved_budget(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    fixed_request["current"].update(
+        {
+            "current_hour": 1,
+            "state_revision": 1,
+            "last_step_id": "2917c89e-4936-4ddf-b167-90555465cb01",
+            "last_observed_at": "2026-09-03T06:00:00Z",
+            "spent": "13.000000",
+        }
+    )
+    fixed_request["current"]["channels"]["search_1"]["spent"] = "13.000000"
+    response = client.post("/v1/plans", json=fixed_request)
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation_failed"
+
+
 def test_request_id_does_not_change_plan_id(
     client: TestClient, fixed_request: dict[str, Any]
 ) -> None:
@@ -104,7 +123,7 @@ def test_request_id_does_not_change_plan_id(
     assert second["allocations"] == first["allocations"]
 
 
-def test_optimized_strategy_uses_catalog_and_keeps_exact_budget(
+def test_optimized_strategy_uses_catalog_and_accounts_for_reserve(
     client: TestClient, fixed_request: dict[str, Any]
 ) -> None:
     channels = ["programmatic", "social_1", "marketplace_3"]
@@ -120,7 +139,7 @@ def test_optimized_strategy_uses_catalog_and_keeps_exact_budget(
     assert body["strategy"] == "optimized"
     assert sum(
         money_to_micros(item["budget_cap"]) for item in body["allocations"]
-    ) == money_to_micros(body["budget"])
+    ) + money_to_micros(body["unallocated_budget"]) == money_to_micros(body["budget"])
     totals = {
         channel: sum(
             money_to_micros(item["budget_cap"])

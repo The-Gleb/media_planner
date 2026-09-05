@@ -37,6 +37,7 @@ def test_reachable_target_returns_executable_minimum_budget(
     assert body["type"] == "target_kpi"
     assert body["target"] == {"metric": "clicks", "value": "50000"}
     assert body["required_budget"] == body["budget"]
+    assert body["unallocated_budget"] == "0.000000"
     assert int(body["expected"]["clicks"]) >= 50_000
     assert sum(
         money_to_micros(item["budget_cap"]) for item in body["allocations"]
@@ -50,6 +51,7 @@ def test_unreachable_target_is_a_domain_result(
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["feasible"] is False
+    assert body["unallocated_budget"] is None
     assert body["allocations"] == []
     assert body["reason"]["code"] == "target_exceeds_capacity"
     assert body["reason"]["recommended_target"] == body["reason"]["max_achievable"]

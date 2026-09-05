@@ -395,6 +395,7 @@ async def create_plan(
                 optimize=request.target.metric,
                 currency=request.simulation.currency,
                 budget=None,
+                unallocated_budget=None,
                 horizon=request.horizon,
                 expected=expected,
                 allocations=[],
@@ -418,6 +419,7 @@ async def create_plan(
             optimize=request.target.metric,
             currency=request.simulation.currency,
             budget=budget,
+            unallocated_budget=micros_to_money(plan.unallocated_budget_micros),
             horizon=request.horizon,
             expected=expected,
             allocations=[
@@ -456,6 +458,7 @@ async def create_plan(
         optimize=request.optimize,
         currency=request.simulation.currency,
         budget=micros_to_money(budget_micros),
+        unallocated_budget=micros_to_money(plan.unallocated_budget_micros),
         horizon=request.horizon,
         expected=None,
         allocations=[

@@ -129,8 +129,8 @@ without resetting or advancing Simulator.
 - The number of hours multiplied by the number of channels is large enough to make a full plan
   impractical; the request is rejected at the documented campaign limits rather than partially
   planned.
-- A simulation spends less than a cap because inventory is unavailable. The unused amount remains
-  unallocated in v0; the stable plan is not increased to compensate.
+- A simulation spends less than a cap because inventory is unavailable. Uniform keeps its stable
+  schedule; optimized accounts for actual spend and may reassign only the still-approved remainder.
 - Actual spend differs from planned caps, including a channel with zero impressions and zero spend.
 - Observations are duplicated, missing a planned channel, assigned to the wrong hour, or arrive out
   of order; they are not counted twice and do not silently advance campaign state.
@@ -151,8 +151,8 @@ without resetting or advancing Simulator.
   the available channel identifiers, one optimization KPI, and one supported allocation strategy.
 - **FR-003**: The selectable optimization KPIs MUST be `unique_reach`, `clicks`, and `conversions`,
   with user-facing labels for reach, clicks, and conversions.
-- **FR-004**: The strategy control MUST identify uniform allocation as the only supported v0
-  strategy and MUST NOT imply that it uses forecasts or observed performance.
+- **FR-004**: The strategy control MUST offer `uniform` and `optimized`, and MUST NOT imply that
+  uniform uses forecasts or observed performance.
 - **FR-005**: Target-KPI mode MUST accept a positive reach, click or conversion target and MUST use
   the optimized public-catalog strategy at initial state revision zero.
 - **FR-006**: Target-KPI planning MUST return either an executable plan with a one-ruble-quantized
@@ -174,9 +174,10 @@ without resetting or advancing Simulator.
   MUST NOT retrieve observations from or advance the simulation directly.
 - **FR-015**: The campaign coordinator MUST submit only the current hour's planned channel caps to
   the simulation, then incorporate only successfully committed observations before replanning.
-- **FR-016**: For unchanged plan-defining inputs, the v0 replanning result MUST retain the original
-  horizon, allocation ordering and allocation caps regardless of updated actual campaign state.
-- **FR-017**: Unspent budget caused by delivery below a budget cap MUST NOT be redistributed in v0.
+- **FR-016**: Uniform replanning MUST retain the original horizon, allocation ordering and allocation
+  caps regardless of updated actual campaign state.
+- **FR-017**: Optimized replanning MAY redistribute approved budget left unspent by prior delivery,
+  but MUST NOT increase the campaign budget or allocate zero-gain saturation reserve.
 - **FR-018**: A planning or simulation failure MUST preserve the last committed campaign state and
   permit safe retry without counting observations twice.
 - **FR-019**: The interface MUST show cumulative actual unique reach, clicks and conversions while a
@@ -210,7 +211,8 @@ without resetting or advancing Simulator.
   same controlled market scenario.
 - **FR-032**: Fixed-budget planning MUST offer both exact uniform allocation and a catalog-based
   optimized strategy. The optimized strategy MUST use only public world-config ranges, MUST NOT read
-  hidden seeded world values, and MUST still return allocations whose micro-unit sum equals budget.
+  hidden seeded world values, and MUST conserve the approved budget as actual spend, future caps and
+  an explicit unallocated reserve.
 - **FR-033**: The interface MUST support two sequential runs with different strategies on the same
   simulation ID, seeds, start hour and scenario, preserving the completed first result while the
   Simulator is reset for the second run and displaying spend/reach/click/conversion comparison.
@@ -219,11 +221,17 @@ without resetting or advancing Simulator.
   slots by marginal KPI gain, whether actual KPI is below or above the initial trajectory.
 - **FR-035**: Live and final summaries MUST show aggregate spend, impressions, non-deduplicated
   reach, clicks and conversions across all channels.
+- **FR-036**: Optimized planning MUST model channel saturation with non-decreasing effective CPM and
+  non-increasing CTR, CR and new-reach probability as reach and frequency grow.
+- **FR-037**: Optimized response curves MUST expose non-negative, non-increasing marginal KPI gains
+  to deterministic water-filling and MUST stop allocating when no segment has positive useful gain.
+- **FR-038**: Any approved budget that is neither already spent nor assigned to a positive-gain
+  future segment MUST be returned as `unallocated_budget` and shown explicitly in the plan summary.
 
 ### Key Entities
 
-- **Planning Mode**: Whether the campaign fixes total budget or fixes a target KPI. Only fixed budget
-  is executable in this version.
+- **Planning Mode**: Whether the campaign fixes total budget or first derives an approved budget from
+  a target KPI. Both execute through fixed-budget hourly replanning after launch.
 - **KPI**: The selected campaign outcome—unique reach, clicks, or conversions. It is descriptive in
   v0 because uniform allocation does not optimize against performance data.
 - **Strategy**: The allocation rule selected for a plan. `uniform` divides exact micro-units evenly;
@@ -234,8 +242,9 @@ without resetting or advancing Simulator.
   campaign state supplied for one planning round.
 - **Campaign State**: The current hour and cumulative actual totals, including a breakdown for every
   channel. It is derived only from committed simulation observations.
-- **Media Plan**: Feasibility, horizon, selected KPI and strategy, and the complete deterministic set
-  of hourly channel allocations. Forecast outcomes are unavailable in v0.
+- **Media Plan**: Feasibility, horizon, selected KPI and strategy, the complete deterministic set of
+  hourly channel allocations, and any explicit budget reserve. Target-KPI responses include a
+  benchmark forecast; fixed-budget responses do not expose one.
 - **Allocation**: One channel/hour pair and its maximum permitted spend for that simulation step.
 - **Planning Round**: One request and response in the feedback loop. Uniform retains its schedule;
   optimized produces a new state-correlated plan for future hours.
@@ -249,7 +258,8 @@ without resetting or advancing Simulator.
 - **SC-001**: A user can configure fixed-budget mode and obtain an executable plan in under two
   minutes without manually calculating per-channel or per-hour caps.
 - **SC-002**: For 100% of valid test campaigns, the plan contains exactly `hours × channels`
-  allocations and their caps sum exactly to the entered total budget.
+  allocations. Uniform caps sum exactly to budget; optimized actual spend, future caps and reserve
+  sum exactly to budget.
 - **SC-003**: For 100% of equivalent planning requests, allocation hours, channel ordering and caps
   are identical.
 - **SC-004**: After each committed simulation hour, the updated plan and actual KPI summary become
@@ -264,8 +274,9 @@ without resetting or advancing Simulator.
   contributions to cumulative KPIs after retry.
 - **SC-009**: Across manual and automatic acceptance runs, at most one campaign is active and the
   combined number of in-flight Simulator steps and planning rounds never exceeds one.
-- **SC-010**: Both strategies allocate exactly 100% of the requested micro-unit budget, while an
-  optimized plan differs from a uniform plan for at least one representative eight-channel case.
+- **SC-010**: Uniform allocates exactly 100% of the requested micro-unit budget. Optimized allocates
+  only positive-gain segments, reports the remainder explicitly, and differs from uniform for at
+  least one representative eight-channel case.
 - **SC-011**: A user can finish one strategy, reset, finish the other strategy and see both exact
   result rows without ever running two Simulator campaigns concurrently.
 
@@ -284,10 +295,11 @@ without resetting or advancing Simulator.
 - The full original plan is returned on every v0 planning round. The coordinator selects allocations
   for the current hour; completed allocations remain in the plan for auditability.
 - Uniform allocation ignores the selected KPI and observed results. Optimized allocation uses the
-  selected KPI and public range midpoints but its forecast values remain internal and are not exposed
-  as product forecasts in this iteration.
-- Learned forecasts, unused-budget recovery, deduplicated cross-channel reach, probabilistic service
-  levels and automatic post-launch budget increases are outside this feature.
+  selected KPI and public range midpoints. Its forecast remains internal for fixed-budget responses
+  and is exposed as a labeled benchmark for target-KPI responses.
+- Learned forecasts, deduplicated cross-channel reach, probabilistic service levels and automatic
+  post-launch budget increases are outside this feature. Saturation-induced unused budget is retained
+  as a visible reserve rather than silently redistributed.
 - The current campaign limits of up to 2,160 hours and 20 channels remain applicable.
 - Parallel campaign execution and overlapping hourly steps are outside v0 scope.
 - Until Simulator gains a package-purchase action, `sms` is represented internally by an effective

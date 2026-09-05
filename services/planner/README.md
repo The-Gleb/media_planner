@@ -5,20 +5,26 @@ makes no outbound calls, and supports fixed-budget schedules plus initial target
 Target planning uses only public catalog ranges, searches in one-ruble quanta and returns either an
 executable plan or a structured `target_exceeds_capacity` result.
 
-## Exact allocation
+## Allocation and budget conservation
 
 Money is transported as canonical non-negative decimal strings and converted to signed-64-safe
 integer micro-units. For `N = hours × channels`, the allocator uses `divmod(total_micros, N)` and
 assigns one remainder micro in ascending-hour, then lexicographic-channel order. Every response uses
-exactly six fractional digits, and caps sum exactly to the requested budget. For `uniform`, observed
+exactly six fractional digits. For `uniform`, caps sum exactly to the requested budget; observed
 campaign state is validated but does not change the schedule or `plan_id`.
 
 `optimized` reads public ranges from the mounted world config and recalibrates channel CPM, CTR, CR
-and supply from cumulative Simulator facts. Every hour it subtracts actual spend, accounts for
-observed saturation, and water-fills the remaining budget over the remaining horizon by marginal
-reach/click/conversion gain—regardless of whether the run is ahead of or behind its initial KPI
-trajectory. State changes produce a new plan ID; largest-remainder conversion keeps the full
-schedule's micro-unit sum exact. Planner never calls Simulator or reads the seeded hidden world.
+and supply from cumulative Simulator facts. Its response curves model increasing effective CPM and
+decreasing CTR, CR and new reach as reach and frequency rise. A 128-point quadratic grid gives finer
+resolution at low spend; a concavity projection makes marginal gains non-increasing, and deterministic
+water-filling buys only segments with positive marginal KPI return. Every hour Planner subtracts
+actual spend and reallocates the remaining useful amount over the remaining horizon—regardless of
+whether the run is ahead of or behind its initial KPI trajectory.
+
+The optimized conservation invariant is `actual spend + future caps + unallocated_budget = approved
+budget`. The explicit reserve prevents a very large budget from being dumped into a saturated channel.
+State changes produce a new plan ID; largest-remainder conversion keeps all allocated micro-units
+exact. Planner never calls Simulator or reads the seeded hidden world.
 
 ## Target-KPI planning
 

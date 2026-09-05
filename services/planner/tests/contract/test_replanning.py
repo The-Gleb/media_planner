@@ -116,4 +116,4 @@ def test_optimized_reallocates_remaining_budget_from_every_committed_state(
     assert second["allocations"] != first["allocations"]
     assert sum(
         money_to_micros(item["budget_cap"]) for item in second["allocations"]
-    ) == money_to_micros(request["budget"])
+    ) + money_to_micros(second["unallocated_budget"]) == money_to_micros(request["budget"])

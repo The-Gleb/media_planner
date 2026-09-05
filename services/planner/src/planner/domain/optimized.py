@@ -1,16 +1,21 @@
+import heapq
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from planner.domain.catalog import ChannelBenchmark, load_catalog
 from planner.domain.models import Allocation, Horizon
-from planner.domain.values import money_to_micros
+from planner.domain.values import MAX_MICROS, money_to_micros
 
-GRID_SIZE = 200
+CURVE_POINTS = 128
+MODEL_MAX_STEPS = 240
+WEIGHT_SCALE = 10**15
 CTR_PRIOR_IMPRESSIONS = 1_000.0
 CR_PRIOR_CLICKS = 50.0
+CR_FATIGUE_RATIO = 0.5
+MIN_MARGINAL_KPI_PER_RUBLE = 1e-12
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,6 +37,37 @@ class Forecast:
     conversions: float
 
 
+@dataclass(frozen=True, slots=True)
+class ResponseSegment:
+    cost_micros: int
+    marginal_kpi_per_ruble: float
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedOptimization:
+    horizon: Horizon
+    future: Horizon | None
+    channels: tuple[ChannelBenchmark, ...]
+    curves: tuple[tuple[ResponseSegment, ...], ...]
+    past_allocations: tuple[Allocation, ...]
+    spent_micros: int
+    start_clock_hour: int
+
+
+@dataclass(slots=True)
+class _SlopeBlock:
+    costs: list[int]
+    gain: float
+
+    @property
+    def cost(self) -> int:
+        return sum(self.costs)
+
+    @property
+    def slope(self) -> float:
+        return self.gain * 1_000_000 / self.cost
+
+
 def _observed(current: Mapping[str, object] | None, channel_id: str) -> ObservedChannel:
     if current is None:
         return ObservedChannel()
@@ -49,6 +85,13 @@ def _observed(current: Mapping[str, object] | None, channel_id: str) -> Observed
         clicks=int(str(raw.get("clicks", "0"))),
         conversions=int(str(raw.get("conversions", "0"))),
     )
+
+
+def _start_clock_hour(simulation: Mapping[str, object] | None) -> int:
+    if simulation is None:
+        return 0
+    start = datetime.fromisoformat(str(simulation["start_hour"]).replace("Z", "+00:00"))
+    return start.astimezone(ZoneInfo(str(simulation["time_zone"]))).hour
 
 
 def _calibrate(
@@ -91,40 +134,84 @@ def _calibrate(
     )
 
 
+def _hour_weights(
+    channel: ChannelBenchmark, horizon: Horizon, start_clock_hour: int
+) -> list[float]:
+    return [
+        channel.hourly_profile[(start_clock_hour + hour) % 24]
+        for hour in range(horizon.from_hour, horizon.to_hour)
+    ]
+
+
+def _model_buckets(weights: Sequence[float]) -> list[float]:
+    """Bound forecast cost while retaining exact hourly steps for short campaigns."""
+    if len(weights) <= MODEL_MAX_STEPS:
+        return list(weights)
+    bucket_size = math.ceil(len(weights) / MODEL_MAX_STEPS)
+    return [
+        sum(weights[index : index + bucket_size]) for index in range(0, len(weights), bucket_size)
+    ]
+
+
+def _channel_capacity_micros(
+    channel: ChannelBenchmark, horizon: Horizon, start_clock_hour: int
+) -> int:
+    supply = channel.daily_capacity * sum(_hour_weights(channel, horizon, start_clock_hour))
+    maximum_cpm = channel.cpm * (1.0 + channel.price_growth)
+    units = supply * maximum_cpm / 1_000.0
+    return min(MAX_MICROS, max(0, math.ceil(units * 1_000_000)))
+
+
 def _campaign_forecast(
     channel: ChannelBenchmark,
     observed: ObservedChannel,
-    daily_budget: float,
-    days: int,
+    total_budget: float,
+    horizon: Horizon,
+    start_clock_hour: int,
 ) -> Forecast:
+    weights = _model_buckets(_hour_weights(channel, horizon, start_clock_hour))
+    total_weight = sum(weights)
     reach = min(float(observed.unique_reach), channel.audience_capacity)
     impressions_total = float(observed.impressions)
+    future_impressions = 0.0
     clicks_total = 0.0
     conversions_total = 0.0
     spend_total = 0.0
-    for _ in range(days):
+    if total_weight <= 0:
+        return Forecast(0, 0.0, reach, 0.0, 0.0)
+
+    for weight in weights:
         saturation = min(reach / channel.audience_capacity, 1.0)
         depth = max(
             (saturation - channel.saturation_threshold) / (1.0 - channel.saturation_threshold),
             0.0,
         )
         frequency = max(impressions_total / max(reach, 1.0), 1.0)
+        excess_frequency = max(frequency - 1.0, 0.0)
         cpm = channel.cpm * (1.0 + channel.price_growth * depth**2)
-        impressions = min(channel.daily_capacity, daily_budget * 1_000.0 / cpm)
-        fatigue = math.exp(-channel.ctr_fatigue * depth - 0.03 * max(frequency - 1.0, 0.0))
+        bucket_budget = total_budget * weight / total_weight
+        supply = channel.daily_capacity * weight
+        impressions = min(supply, bucket_budget * 1_000.0 / cpm)
+        fatigue_exponent = (
+            channel.ctr_fatigue * depth + channel.frequency_fatigue * excess_frequency
+        )
+        ctr = channel.ctr * math.exp(-fatigue_exponent)
+        cr = channel.cr * math.exp(-CR_FATIGUE_RATIO * fatigue_exponent)
         new_probability = max(
-            (1.0 - depth) ** channel.reach_decay * math.exp(-0.05 * max(frequency - 1.0, 0.0)),
+            (1.0 - depth) ** channel.reach_decay
+            * math.exp(-channel.frequency_reach_decay * excess_frequency),
             0.0,
         )
-        clicks = impressions * channel.ctr * fatigue
+        clicks = impressions * ctr
         spend_total += impressions * cpm / 1_000.0
         reach = min(reach + impressions * new_probability, channel.audience_capacity)
         impressions_total += impressions
+        future_impressions += impressions
         clicks_total += clicks
-        conversions_total += clicks * channel.cr
+        conversions_total += clicks * cr
     return Forecast(
         spend_micros=max(0, round(spend_total * 1_000_000)),
-        impressions=impressions_total - observed.impressions,
+        impressions=future_impressions,
         unique_reach=reach,
         clicks=clicks_total,
         conversions=conversions_total,
@@ -134,11 +221,12 @@ def _campaign_forecast(
 def _campaign_kpi(
     channel: ChannelBenchmark,
     observed: ObservedChannel,
-    daily_budget: float,
-    days: int,
+    total_budget: float,
+    horizon: Horizon,
+    start_clock_hour: int,
     metric: str,
 ) -> float:
-    forecast = _campaign_forecast(channel, observed, daily_budget, days)
+    forecast = _campaign_forecast(channel, observed, total_budget, horizon, start_clock_hour)
     return (
         forecast.unique_reach
         if metric == "unique_reach"
@@ -148,15 +236,138 @@ def _campaign_kpi(
     )
 
 
+def _curve_points(capacity_micros: int) -> list[int]:
+    if capacity_micros <= 0:
+        return [0]
+    points = [0]
+    denominator = CURVE_POINTS * CURVE_POINTS
+    for index in range(1, CURVE_POINTS + 1):
+        point = math.ceil(capacity_micros * index * index / denominator)
+        if point > points[-1]:
+            points.append(point)
+    if points[-1] != capacity_micros:
+        points.append(capacity_micros)
+    return points
+
+
+def _concave_segments(
+    points: Sequence[int], values: Sequence[float]
+) -> tuple[ResponseSegment, ...]:
+    """Project non-negative finite differences onto non-increasing marginal slopes."""
+    blocks: list[_SlopeBlock] = []
+    for index in range(len(points) - 1):
+        cost = points[index + 1] - points[index]
+        gain = max(values[index + 1] - values[index], 0.0)
+        blocks.append(_SlopeBlock([cost], gain))
+        while len(blocks) >= 2 and blocks[-2].slope < blocks[-1].slope:
+            right = blocks.pop()
+            left = blocks.pop()
+            blocks.append(_SlopeBlock(left.costs + right.costs, left.gain + right.gain))
+
+    result: list[ResponseSegment] = []
+    for block in blocks:
+        result.extend(ResponseSegment(cost, block.slope) for cost in block.costs)
+    return tuple(result)
+
+
+def _response_segments(
+    channel: ChannelBenchmark,
+    observed: ObservedChannel,
+    horizon: Horizon,
+    start_clock_hour: int,
+    metric: str,
+) -> tuple[ResponseSegment, ...]:
+    capacity = _channel_capacity_micros(channel, horizon, start_clock_hour)
+    points = _curve_points(capacity)
+    values = [
+        _campaign_kpi(
+            channel,
+            observed,
+            point / 1_000_000,
+            horizon,
+            start_clock_hour,
+            metric,
+        )
+        for point in points
+    ]
+    return _concave_segments(points, values)
+
+
+def _waterfill(
+    budget_micros: int,
+    curves: Sequence[tuple[ResponseSegment, ...]],
+) -> list[int]:
+    allocated = [0] * len(curves)
+    pointers = [0] * len(curves)
+    heap: list[tuple[float, int]] = []
+    for index, curve in enumerate(curves):
+        if curve:
+            heapq.heappush(heap, (-curve[0].marginal_kpi_per_ruble, index))
+
+    remaining = budget_micros
+    while remaining > 0 and heap:
+        negative_marginal, index = heapq.heappop(heap)
+        marginal = -negative_marginal
+        if marginal <= MIN_MARGINAL_KPI_PER_RUBLE:
+            break
+        segment = curves[index][pointers[index]]
+        used = min(segment.cost_micros, remaining)
+        allocated[index] += used
+        remaining -= used
+        if used < segment.cost_micros:
+            break
+        pointers[index] += 1
+        if pointers[index] < len(curves[index]):
+            next_segment = curves[index][pointers[index]]
+            heapq.heappush(heap, (-next_segment.marginal_kpi_per_ruble, index))
+    return allocated
+
+
+def _exact_weighted_allocations(
+    horizon: Horizon,
+    channels: Sequence[ChannelBenchmark],
+    channel_budgets: Sequence[int],
+    start_clock_hour: int,
+) -> list[Allocation]:
+    by_channel: dict[str, list[int]] = {}
+    for channel, channel_budget in zip(channels, channel_budgets, strict=True):
+        weights = [
+            max(0, round(weight * WEIGHT_SCALE))
+            for weight in _hour_weights(channel, horizon, start_clock_hour)
+        ]
+        total_weight = sum(weights)
+        if total_weight <= 0:
+            by_channel[channel.channel_id] = [0] * horizon.duration
+            continue
+        quotients = [divmod(channel_budget * weight, total_weight) for weight in weights]
+        micros = [quotient for quotient, _ in quotients]
+        remainder = channel_budget - sum(micros)
+        order = sorted(range(len(weights)), key=lambda index: (-quotients[index][1], index))
+        for index in order[:remainder]:
+            micros[index] += 1
+        by_channel[channel.channel_id] = micros
+
+    return [
+        Allocation(
+            channel.channel_id,
+            hour,
+            by_channel[channel.channel_id][hour - horizon.from_hour],
+        )
+        for hour in range(horizon.from_hour, horizon.to_hour)
+        for channel in channels
+    ]
+
+
 def forecast_allocations(
     allocations: tuple[Allocation, ...],
     horizon: Horizon,
     channel_ids: list[str],
+    simulation: Mapping[str, object] | None = None,
 ) -> Forecast:
     """Forecast an initial plan from public catalog benchmarks only."""
     catalog = load_catalog()
     ordered_ids = sorted(channel_ids)
-    days = max(1, math.ceil(horizon.duration / 24))
+    start_clock_hour = _start_clock_hour(simulation)
     totals_micros = {channel_id: 0 for channel_id in ordered_ids}
     for allocation in allocations:
         totals_micros[allocation.channel_id] += allocation.budget_micros
@@ -165,8 +376,9 @@ def forecast_allocations(
         _campaign_forecast(
             catalog[channel_id],
             ObservedChannel(),
-            totals_micros[channel_id] / 1_000_000 / days,
-            days,
+            totals_micros[channel_id] / 1_000_000,
+            horizon,
+            start_clock_hour,
         )
         for channel_id in ordered_ids
     ]
@@ -179,70 +391,20 @@ def forecast_allocations(
     )
 
 
-def _daily_waterfill(
-    total_daily_budget: float,
-    channels: list[ChannelBenchmark],
-    observations: list[ObservedChannel],
-    days: int,
-    metric: str,
-) -> list[float]:
-    if total_daily_budget <= 0:
-        return [0.0] * len(channels)
-    slice_size = total_daily_budget / GRID_SIZE
-    curves = [
-        [
-            _campaign_kpi(channel, observations[index], slice_size * point, days, metric)
-            for point in range(GRID_SIZE + 1)
-        ]
-        for index, channel in enumerate(channels)
-    ]
-    allocation = [0.0] * len(channels)
-    pointers = [0] * len(channels)
-    for _ in range(GRID_SIZE):
-        marginal = [
-            curves[index][pointer + 1] - curves[index][pointer]
-            for index, pointer in enumerate(pointers)
-        ]
-        best = max(range(len(channels)), key=lambda index: (marginal[index], -index))
-        allocation[best] += slice_size
-        pointers[best] += 1
-    return allocation
-
-
-def _exact_weighted_allocations(
-    budget_micros: int,
+def useful_budget_capacity_micros(
     horizon: Horizon,
-    channels: list[ChannelBenchmark],
-    daily: list[float],
-    start_clock_hour: int,
-) -> list[Allocation]:
-    slots = [
-        (
-            hour,
-            channel.channel_id,
-            daily[index] * channel.hourly_profile[(start_clock_hour + hour) % 24],
-        )
-        for hour in range(horizon.from_hour, horizon.to_hour)
-        for index, channel in enumerate(channels)
-    ]
-    total_weight = sum(weight for _, _, weight in slots)
-    if total_weight <= 0:
-        count = len(slots)
-        quotient, remainder = divmod(budget_micros, count)
-        return [
-            Allocation(channel_id, hour, quotient + (index < remainder))
-            for index, (hour, channel_id, _) in enumerate(slots)
-        ]
-    raw = [budget_micros * weight / total_weight for _, _, weight in slots]
-    micros = [math.floor(value) for value in raw]
-    remainder = budget_micros - sum(micros)
-    order = sorted(range(len(raw)), key=lambda index: (-(raw[index] - micros[index]), index))
-    for index in order[:remainder]:
-        micros[index] += 1
-    return [
-        Allocation(channel_id, hour, micros[index])
-        for index, (hour, channel_id, _) in enumerate(slots)
-    ]
+    channel_ids: list[str],
+    simulation: Mapping[str, object] | None = None,
+) -> int:
+    catalog = load_catalog()
+    start_clock_hour = _start_clock_hour(simulation)
+    return min(
+        MAX_MICROS,
+        sum(
+            _channel_capacity_micros(catalog[channel_id], horizon, start_clock_hour)
+            for channel_id in channel_ids
+        ),
+    )
 
 
 def allocate_optimized(
@@ -253,6 +415,17 @@ def allocate_optimized(
     current: Mapping[str, object] | None = None,
     simulation: Mapping[str, object] | None = None,
 ) -> tuple[Allocation, ...]:
+    prepared = prepare_optimized(horizon, channel_ids, metric, current, simulation)
+    return allocate_prepared(prepared, budget_micros)
+
+
+def prepare_optimized(
+    horizon: Horizon,
+    channel_ids: list[str],
+    metric: str,
+    current: Mapping[str, object] | None = None,
+    simulation: Mapping[str, object] | None = None,
+) -> PreparedOptimization:
     catalog = load_catalog()
     ordered_ids = sorted(channel_ids)
     elapsed = (
@@ -261,21 +434,18 @@ def allocate_optimized(
         else 0
     )
     elapsed = min(max(elapsed, 0), horizon.duration)
-    start_clock_hour = 0
-    if simulation:
-        start = datetime.fromisoformat(str(simulation["start_hour"]).replace("Z", "+00:00"))
-        start_clock_hour = start.astimezone(ZoneInfo(str(simulation["time_zone"]))).hour
+    start_clock_hour = _start_clock_hour(simulation)
     observations = [_observed(current, channel_id) for channel_id in ordered_ids]
     channels = [
         _calibrate(catalog[channel_id], observations[index], elapsed, start_clock_hour)
         for index, channel_id in enumerate(ordered_ids)
     ]
 
-    allocations: list[Allocation] = []
+    past_allocations: list[Allocation] = []
     for hour_offset in range(elapsed):
         for index, channel_id in enumerate(ordered_ids):
             quotient, remainder = divmod(observations[index].spent_micros, max(elapsed, 1))
-            allocations.append(
+            past_allocations.append(
                 Allocation(
                     channel_id,
                     horizon.from_hour + hour_offset,
@@ -284,27 +454,46 @@ def allocate_optimized(
             )
 
     spent_micros = sum(item.spent_micros for item in observations)
-    remaining_micros = max(budget_micros - spent_micros, 0)
     future_from = horizon.from_hour + elapsed
-    if future_from < horizon.to_hour:
-        future = Horizon(future_from, horizon.to_hour)
-        days = max(1, math.ceil(future.duration / 24))
-        daily = _daily_waterfill(
-            remaining_micros / 1_000_000 / days,
-            channels,
-            observations,
-            days,
-            metric,
+    future = Horizon(future_from, horizon.to_hour) if future_from < horizon.to_hour else None
+    curves = (
+        tuple(
+            _response_segments(
+                channel,
+                observations[index],
+                future,
+                start_clock_hour,
+                metric,
+            )
+            for index, channel in enumerate(channels)
         )
+        if future is not None
+        else ()
+    )
+    return PreparedOptimization(
+        horizon=horizon,
+        future=future,
+        channels=tuple(channels),
+        curves=curves,
+        past_allocations=tuple(past_allocations),
+        spent_micros=spent_micros,
+        start_clock_hour=start_clock_hour,
+    )
+
+
+def allocate_prepared(prepared: PreparedOptimization, budget_micros: int) -> tuple[Allocation, ...]:
+    allocations = list(prepared.past_allocations)
+    remaining_micros = max(budget_micros - prepared.spent_micros, 0)
+    future = prepared.future
+    if future is not None:
+        channel_budgets = _waterfill(remaining_micros, prepared.curves)
         allocations.extend(
-            _exact_weighted_allocations(remaining_micros, future, channels, daily, start_clock_hour)
+            _exact_weighted_allocations(
+                future,
+                prepared.channels,
+                channel_budgets,
+                prepared.start_clock_hour,
+            )
         )
-    elif allocations:
-        unassigned = budget_micros - sum(item.budget_micros for item in allocations)
-        quotient, remainder = divmod(max(unassigned, 0), len(allocations))
-        allocations = [
-            replace(item, budget_micros=item.budget_micros + quotient + (index < remainder))
-            for index, item in enumerate(allocations)
-        ]
 
     return tuple(allocations)

@@ -100,6 +100,7 @@ paths:
                     optimize: unique_reach
                     currency: RUB
                     budget: '12.000000'
+                    unallocated_budget: '0.000000'
                     horizon:
                       from_hour: 0
                       to_hour: 2
@@ -443,6 +444,7 @@ components:
         - optimize
         - currency
         - budget
+        - unallocated_budget
         - horizon
         - expected
         - allocations
@@ -473,6 +475,9 @@ components:
           pattern: '^[A-Z]{3}$'
         budget:
           $ref: '#/components/schemas/Money'
+        unallocated_budget:
+          $ref: '#/components/schemas/Money'
+          description: Budget retained outside channel caps after marginal KPI gain is exhausted.
         horizon:
           $ref: '#/components/schemas/Horizon'
         expected:
@@ -520,7 +525,7 @@ components:
     TargetKPIPlan:
       type: object
       additionalProperties: false
-      required: [request_id, state_revision, plan_id, feasible, type, strategy, optimize, currency, budget, horizon, expected, allocations, required_budget, reason, target]
+      required: [request_id, state_revision, plan_id, feasible, type, strategy, optimize, currency, budget, unallocated_budget, horizon, expected, allocations, required_budget, reason, target]
       properties:
         request_id:
           type: string
@@ -543,6 +548,8 @@ components:
           pattern: '^[A-Z]{3}$'
         budget:
           $ref: '#/components/schemas/Money'
+        unallocated_budget:
+          $ref: '#/components/schemas/Money'
         horizon:
           $ref: '#/components/schemas/Horizon'
         expected:
@@ -562,7 +569,7 @@ components:
     InfeasibleTargetKPIPlan:
       type: object
       additionalProperties: false
-      required: [request_id, state_revision, plan_id, feasible, type, strategy, optimize, currency, budget, horizon, expected, allocations, required_budget, reason, target]
+      required: [request_id, state_revision, plan_id, feasible, type, strategy, optimize, currency, budget, unallocated_budget, horizon, expected, allocations, required_budget, reason, target]
       properties:
         request_id:
           type: string
@@ -583,6 +590,8 @@ components:
           type: string
           pattern: '^[A-Z]{3}$'
         budget:
+          type: 'null'
+        unallocated_budget:
           type: 'null'
         horizon:
           $ref: '#/components/schemas/Horizon'

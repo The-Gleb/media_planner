@@ -20,7 +20,10 @@ Money remains decimal text at service boundaries and integer micros in calculati
 
 The default deterministic world contains eight channels (`social_1..3`, `programmatic`,
 `marketplace_1..3`, `sms`). Planner offers exact `uniform` allocation and a catalog-based
-`optimized` water-filling strategy. Controlled market shocks can be attached to reset. To compare
+`optimized` water-filling strategy. The optimized model raises effective CPM and lowers CTR, CR and
+new reach as a channel saturates; money with no positive marginal KPI return is exposed as an
+explicit unallocated reserve instead of being forced into the current best channel. Controlled
+market shocks can be attached to reset. To compare
 strategies, finish one run, select the other strategy and reset: execution remains sequential while
 the dashboard retains both result summaries.
 
@@ -32,3 +35,5 @@ replanning loop, so execution never increases approved spend automatically.
 
 See `services/simulator/README.md`, `services/planner/README.md`, `services/frontend/README.md`, and
 `specs/003-minimal-budget-planner/quickstart.md` for development, failure handling, and validation details.
+The implemented formulas and optimization invariants are documented in
+`docs/mathematical-model.md`.

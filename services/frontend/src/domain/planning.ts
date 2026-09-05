@@ -21,11 +21,11 @@ export interface ExpectedOutcome { spend: MoneyText; impressions: string; unique
 export interface MediaPlan {
   requestId: string; stateRevision: number; planId: string; feasible: true; type: PlanType
   strategy: Strategy; optimize: KPI; currency: string; budget: MoneyText; horizon: Horizon
-  expected: ExpectedOutcome | null; allocations: Allocation[]; requiredBudget: MoneyText | null; reason: null; target: TargetKPI | null
+  expected: ExpectedOutcome | null; allocations: Allocation[]; unallocatedBudget: MoneyText; requiredBudget: MoneyText | null; reason: null; target: TargetKPI | null
 }
 export interface InfeasibleTargetPlan {
   requestId: string; stateRevision: 0; planId: null; feasible: false; type: 'target_kpi'; strategy: 'optimized'; optimize: KPI
-  currency: string; budget: null; horizon: Horizon; expected: ExpectedOutcome; allocations: []
+  currency: string; budget: null; horizon: Horizon; expected: ExpectedOutcome; allocations: []; unallocatedBudget: null
   requiredBudget: null; target: TargetKPI
   reason: { code: 'target_exceeds_capacity'; detail: string; maxAchievable: string; recommendedTarget: string }
 }
