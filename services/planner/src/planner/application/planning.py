@@ -23,18 +23,35 @@ def history_payload(history: Sequence[PastCampaign]) -> list[dict[str, object]]:
         {
             "horizon_hours": campaign.horizon_hours,
             "channels": {
-                channel_id: [
-                    [
-                        item.hours,
-                        item.requests,
-                        item.impressions,
-                        item.unique_reach,
-                        item.clicks,
-                        item.conversions,
-                        item.spent_micros,
-                    ]
-                    for item in channel.bins
-                ]
+                channel_id: {
+                    "bins": [
+                        [
+                            item.hours,
+                            item.requests,
+                            item.impressions,
+                            item.unique_reach,
+                            item.clicks,
+                            item.conversions,
+                            item.spent_micros,
+                        ]
+                        for item in channel.bins
+                    ],
+                    "daily": [
+                        [
+                            item.day,
+                            item.hours,
+                            item.requests,
+                            item.impressions,
+                            item.unique_reach,
+                            item.clicks,
+                            item.conversions,
+                            item.spent_micros,
+                            item.reach_before,
+                            item.impressions_before,
+                        ]
+                        for item in channel.daily
+                    ],
+                }
                 for channel_id, channel in sorted(campaign.channels.items())
             },
         }

@@ -458,6 +458,7 @@ class Execution:
     fact_kpi: list[float]
     facts: dict[str, dict[str, int]]
     bins: dict[str, list[dict[str, int]]]
+    daily: dict[str, list[dict[str, int]]]
     replans: int
     reallocated: int
 
@@ -512,6 +513,7 @@ def execute_campaign(
     bins = {
         c: [dict.fromkeys(("hours", "spent", *FACT_KEYS), 0) for _ in range(24)] for c in channels
     }
+    daily: dict[str, list[dict[str, int]]] = {c: [] for c in channels}
     plan_spend, plan_kpi = approved.cumulative(duration)
     fact_spend: list[float] = []
     fact_kpi: list[float] = []
@@ -545,6 +547,23 @@ def execute_campaign(
                         money(record["spent"]),
                     ]
                 )
+            day_index = hour // 24
+            if len(daily[channel_id]) <= day_index:
+                daily[channel_id].append(
+                    {
+                        "day": day_index,
+                        "hours": 0,
+                        "spent": 0,
+                        **dict.fromkeys(FACT_KEYS, 0),
+                        "reach_before": record["unique_reach"],
+                        "impressions_before": record["impressions"],
+                    }
+                )
+            day_row = daily[channel_id][day_index]
+            day_row["hours"] += 1
+            day_row["spent"] += spend
+            for key in FACT_KEYS:
+                day_row[key] += int(observation[key])
             record["spent"] += spend
             hour_row["channels"][channel_id] = {
                 "spent": observation["spend"],
@@ -577,7 +596,9 @@ def execute_campaign(
             )
             current = PlanView(planner.plan(body), channels, brief.optimize, approved.budget_micros)
             replans += 1
-    return Execution(plan_spend, plan_kpi, fact_spend, fact_kpi, facts, bins, replans, reallocated)
+    return Execution(
+        plan_spend, plan_kpi, fact_spend, fact_kpi, facts, bins, daily, replans, reallocated
+    )
 
 
 def past_campaign(execution: Execution, horizon_hours: int) -> dict[str, Any]:
@@ -594,7 +615,18 @@ def past_campaign(execution: Execution, horizon_hours: int) -> dict[str, Any]:
                         "spent": money(item["spent"]),
                     }
                     for hour, item in enumerate(channel_bins)
-                ]
+                ],
+                "daily": [
+                    {
+                        "day": item["day"],
+                        "hours": item["hours"],
+                        **{key: str(item[key]) for key in FACT_KEYS},
+                        "spent": money(item["spent"]),
+                        "reach_before": str(item["reach_before"]),
+                        "impressions_before": str(item["impressions_before"]),
+                    }
+                    for item in execution.daily[channel_id]
+                ],
             }
             for channel_id, channel_bins in execution.bins.items()
         },

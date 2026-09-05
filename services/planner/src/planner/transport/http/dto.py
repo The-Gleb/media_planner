@@ -239,13 +239,46 @@ class HourBinDTO(StrictModel):
         return self
 
 
+class DailyFactsDTO(StrictModel):
+    """One campaign day of a channel plus its cumulative reach and impressions at day start."""
+
+    day: StrictInt = Field(ge=0, le=89)
+    hours: StrictInt = Field(ge=1, le=24)
+    requests: CountText
+    impressions: CountText
+    unique_reach: CountText
+    clicks: CountText
+    conversions: CountText
+    spent: MoneyText
+    reach_before: CountText
+    impressions_before: CountText
+
+    @model_validator(mode="after")
+    def validate_funnel(self) -> DailyFactsDTO:
+        impressions = count_to_int(self.impressions)
+        clicks = count_to_int(self.clicks)
+        if clicks > impressions or count_to_int(self.conversions) > clicks:
+            raise ValueError(
+                "clicks cannot exceed impressions and conversions cannot exceed clicks"
+            )
+        if count_to_int(self.unique_reach) > impressions:
+            raise ValueError("unique reach cannot exceed impressions")
+        if count_to_int(self.reach_before) > count_to_int(self.impressions_before):
+            raise ValueError("cumulative reach cannot exceed cumulative impressions")
+        return self
+
+
 class PastCampaignChannelDTO(StrictModel):
     bins: list[HourBinDTO] = Field(min_length=24, max_length=24)
+    daily: list[DailyFactsDTO] = Field(default_factory=list, max_length=90)
 
     @model_validator(mode="after")
     def validate_bins(self) -> PastCampaignChannelDTO:
         if [item.hour for item in self.bins] != list(range(24)):
             raise ValueError("bins must cover hours 0..23 exactly once in order")
+        days = [item.day for item in self.daily]
+        if days != sorted(days) or len(set(days)) != len(days):
+            raise ValueError("daily rows must be strictly ascending by day")
         return self
 
 

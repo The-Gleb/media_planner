@@ -14,7 +14,7 @@ from starlette.responses import Response
 
 from planner.application.planning import create_fixed_budget_plan, create_target_kpi_plan
 from planner.config import Settings
-from planner.domain.history import HourBin, PastCampaign, PastCampaignChannel
+from planner.domain.history import DailyFacts, HourBin, PastCampaign, PastCampaignChannel
 from planner.domain.models import ApprovedPlan, Forecast, Horizon, MediaPlan, Strategy
 from planner.domain.values import count_to_int, micros_to_money, money_to_micros
 from planner.transport.http.dto import (
@@ -494,7 +494,22 @@ def _history(history: list[PastCampaignDTO]) -> tuple[PastCampaign, ...]:
                             spent_micros=money_to_micros(item.spent),
                         )
                         for item in channel.bins
-                    )
+                    ),
+                    daily=tuple(
+                        DailyFacts(
+                            day=item.day,
+                            hours=item.hours,
+                            requests=count_to_int(item.requests),
+                            impressions=count_to_int(item.impressions),
+                            unique_reach=count_to_int(item.unique_reach),
+                            clicks=count_to_int(item.clicks),
+                            conversions=count_to_int(item.conversions),
+                            spent_micros=money_to_micros(item.spent),
+                            reach_before=count_to_int(item.reach_before),
+                            impressions_before=count_to_int(item.impressions_before),
+                        )
+                        for item in channel.daily
+                    ),
                 )
                 for channel_id, channel in campaign.channels.items()
             },

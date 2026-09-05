@@ -41,8 +41,30 @@ class HourBin:
 
 
 @dataclass(frozen=True, slots=True)
+class DailyFacts:
+    """Facts of one channel over one campaign day plus the saturation state at its start.
+
+    ``reach_before`` and ``impressions_before`` are the channel's cumulative unique reach and
+    impressions when the day began; together with the day's outcome they reveal how CTR, price
+    and the share of new users moved as the audience was bought out.
+    """
+
+    day: int
+    hours: int
+    requests: int
+    impressions: int
+    unique_reach: int
+    clicks: int
+    conversions: int
+    spent_micros: int
+    reach_before: int
+    impressions_before: int
+
+
+@dataclass(frozen=True, slots=True)
 class PastCampaignChannel:
     bins: tuple[HourBin, ...]
+    daily: tuple[DailyFacts, ...] = ()
 
     def __post_init__(self) -> None:
         if len(self.bins) != HOURS_PER_DAY:
@@ -114,6 +136,149 @@ def saturation_ratios(
     return max(ctr_ratio, 1e-6), max(cpm_ratio, 1e-6)
 
 
+RIDGE_SHARE = 0.5
+"""Ridge weight toward catalog saturation parameters, as a share of the total row weight."""
+MIN_FIT_IMPRESSIONS = 500.0
+BASE_DEPTH = 0.05
+
+
+def _solve(matrix: list[list[float]], vector: list[float]) -> list[float] | None:
+    """Gaussian elimination with partial pivoting for the tiny normal-equation systems here."""
+    size = len(vector)
+    rows = [list(row) + [value] for row, value in zip(matrix, vector, strict=True)]
+    for column in range(size):
+        pivot = max(range(column, size), key=lambda index: abs(rows[index][column]))
+        if abs(rows[pivot][column]) < 1e-12:
+            return None
+        rows[column], rows[pivot] = rows[pivot], rows[column]
+        for index in range(size):
+            if index == column:
+                continue
+            factor = rows[index][column] / rows[column][column]
+            rows[index] = [a - factor * b for a, b in zip(rows[index], rows[column], strict=True)]
+    return [rows[index][size] / rows[index][index] for index in range(size)]
+
+
+def _ridge(
+    rows: list[tuple[list[float], float, float]],
+    prior: list[float],
+    penalised: list[bool],
+) -> list[float]:
+    """Weighted least squares with a ridge pull toward ``prior`` on the penalised coefficients."""
+    size = len(prior)
+    total_weight = sum(weight for _, _, weight in rows)
+    if total_weight <= 0:
+        return list(prior)
+    ridge = RIDGE_SHARE * total_weight
+    matrix = [[0.0] * size for _ in range(size)]
+    vector = [0.0] * size
+    for features, target, weight in rows:
+        for i in range(size):
+            vector[i] += weight * features[i] * target
+            for j in range(size):
+                matrix[i][j] += weight * features[i] * features[j]
+    for i in range(size):
+        if penalised[i]:
+            matrix[i][i] += ridge
+            vector[i] += ridge * prior[i]
+    solution = _solve(matrix, vector)
+    return solution if solution is not None else list(prior)
+
+
+def _depth(channel: ChannelBenchmark, reach_before: int) -> float:
+    saturation = min(reach_before / channel.audience_capacity, 1.0)
+    return max(
+        (saturation - channel.saturation_threshold) / (1.0 - channel.saturation_threshold), 0.0
+    )
+
+
+def _excess_frequency(reach_before: int, impressions_before: int) -> float:
+    return max(impressions_before / max(reach_before, 1) - 1.0, 0.0)
+
+
+def fit_saturation(
+    channel: ChannelBenchmark, history: Sequence[PastCampaignChannel]
+) -> ChannelBenchmark:
+    """Learn the saturation mechanics from daily rows of past campaigns.
+
+    Three separate regressions, each pulled toward the catalog value by a ridge term so that
+    campaigns that never bought deep into the audience leave the catalog untouched:
+
+    * ``log CTR_d = b − α·depth_d − α_f·excess_frequency_d`` gives CTR fatigue and frequency
+      fatigue (the intercept is the base CTR, used by the caller);
+    * ``CPM_d / P0 − 1 = g·depth_d²`` gives price growth, with ``P0`` the price at low depth;
+    * ``log(new_reach_d / impressions_d) = ρ·log(1 − depth_d) − ρ_f·excess_frequency_d`` gives
+      the reach decay and the frequency reach decay.
+    """
+    weights = recency_weights(len(history))
+    ctr_rows: list[tuple[list[float], float, float]] = []
+    reach_rows: list[tuple[list[float], float, float]] = []
+    price_rows: list[tuple[float, float, float]] = []
+    for weight, campaign in zip(weights, history, strict=True):
+        for day in campaign.daily:
+            if day.impressions < MIN_FIT_IMPRESSIONS:
+                continue
+            depth = _depth(channel, day.reach_before)
+            excess = _excess_frequency(day.reach_before, day.impressions_before)
+            row_weight = weight * day.impressions
+            if day.clicks > 0:
+                ctr_rows.append(
+                    ([1.0, -depth, -excess], math.log(day.clicks / day.impressions), row_weight)
+                )
+            if day.unique_reach > 0 and depth < 1.0:
+                reach_rows.append(
+                    (
+                        [math.log(1.0 - depth), -excess],
+                        math.log(day.unique_reach / day.impressions),
+                        row_weight,
+                    )
+                )
+            if day.spent_micros > 0:
+                price_rows.append(
+                    (depth, day.spent_micros / 1e6 * 1_000.0 / day.impressions, row_weight)
+                )
+    if not ctr_rows and not reach_rows and not price_rows:
+        return channel
+
+    ctr_fatigue, frequency_fatigue = channel.ctr_fatigue, channel.frequency_fatigue
+    if ctr_rows:
+        _, alpha, alpha_f = _ridge(
+            ctr_rows,
+            [0.0, channel.ctr_fatigue, channel.frequency_fatigue],
+            [False, True, True],
+        )
+        ctr_fatigue, frequency_fatigue = max(alpha, 0.0), max(alpha_f, 0.0)
+
+    reach_decay, frequency_reach_decay = channel.reach_decay, channel.frequency_reach_decay
+    if reach_rows:
+        rho, rho_f = _ridge(
+            reach_rows, [channel.reach_decay, channel.frequency_reach_decay], [True, True]
+        )
+        reach_decay, frequency_reach_decay = max(rho, 0.0), max(rho_f, 0.0)
+
+    price_growth = channel.price_growth
+    if price_rows:
+        shallow = [(cpm, w) for depth, cpm, w in price_rows if depth <= BASE_DEPTH]
+        base_weight = sum(w for _, w in shallow)
+        if base_weight > 0:
+            base_cpm = sum(cpm * w for cpm, w in shallow) / base_weight
+            growth_rows = [
+                ([depth**2], cpm / base_cpm - 1.0, w) for depth, cpm, w in price_rows if depth > 0
+            ]
+            if growth_rows:
+                (g,) = _ridge(growth_rows, [channel.price_growth], [True])
+                price_growth = max(g, 0.0)
+
+    return replace(
+        channel,
+        ctr_fatigue=ctr_fatigue,
+        frequency_fatigue=frequency_fatigue,
+        reach_decay=reach_decay,
+        frequency_reach_decay=frequency_reach_decay,
+        price_growth=price_growth,
+    )
+
+
 def channel_prior(
     channel: ChannelBenchmark, history: Sequence[PastCampaignChannel]
 ) -> ChannelBenchmark:
@@ -127,6 +292,7 @@ def channel_prior(
     if not history:
         return channel
     weights = recency_weights(len(history))
+    channel = fit_saturation(channel, history)
 
     impressions = clicks = conversions = spent = hours = 0.0
     bin_hours = [0.0] * HOURS_PER_DAY
