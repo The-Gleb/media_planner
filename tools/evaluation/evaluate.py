@@ -46,7 +46,8 @@ DEFAULT_SIMULATOR_BIN = REPO_ROOT / "services/simulator/bin/simulator"
 DEFAULT_WORLD_CONFIG = REPO_ROOT / "services/simulator/configs/world-config.mediaplan.json"
 MICROS = 1_000_000
 SCENARIOS = ("none", "ctr_drop", "cpm_spike", "supply_drop", "pause")
-MODES = ("frozen", "adaptive")
+MODES = ("frozen", "adaptive", "adaptive_max")
+RECENT_HOURS = 72
 SHOCK_MULTIPLIERS = {"ctr_drop": 0.6, "cpm_spike": 1.6, "supply_drop": 0.5}
 FACT_KEYS = ("requests", "impressions", "unique_reach", "clicks", "conversions")
 HISTORY_SEED_BASE = 1000
@@ -401,6 +402,8 @@ def plan_request(
     history: Sequence[dict[str, Any]],
     strategy: str = "optimized",
     budget_micros: int | None = None,
+    recent: Sequence[dict[str, Any]] = (),
+    approved: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     totals = {
         key: sum(facts[c][key] for c in channels)
@@ -430,8 +433,10 @@ def plan_request(
                 }
                 for c in channels
             },
+            "recent_hours": list(recent),
         },
         "history": list(history),
+        "approved": approved,
         "budget": money(brief.budget_micros if budget_micros is None else budget_micros),
         "optimize": brief.optimize,
         "target": None,
@@ -476,6 +481,7 @@ def execute_campaign(
     events: list[dict[str, Any]],
     random_events: bool,
     adaptive: bool,
+    tracking: bool,
     history: Sequence[dict[str, Any]],
     dataset: Any,
     dataset_tags: Mapping[str, object],
@@ -494,6 +500,15 @@ def execute_campaign(
     simulator.reset(reset_payload)
 
     facts = zero_facts(channels)
+    recent: list[dict[str, Any]] = []
+    approved_payload = (
+        {
+            "kpi_target": str(max(1, round(approved.total_kpi))),
+            "channel_budgets": {c: money(approved.channel_budget[c]) for c in channels},
+        }
+        if tracking
+        else None
+    )
     bins = {
         c: [dict.fromkeys(("hours", "spent", *FACT_KEYS), 0) for _ in range(24)] for c in channels
     }
@@ -509,6 +524,7 @@ def execute_campaign(
             reallocated += abs(current.caps[hour][c] - approved.caps[hour][c])
         response = simulator.step(actions)
         local = _local(response["observed_hour"], brief.time_zone)
+        hour_row: dict[str, Any] = {"hour": hour, "channels": {}}
         for observation in response["observations"]:
             channel_id = observation["channel_id"]
             record = facts[channel_id]
@@ -530,12 +546,18 @@ def execute_campaign(
                     ]
                 )
             record["spent"] += spend
+            hour_row["channels"][channel_id] = {
+                "spent": observation["spend"],
+                **{key: str(observation[key]) for key in FACT_KEYS},
+            }
             hour_bin = bins[channel_id][local.hour]
             hour_bin["hours"] += 1
             hour_bin["spent"] += spend
             for key in FACT_KEYS:
                 record[key] += int(observation[key])
                 hour_bin[key] += int(observation[key])
+        recent.append(hour_row)
+        del recent[:-RECENT_HOURS]
         fact_spend.append(sum(facts[c]["spent"] for c in channels) / MICROS)
         fact_kpi.append(float(sum(facts[c][brief.optimize] for c in channels)))
         next_hour = hour + 1
@@ -550,6 +572,8 @@ def execute_campaign(
                 response["observed_hour"],
                 history,
                 budget_micros=approved.budget_micros,
+                recent=recent,
+                approved=approved_payload,
             )
             current = PlanView(planner.plan(body), channels, brief.optimize, approved.budget_micros)
             replans += 1
@@ -634,7 +658,8 @@ def load_or_generate_history(
             campaign_seed=campaign_seed,
             events=[],
             random_events=brief.history_random_events,
-            adaptive=brief.history_mode == "adaptive",
+            adaptive=brief.history_mode != "uniform" and brief.history_mode != "frozen",
+            tracking=brief.history_mode == "adaptive",
             history=history,
             dataset=dataset,
             dataset_tags={
@@ -701,7 +726,8 @@ def run_campaign(
         campaign_seed=spec.campaign_seed,
         events=events,
         random_events=brief.random_events,
-        adaptive=spec.mode == "adaptive",
+        adaptive=spec.mode != "frozen",
+        tracking=spec.mode == "adaptive",
         history=history,
         dataset=dataset,
         dataset_tags={
@@ -878,6 +904,10 @@ def worker_main(
 # --------------------------------------------------------------------------------------
 
 
+def shortfall(result: RunResult) -> float:
+    return max(0.0, -result.final_dev_kpi)
+
+
 def _group(results: list[RunResult], **match: object) -> list[RunResult]:
     return [r for r in results if all(getattr(r, key) == value for key, value in match.items())]
 
@@ -950,30 +980,31 @@ def summarize(results: list[RunResult], brief: Brief) -> str:
 
     lines.append("\n## Frozen vs adaptive (same seeds, shock and history; adaptive − frozen)\n")
     lines.append(
-        "| History | Scenario | Pairs | Δ |final dev KPI| p50 | Δ |final dev spend| p50 "
-        "| Adaptive closer at the end (KPI) | Δ trajectory error KPI p50 "
-        "| Adaptive closer on trajectory (KPI) |"
+        "| History | Scenario | Adaptive kind | Pairs | Δ |final dev KPI| p50 | Δ KPI shortfall p50 "
+        "| Δ |final dev spend| p50 | Adaptive closer at the end (KPI) | Δ trajectory error KPI p50 |"
     )
-    lines.append("|---:|---|---:|---:|---:|---:|---:|---:|")
+    lines.append("|---:|---|---|---:|---:|---:|---:|---:|---:|")
     for level in levels:
         for scenario in SCENARIOS:
-            pairs = [
-                (by_key[(level, scenario, r.world_seed, r.campaign_seed, "frozen")], r)
-                for r in _group(results, history=level, scenario=scenario, mode="adaptive")
-                if (level, scenario, r.world_seed, r.campaign_seed, "frozen") in by_key
-            ]
-            if not pairs:
-                continue
-            delta_final_kpi = [a.final_ape_kpi - f.final_ape_kpi for f, a in pairs]
-            delta_final_spend = [a.final_ape_spend - f.final_ape_spend for f, a in pairs]
-            delta_traj_kpi = [a.mape_kpi - f.mape_kpi for f, a in pairs]
-            lines.append(
-                f"| {level} | {scenario} | {len(pairs)} | {_median(delta_final_kpi):+.1%} "
-                f"| {_median(delta_final_spend):+.1%} "
-                f"| {sum(d < 0 for d in delta_final_kpi) / len(pairs):.0%} "
-                f"| {_median(delta_traj_kpi):+.1%} "
-                f"| {sum(d < 0 for d in delta_traj_kpi) / len(pairs):.0%} |"
-            )
+            for kind in ("adaptive", "adaptive_max"):
+                pairs = [
+                    (by_key[(level, scenario, r.world_seed, r.campaign_seed, "frozen")], r)
+                    for r in _group(results, history=level, scenario=scenario, mode=kind)
+                    if (level, scenario, r.world_seed, r.campaign_seed, "frozen") in by_key
+                ]
+                if not pairs:
+                    continue
+                delta_final_kpi = [a.final_ape_kpi - f.final_ape_kpi for f, a in pairs]
+                delta_short = [shortfall(a) - shortfall(f) for f, a in pairs]
+                delta_final_spend = [a.final_ape_spend - f.final_ape_spend for f, a in pairs]
+                delta_traj_kpi = [a.mape_kpi - f.mape_kpi for f, a in pairs]
+                lines.append(
+                    f"| {level} | {scenario} | {kind} | {len(pairs)} "
+                    f"| {_median(delta_final_kpi):+.1%} | {_median(delta_short):+.1%} "
+                    f"| {_median(delta_final_spend):+.1%} "
+                    f"| {sum(d < 0 for d in delta_final_kpi) / len(pairs):.0%} "
+                    f"| {_median(delta_traj_kpi):+.1%} |"
+                )
     lines.append(
         "\nFinal dev is the signed deviation of the cumulative fact from the approved plan at the end "
         "of the campaign, (fact − plan) / plan; the case threshold of 20% applies to its absolute "
@@ -981,7 +1012,10 @@ def summarize(results: list[RunResult], brief: Brief) -> str:
         f"|fact_t − plan_t| / plan_t over hours after the first {brief.trajectory_skip_hours} h. "
         "History N means the plan was built with the observable facts of N earlier campaigns on "
         "the same world seed; 0 is the public catalog alone. Reallocated is the share of the "
-        "budget moved away from approved caps."
+        "budget moved away from approved caps. Mode adaptive tracks the approved plan (moves "
+        "budget only when the projected finish leaves the plan); adaptive_max is the earlier "
+        "behaviour that maximises the remaining KPI every hour. KPI shortfall counts only "
+        "underdelivery."
     )
     return "\n".join(lines) + "\n"
 

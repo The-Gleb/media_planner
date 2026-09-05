@@ -15,7 +15,7 @@ from starlette.responses import Response
 from planner.application.planning import create_fixed_budget_plan, create_target_kpi_plan
 from planner.config import Settings
 from planner.domain.history import HourBin, PastCampaign, PastCampaignChannel
-from planner.domain.models import Forecast, Horizon, MediaPlan, Strategy
+from planner.domain.models import ApprovedPlan, Forecast, Horizon, MediaPlan, Strategy
 from planner.domain.values import count_to_int, micros_to_money, money_to_micros
 from planner.transport.http.dto import (
     AllocationDTO,
@@ -447,6 +447,15 @@ async def create_plan(
         optimize=request.optimize.value,
         strategy=request.strategy.value,
         history=_history(request.history),
+        approved=ApprovedPlan(
+            kpi_target=float(count_to_int(request.approved.kpi_target, positive=True)),
+            channel_budgets_micros={
+                channel_id: money_to_micros(value)
+                for channel_id, value in request.approved.channel_budgets.items()
+            },
+        )
+        if request.approved is not None
+        else None,
     )
     return MediaPlanDTO(
         request_id=request.request_id,

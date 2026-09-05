@@ -118,3 +118,15 @@ class MediaPlan:
     allocations: tuple[Allocation, ...]
     unallocated_budget_micros: int
     forecast: PlanForecast | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ApprovedPlan:
+    """Target that adaptive replanning tracks: the approved KPI total and channel budgets.
+
+    ``channel_budgets_micros`` are the approved whole-campaign budgets per channel; the future
+    approved mix is what remains of them after actual spend.
+    """
+
+    kpi_target: float
+    channel_budgets_micros: Mapping[str, int]

@@ -55,6 +55,39 @@ def _initial_state(channel: ChannelBenchmark, observed: ObservedChannel) -> _Sat
     )
 
 
+@dataclass(frozen=True, slots=True)
+class SaturationMultipliers:
+    """Effective-to-base multipliers implied by the accumulated reach and frequency."""
+
+    cpm: float
+    ctr: float
+    cr: float
+    new_reach_probability: float
+
+
+def saturation_multipliers(
+    channel: ChannelBenchmark, reach: float, impressions_total: float
+) -> SaturationMultipliers:
+    saturation = min(reach / channel.audience_capacity, 1.0)
+    depth = max(
+        (saturation - channel.saturation_threshold) / (1.0 - channel.saturation_threshold),
+        0.0,
+    )
+    frequency = max(impressions_total / max(reach, 1.0), 1.0)
+    excess_frequency = max(frequency - 1.0, 0.0)
+    fatigue_exponent = channel.ctr_fatigue * depth + channel.frequency_fatigue * excess_frequency
+    return SaturationMultipliers(
+        cpm=1.0 + channel.price_growth * depth**2,
+        ctr=math.exp(-fatigue_exponent),
+        cr=math.exp(-CR_FATIGUE_RATIO * fatigue_exponent),
+        new_reach_probability=max(
+            (1.0 - depth) ** channel.reach_decay
+            * math.exp(-channel.frequency_reach_decay * excess_frequency),
+            0.0,
+        ),
+    )
+
+
 def _forecast_step(
     channel: ChannelBenchmark,
     state: _SaturationState,
@@ -66,26 +99,14 @@ def _forecast_step(
     ``weight`` is the share of daily supply available in the period; ``budget`` is in
     whole currency units. The returned ``unique_reach`` is the new reach of the period.
     """
-    saturation = min(state.reach / channel.audience_capacity, 1.0)
-    depth = max(
-        (saturation - channel.saturation_threshold) / (1.0 - channel.saturation_threshold),
-        0.0,
-    )
-    frequency = max(state.impressions_total / max(state.reach, 1.0), 1.0)
-    excess_frequency = max(frequency - 1.0, 0.0)
-    cpm = channel.cpm * (1.0 + channel.price_growth * depth**2)
+    multipliers = saturation_multipliers(channel, state.reach, state.impressions_total)
+    cpm = channel.cpm * multipliers.cpm
     supply = channel.daily_capacity * weight
     impressions = min(supply, budget * 1_000.0 / cpm)
-    fatigue_exponent = channel.ctr_fatigue * depth + channel.frequency_fatigue * excess_frequency
-    ctr = channel.ctr * math.exp(-fatigue_exponent)
-    cr = channel.cr * math.exp(-CR_FATIGUE_RATIO * fatigue_exponent)
-    new_probability = max(
-        (1.0 - depth) ** channel.reach_decay
-        * math.exp(-channel.frequency_reach_decay * excess_frequency),
-        0.0,
+    clicks = impressions * channel.ctr * multipliers.ctr
+    new_reach = min(
+        impressions * multipliers.new_reach_probability, channel.audience_capacity - state.reach
     )
-    clicks = impressions * ctr
-    new_reach = min(impressions * new_probability, channel.audience_capacity - state.reach)
     state.reach += new_reach
     state.impressions_total += impressions
     return Forecast(
@@ -93,7 +114,7 @@ def _forecast_step(
         impressions=impressions,
         unique_reach=new_reach,
         clicks=clicks,
-        conversions=clicks * cr,
+        conversions=clicks * channel.cr * multipliers.cr,
     )
 
 

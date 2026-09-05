@@ -122,6 +122,13 @@ class ChannelStateDTO(StrictModel):
     conversions: CountText
 
 
+class RecentHourDTO(StrictModel):
+    """Facts of one committed campaign hour per channel; feeds the windowed calibration."""
+
+    hour: StrictInt = Field(ge=0, le=2159)
+    channels: dict[ChannelID, ChannelStateDTO] = Field(min_length=1, max_length=20)
+
+
 class CampaignStateDTO(StrictModel):
     current_hour: StrictInt = Field(ge=0, le=2160)
     state_revision: StrictInt = Field(ge=0, le=2160)
@@ -132,6 +139,7 @@ class CampaignStateDTO(StrictModel):
     clicks: CountText
     conversions: CountText
     channels: dict[ChannelID, ChannelStateDTO] = Field(min_length=1, max_length=20)
+    recent_hours: list[RecentHourDTO] = Field(default_factory=list, max_length=168)
 
     @model_validator(mode="after")
     def validate_snapshot(self) -> CampaignStateDTO:
@@ -172,6 +180,14 @@ class CampaignStateDTO(StrictModel):
         ):
             raise ValueError("last_observed_at must be aligned to the start of an hour")
 
+        hours = [item.hour for item in self.recent_hours]
+        if hours != sorted(hours) or len(set(hours)) != len(hours):
+            raise ValueError("recent_hours must be strictly ascending")
+        if hours and hours[-1] != self.current_hour - 1:
+            raise ValueError("recent_hours must end with the latest committed hour")
+        for item in self.recent_hours:
+            if set(item.channels) - set(self.channels):
+                raise ValueError("recent_hours may only mention campaign channels")
         channel_values = tuple(self.channels.values())
         if money_to_micros(self.spent) != sum(
             money_to_micros(item.spent) for item in channel_values
@@ -284,16 +300,29 @@ class RequestBase(StrictModel):
         return self
 
 
+class ApprovedPlanDTO(StrictModel):
+    """Approved plan that adaptive replanning keeps the campaign on."""
+
+    kpi_target: PositiveCountText
+    channel_budgets: dict[ChannelID, MoneyText] = Field(min_length=1, max_length=20)
+
+
 class FixedBudgetPlanRequestDTO(RequestBase):
     type: Literal["fixed_budget"]
     budget: MoneyText
     optimize: KPI
     target: None = None
+    approved: ApprovedPlanDTO | None = None
 
     @model_validator(mode="after")
     def validate_budget_balance(self) -> FixedBudgetPlanRequestDTO:
         if money_to_micros(self.current.spent) > money_to_micros(self.budget):
             raise ValueError("campaign spent cannot exceed the approved budget")
+        if self.approved is not None:
+            if set(self.approved.channel_budgets) - set(self.channels):
+                raise ValueError("approved channel budgets may only mention campaign channels")
+            if self.strategy is not Strategy.OPTIMIZED:
+                raise ValueError("an approved plan can only be tracked by the optimized strategy")
         return self
 
 

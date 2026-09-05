@@ -37,6 +37,15 @@ ran under, and then applies the ordinary current-campaign calibration on top. Th
 market plans from public benchmarks; every next one plans from what that market actually showed.
 History enters the optimized `plan_id` and never changes uniform plans.
 
+When the client also sends the latest committed hours (`current.recent_hours`), calibration uses a
+24-hour half-life window with a change-point test: a CTR, CPM or supply jump in the last six hours
+makes the window collapse to those hours, so a shock overrides both prior and earlier facts within
+hours; zero requests are read as a paused channel. When the client sends the `approved` plan (its
+KPI target and channel budgets), replanning tracks it instead of maximising: the approved channel
+mix is kept while the projected finish is on plan and on budget, and budget moves toward the
+KPI-maximising allocation only as far as needed to get back on plan or to spend money a paused
+channel cannot take.
+
 The optimized conservation invariant is `actual spend + future caps + unallocated_budget = approved
 budget`. The explicit reserve prevents a very large budget from being dumped into a saturated channel.
 State changes produce a new plan ID; largest-remainder conversion keeps all allocated micro-units

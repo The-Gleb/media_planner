@@ -181,6 +181,35 @@ def channel_prior(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class PriorStrength:
+    """Pseudo-counts that say how much current-campaign evidence it takes to move the prior."""
+
+    impressions: float
+    clicks: float
+
+
+BASE_PRIOR_IMPRESSIONS = 1_000.0
+BASE_PRIOR_CLICKS = 50.0
+MAX_HISTORY_PRIOR_IMPRESSIONS = 30_000.0
+MAX_HISTORY_PRIOR_CLICKS = 1_500.0
+
+
+def prior_strength(history: Sequence[PastCampaignChannel]) -> PriorStrength:
+    """Catalog pseudo-counts plus recency-weighted history evidence, capped.
+
+    The cap keeps the prior movable: a shock in the current campaign must still be able to
+    override three campaigns of history within a day or two of fresh facts.
+    """
+    weights = recency_weights(len(history))
+    impressions = sum(w * c.impressions for w, c in zip(weights, history, strict=True))
+    clicks = sum(w * c.clicks for w, c in zip(weights, history, strict=True))
+    return PriorStrength(
+        impressions=BASE_PRIOR_IMPRESSIONS + min(impressions, MAX_HISTORY_PRIOR_IMPRESSIONS),
+        clicks=BASE_PRIOR_CLICKS + min(clicks, MAX_HISTORY_PRIOR_CLICKS),
+    )
+
+
 def channel_history(history: Sequence[PastCampaign], channel_id: str) -> list[PastCampaignChannel]:
     return [
         campaign.channels[channel_id] for campaign in history if channel_id in campaign.channels

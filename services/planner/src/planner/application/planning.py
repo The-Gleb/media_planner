@@ -5,7 +5,7 @@ from collections.abc import Mapping, Sequence
 
 from planner.domain.catalog import load_catalog
 from planner.domain.history import PastCampaign
-from planner.domain.models import KPI, Horizon, MediaPlan, Strategy
+from planner.domain.models import KPI, ApprovedPlan, Horizon, MediaPlan, Strategy
 from planner.domain.optimized import allocate_optimized, forecast_plan
 from planner.domain.target import TargetBudgetSolution, solve_target_budget
 from planner.domain.uniform import allocate_uniformly
@@ -13,7 +13,7 @@ from planner.domain.values import MAX_MICROS
 
 _CHANNEL_RE = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
 
-FINGERPRINT_VERSION = "fixed-budget-v2"
+FINGERPRINT_VERSION = "fixed-budget-v3"
 TARGET_FINGERPRINT_VERSION = "target-kpi-v3"
 
 
@@ -62,6 +62,7 @@ def create_fixed_budget_plan(
     strategy: str = "uniform",
     current: Mapping[str, object] | None = None,
     history: Sequence[PastCampaign] = (),
+    approved: ApprovedPlan | None = None,
 ) -> MediaPlan:
     if not 0 <= budget_micros <= MAX_MICROS:
         raise ValueError("budget must fit the signed int64 micro-unit range")
@@ -93,11 +94,23 @@ def create_fixed_budget_plan(
         defining["current"] = dict(current)
     if strategy == Strategy.OPTIMIZED.value and history:
         defining["history"] = history_payload(history)
+    if strategy == Strategy.OPTIMIZED.value and approved is not None:
+        defining["approved"] = {
+            "kpi_target": approved.kpi_target,
+            "channel_budgets_micros": dict(sorted(approved.channel_budgets_micros.items())),
+        }
     allocations = (
         allocate_uniformly(budget_micros, horizon, ordered_channels)
         if strategy == Strategy.UNIFORM.value
         else allocate_optimized(
-            budget_micros, horizon, ordered_channels, optimize, current, simulation, history
+            budget_micros,
+            horizon,
+            ordered_channels,
+            optimize,
+            current,
+            simulation,
+            history,
+            approved,
         )
     )
     return MediaPlan(

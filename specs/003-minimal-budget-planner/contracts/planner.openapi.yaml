@@ -251,6 +251,10 @@ components:
           $ref: '#/components/schemas/KPI'
         target:
           type: 'null'
+        approved:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/ApprovedPlan'
           default: null
     TargetKPIPlanRequest:
       type: object
@@ -421,6 +425,15 @@ components:
             $ref: '#/components/schemas/ChannelID'
           additionalProperties:
             $ref: '#/components/schemas/ChannelState'
+        recent_hours:
+          description: >-
+            Optional window of the latest committed hours (ascending, ending at current_hour − 1).
+            Enables the windowed calibration with change-point detection; without it Planner
+            calibrates from cumulative totals only.
+          type: array
+          maxItems: 168
+          items:
+            $ref: '#/components/schemas/RecentHour'
     ChannelState:
       type: object
       additionalProperties: false
@@ -705,6 +718,39 @@ components:
           maxProperties: 20
           additionalProperties:
             $ref: '#/components/schemas/PastCampaignChannel'
+    RecentHour:
+      type: object
+      additionalProperties: false
+      required: [hour, channels]
+      properties:
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 2159
+        channels:
+          type: object
+          minProperties: 1
+          maxProperties: 20
+          additionalProperties:
+            $ref: '#/components/schemas/ChannelState'
+    ApprovedPlan:
+      type: object
+      additionalProperties: false
+      required: [kpi_target, channel_budgets]
+      description: >-
+        The approved plan that adaptive replanning keeps the campaign on. When present, Planner
+        holds the approved channel mix while the projected finish is on plan and moves budget
+        toward the KPI-maximising allocation only as far as needed to reach the target and spend
+        the remaining budget.
+      properties:
+        kpi_target:
+          $ref: '#/components/schemas/PositiveCount'
+        channel_budgets:
+          type: object
+          minProperties: 1
+          maxProperties: 20
+          additionalProperties:
+            $ref: '#/components/schemas/Money'
     Allocation:
       type: object
       additionalProperties: false

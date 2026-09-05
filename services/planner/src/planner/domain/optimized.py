@@ -5,11 +5,13 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from planner.domain.calibration import HourFacts, calibrate
 from planner.domain.catalog import ChannelBenchmark, load_catalog
-from planner.domain.history import PastCampaign, channel_history, channel_prior
+from planner.domain.history import PastCampaign, channel_history, channel_prior, prior_strength
 from planner.domain.models import (
     ZERO_FORECAST,
     Allocation,
+    ApprovedPlan,
     Forecast,
     Horizon,
     PlanForecast,
@@ -27,9 +29,10 @@ from planner.domain.values import MAX_MICROS, money_to_micros
 CURVE_POINTS = 128
 MODEL_MAX_STEPS = 240
 WEIGHT_SCALE = 10**15
-CTR_PRIOR_IMPRESSIONS = 1_000.0
-CR_PRIOR_CLICKS = 50.0
 MIN_MARGINAL_KPI_PER_RUBLE = 1e-12
+TRACKING_KPI_TOLERANCE = 0.02
+TRACKING_SPEND_TOLERANCE = 0.01
+TRACKING_SEARCH_STEPS = 24
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,10 +46,13 @@ class PreparedOptimization:
     horizon: Horizon
     future: Horizon | None
     channels: tuple[ChannelBenchmark, ...]
+    observations: tuple[ObservedChannel, ...]
     curves: tuple[tuple[ResponseSegment, ...], ...]
     past_allocations: tuple[Allocation, ...]
     spent_micros: int
     start_clock_hour: int
+    metric: str
+    shocks: tuple[str | None, ...] = ()
 
 
 @dataclass(slots=True)
@@ -98,44 +104,57 @@ def _start_clock_hour(simulation: Mapping[str, object] | None) -> int:
     return start.astimezone(ZoneInfo(str(simulation["time_zone"]))).hour
 
 
-def _calibrate(
-    channel: ChannelBenchmark,
-    observed: ObservedChannel,
-    elapsed_hours: int,
+def _recent(current: Mapping[str, object] | None, channel_id: str) -> list[HourFacts]:
+    """Recent hourly facts of one channel from ``current.recent_hours`` when the client sends them."""
+    if current is None:
+        return []
+    rows = current.get("recent_hours")
+    if not isinstance(rows, Sequence):
+        return []
+    result: list[HourFacts] = []
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        channels = row.get("channels")
+        if not isinstance(channels, Mapping):
+            continue
+        raw = channels.get(channel_id)
+        if not isinstance(raw, Mapping):
+            continue
+        result.append(
+            HourFacts(
+                hour=int(str(row.get("hour", 0))),
+                requests=int(str(raw.get("requests", "0"))),
+                impressions=int(str(raw.get("impressions", "0"))),
+                unique_reach=int(str(raw.get("unique_reach", "0"))),
+                clicks=int(str(raw.get("clicks", "0"))),
+                conversions=int(str(raw.get("conversions", "0"))),
+                spent_micros=money_to_micros(str(raw.get("spent", "0"))),
+            )
+        )
+    return result
+
+
+def _calibrated_channel(
+    catalog_channel: ChannelBenchmark,
+    channel_id: str,
+    current: Mapping[str, object] | None,
+    history: Sequence[PastCampaign],
+    elapsed: int,
     start_clock_hour: int,
-) -> ChannelBenchmark:
-    if elapsed_hours <= 0:
-        return channel
-
-    ctr = (observed.clicks + CTR_PRIOR_IMPRESSIONS * channel.ctr) / (
-        observed.impressions + CTR_PRIOR_IMPRESSIONS
+) -> tuple[ChannelBenchmark, str | None]:
+    """Catalog → history prior → current-campaign calibration, the single path every caller uses."""
+    past = channel_history(history, channel_id)
+    prior = channel_prior(catalog_channel, past)
+    calibration = calibrate(
+        prior,
+        prior_strength(past),
+        _observed(current, channel_id),
+        _recent(current, channel_id),
+        elapsed,
+        start_clock_hour,
     )
-    cr = (observed.conversions + CR_PRIOR_CLICKS * channel.cr) / (observed.clicks + CR_PRIOR_CLICKS)
-
-    cpm = channel.cpm
-    if observed.impressions > 0 and observed.spent_micros > 0:
-        observed_cpm = observed.spent_micros / 1_000_000 * 1_000 / observed.impressions
-        confidence = min(observed.impressions / 10_000.0, 0.8)
-        ratio = min(max(observed_cpm / channel.cpm, 0.25), 4.0)
-        cpm = channel.cpm * math.exp(confidence * math.log(ratio))
-
-    daily_capacity = channel.daily_capacity
-    expected_requests = channel.daily_capacity * sum(
-        channel.hourly_profile[hour % 24]
-        for hour in range(start_clock_hour, start_clock_hour + elapsed_hours)
-    )
-    if expected_requests > 0 and observed.requests >= 0:
-        ratio = min(max(observed.requests / expected_requests, 0.05), 5.0)
-        confidence = min(elapsed_hours / 24.0, 0.8)
-        daily_capacity *= math.exp(confidence * math.log(ratio))
-
-    return replace(
-        channel,
-        cpm=max(cpm, 0.000001),
-        ctr=min(max(ctr, 0.0), 0.99),
-        cr=min(max(cr, 0.0), 0.99),
-        daily_capacity=max(daily_capacity, 0.0),
-    )
+    return calibration.channel, calibration.shock
 
 
 def _model_buckets(weights: Sequence[float]) -> list[float]:
@@ -355,8 +374,9 @@ def forecast_plan(
         totals.append(observed.as_forecast())
         if future_from >= horizon.to_hour:
             continue
-        prior = channel_prior(catalog[channel_id], channel_history(history, channel_id))
-        channel = _calibrate(prior, observed, elapsed, start_clock_hour)
+        channel, _ = _calibrated_channel(
+            catalog[channel_id], channel_id, current, history, elapsed, start_clock_hour
+        )
         future = Horizon(future_from, horizon.to_hour)
         budgets = [caps[channel_id].get(hour, 0) for hour in range(future_from, horizon.to_hour)]
         steps = forecast_hourly(channel, observed, budgets, future, start_clock_hour)
@@ -404,9 +424,10 @@ def allocate_optimized(
     current: Mapping[str, object] | None = None,
     simulation: Mapping[str, object] | None = None,
     history: Sequence[PastCampaign] = (),
+    approved: ApprovedPlan | None = None,
 ) -> tuple[Allocation, ...]:
     prepared = prepare_optimized(horizon, channel_ids, metric, current, simulation, history)
-    return allocate_prepared(prepared, budget_micros)
+    return allocate_prepared(prepared, budget_micros, approved)
 
 
 def prepare_optimized(
@@ -422,15 +443,14 @@ def prepare_optimized(
     elapsed = _elapsed_hours(current, horizon)
     start_clock_hour = _start_clock_hour(simulation)
     observations = [_observed(current, channel_id) for channel_id in ordered_ids]
-    channels = [
-        _calibrate(
-            channel_prior(catalog[channel_id], channel_history(history, channel_id)),
-            observations[index],
-            elapsed,
-            start_clock_hour,
+    calibrated = [
+        _calibrated_channel(
+            catalog[channel_id], channel_id, current, history, elapsed, start_clock_hour
         )
-        for index, channel_id in enumerate(ordered_ids)
+        for channel_id in ordered_ids
     ]
+    channels = [channel for channel, _ in calibrated]
+    shocks = tuple(shock for _, shock in calibrated)
 
     past_allocations: list[Allocation] = []
     for hour_offset in range(elapsed):
@@ -465,19 +485,112 @@ def prepare_optimized(
         horizon=horizon,
         future=future,
         channels=tuple(channels),
+        observations=tuple(observations),
         curves=curves,
         past_allocations=tuple(past_allocations),
         spent_micros=spent_micros,
         start_clock_hour=start_clock_hour,
+        metric=metric,
+        shocks=shocks,
     )
 
 
-def allocate_prepared(prepared: PreparedOptimization, budget_micros: int) -> tuple[Allocation, ...]:
+def _future_outcome(prepared: PreparedOptimization, channel_budgets: Sequence[int]) -> Forecast:
+    """Projected campaign total (observed + future) for per-channel future budgets."""
+    future = prepared.future
+    if future is None:
+        return sum_forecasts([item.as_forecast() for item in prepared.observations])
+    parts = [item.as_forecast() for item in prepared.observations]
+    for channel, observed, budget in zip(
+        prepared.channels, prepared.observations, channel_budgets, strict=True
+    ):
+        forecast = _campaign_forecast(
+            channel, observed, budget / 1_000_000, future, prepared.start_clock_hour
+        )
+        parts.append(replace(forecast, unique_reach=forecast.unique_reach - observed.unique_reach))
+    return sum_forecasts(parts)
+
+
+def _metric(forecast: Forecast, metric: str) -> float:
+    return float(getattr(forecast, metric))
+
+
+def _approved_mix(
+    prepared: PreparedOptimization, approved: ApprovedPlan, remaining_micros: int
+) -> list[int]:
+    """What is left of the approved channel budgets, rescaled to the remaining money."""
+    leftovers = [
+        max(approved.channel_budgets_micros.get(channel.channel_id, 0) - observed.spent_micros, 0)
+        for channel, observed in zip(prepared.channels, prepared.observations, strict=True)
+    ]
+    total = sum(leftovers)
+    if total <= 0:
+        return [remaining_micros // len(leftovers)] * len(leftovers)
+    scaled = [remaining_micros * item // total for item in leftovers]
+    largest = max(range(len(scaled)), key=lambda index: scaled[index])
+    scaled[largest] += remaining_micros - sum(scaled)
+    return scaled
+
+
+def _blend(base: Sequence[int], target: Sequence[int], share: float, total: int) -> list[int]:
+    """Convex combination of two budget vectors whose entries stay non-negative and sum to total."""
+    mixed = [max(0, int(b + (t - b) * share)) for b, t in zip(base, target, strict=True)]
+    remainder = total - sum(mixed)
+    if remainder:
+        largest = max(range(len(mixed)), key=lambda index: mixed[index])
+        mixed[largest] = max(0, mixed[largest] + remainder)
+    return mixed
+
+
+def _tracking_budgets(
+    prepared: PreparedOptimization, approved: ApprovedPlan, remaining_micros: int
+) -> list[int]:
+    """Smallest move away from the approved mix that puts the projected finish on the plan.
+
+    Behind the plan, or unable to spend the remaining budget with the approved mix (for example a
+    paused channel), the allocation moves toward the KPI-maximising water-fill just far enough to
+    reach the approved KPI target and spend the money; otherwise the approved mix is kept, so an
+    overdelivering market is not chased and no budget is reshuffled after noise.
+    """
+    hold = _approved_mix(prepared, approved, remaining_micros)
+    maximal = _waterfill(remaining_micros, prepared.curves)
+
+    def on_plan(budgets: Sequence[int]) -> bool:
+        outcome = _future_outcome(prepared, budgets)
+        kpi_ok = _metric(outcome, prepared.metric) >= approved.kpi_target * (
+            1.0 - TRACKING_KPI_TOLERANCE
+        )
+        spend_ok = outcome.spend_micros >= (prepared.spent_micros + remaining_micros) * (
+            1.0 - TRACKING_SPEND_TOLERANCE
+        )
+        return kpi_ok and spend_ok
+
+    if on_plan(hold):
+        return hold
+    if not on_plan(maximal):
+        return maximal
+    low, high = 0.0, 1.0
+    for _ in range(TRACKING_SEARCH_STEPS):
+        middle = (low + high) / 2.0
+        if on_plan(_blend(hold, maximal, middle, remaining_micros)):
+            high = middle
+        else:
+            low = middle
+    return _blend(hold, maximal, high, remaining_micros)
+
+
+def allocate_prepared(
+    prepared: PreparedOptimization, budget_micros: int, approved: ApprovedPlan | None = None
+) -> tuple[Allocation, ...]:
     allocations = list(prepared.past_allocations)
     remaining_micros = max(budget_micros - prepared.spent_micros, 0)
     future = prepared.future
     if future is not None:
-        channel_budgets = _waterfill(remaining_micros, prepared.curves)
+        channel_budgets = (
+            _tracking_budgets(prepared, approved, remaining_micros)
+            if approved is not None and prepared.spent_micros > 0
+            else _waterfill(remaining_micros, prepared.curves)
+        )
         allocations.extend(
             _exact_weighted_allocations(
                 future,
