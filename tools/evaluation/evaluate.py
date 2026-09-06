@@ -841,6 +841,16 @@ def run_campaign(
 # --------------------------------------------------------------------------------------
 
 
+def harness_binary(binary: Path, out_dir: Path) -> Path:
+    """Copy of the Simulator binary under its own name, so that killing the dev-stack Simulator
+    by process name never touches the harness workers."""
+    target = out_dir / "simulator-eval"
+    if not target.exists() or target.stat().st_size != binary.stat().st_size:
+        target.write_bytes(binary.read_bytes())
+        target.chmod(0o755)
+    return target
+
+
 def start_simulator(binary: Path, config: Path, port: int) -> subprocess.Popen[bytes]:
     env = dict(os.environ)
     env.update(
@@ -874,14 +884,19 @@ def worker_main(
 ) -> None:
     port = int(args_dict["simulator_port"]) + index
     process = None
+    binary = None
     if not args_dict["simulator_url"]:
-        process = start_simulator(
-            Path(args_dict["simulator_bin"]), Path(args_dict["world_config"]), port
-        )
+        binary = harness_binary(Path(args_dict["simulator_bin"]), out_dir)
+        process = start_simulator(binary, Path(args_dict["world_config"]), port)
     simulator = SimulatorClient(
         args_dict["simulator_url"] or f"http://127.0.0.1:{port}", f"eval-worker-{index}"
     )
     (out_dir / "dataset").mkdir(parents=True, exist_ok=True)
+    results_path = out_dir / f"worker-{index}.jsonl"
+    done: set[str] = set()
+    if results_path.exists():
+        with results_path.open() as handle:
+            done = {json.loads(line)["run_id"] for line in handle if line.strip()}
     try:
         wait_ready(simulator)
         metadata = simulator.metadata()
@@ -889,11 +904,13 @@ def worker_main(
         planner = PlannerClient(args_dict["planner_url"])
         approved_cache: dict[tuple[int, int], tuple[PlanView, list[dict[str, Any]]]] = {}
         with (
-            (out_dir / f"worker-{index}.jsonl").open("w") as results_handle,
-            (out_dir / "dataset" / f"worker-{index}.csv").open("w", newline="") as dataset_handle,
+            results_path.open("a") as results_handle,
+            (out_dir / "dataset" / f"worker-{index}.csv").open("a", newline="") as dataset_handle,
         ):
             dataset = csv.writer(dataset_handle)
             for position, spec in enumerate(specs, start=1):
+                if spec.run_id in done:
+                    continue
                 key = (spec.world_seed, spec.history)
                 if key not in approved_cache:
                     history = load_or_generate_history(
@@ -915,18 +932,35 @@ def worker_main(
                         json.dumps(body)
                     )
                 approved, history = approved_cache[key]
-                result = run_campaign(
-                    spec,
-                    brief,
-                    channels,
-                    metadata,
-                    simulator,
-                    planner,
-                    approved,
-                    history,
-                    out_dir / "trajectories",
-                    dataset,
-                )
+                for attempt in range(3):
+                    try:
+                        result = run_campaign(
+                            spec,
+                            brief,
+                            channels,
+                            metadata,
+                            simulator,
+                            planner,
+                            approved,
+                            history,
+                            out_dir / "trajectories",
+                            dataset,
+                        )
+                        break
+                    except (urlerror.URLError, ConnectionError, OSError) as exc:
+                        if process is None or binary is None or attempt == 2:
+                            raise
+                        print(
+                            f"[worker {index}] simulator lost ({exc}); restarting and retrying "
+                            f"{spec.run_id}",
+                            file=sys.stderr,
+                            flush=True,
+                        )
+                        process.terminate()
+                        process.wait(timeout=5)
+                        process = start_simulator(binary, Path(args_dict["world_config"]), port)
+                        simulator.etag = None
+                        wait_ready(simulator)
                 results_handle.write(json.dumps(asdict(result)) + "\n")
                 results_handle.flush()
                 dataset_handle.flush()
@@ -1176,6 +1210,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--out", default=str(REPO_ROOT / "tools/evaluation/results"))
     parser.add_argument(
+        "--resume", action="store_true", help="keep finished runs in --out and run only the rest"
+    )
+    parser.add_argument(
         "--summarize-only",
         action="store_true",
         help="rewrite summary.md from an existing runs.json in --out without running anything",
@@ -1224,8 +1261,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         (out_dir / "summary.md").write_text(summary)
         print(summary)
         return 0
-    for stale in out_dir.glob("worker-*.jsonl"):
-        stale.unlink()
+    if not args.resume:
+        for stale in out_dir.glob("worker-*.jsonl"):
+            stale.unlink()
+        for stale in (
+            (out_dir / "dataset").glob("worker-*.csv") if (out_dir / "dataset").exists() else []
+        ):
+            stale.unlink()
     workers = 1 if args.simulator_url else max(1, min(args.workers, len(specs)))
     args_dict = vars(args)
     started = time.perf_counter()
