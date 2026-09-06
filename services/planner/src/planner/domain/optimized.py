@@ -5,9 +5,16 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+import numpy as np
+
 from planner.domain.calibration import HourFacts, calibrate
 from planner.domain.catalog import ChannelBenchmark, load_catalog
-from planner.domain.history import PastCampaign, channel_history, channel_prior, prior_strength
+from planner.domain.history import (
+    PastCampaign,
+    cached_channel_prior,
+    channel_history,
+    prior_strength,
+)
 from planner.domain.models import (
     ZERO_FORECAST,
     Allocation,
@@ -18,6 +25,7 @@ from planner.domain.models import (
     sum_forecasts,
 )
 from planner.domain.response import (
+    CR_FATIGUE_RATIO,
     ObservedChannel,
     _forecast_step,
     _hour_weights,
@@ -145,7 +153,7 @@ def _calibrated_channel(
 ) -> tuple[ChannelBenchmark, str | None]:
     """Catalog → history prior → current-campaign calibration, the single path every caller uses."""
     past = channel_history(history, channel_id)
-    prior = channel_prior(catalog_channel, past)
+    prior = cached_channel_prior(catalog_channel, past)
     calibration = calibrate(
         prior,
         prior_strength(past),
@@ -201,22 +209,54 @@ def _campaign_forecast(
     return replace(total, unique_reach=state.reach)
 
 
-def _campaign_kpi(
+def _kpi_curve(
     channel: ChannelBenchmark,
     observed: ObservedChannel,
-    total_budget: float,
+    budgets: Sequence[float],
     horizon: Horizon,
     start_clock_hour: int,
     metric: str,
-) -> float:
-    forecast = _campaign_forecast(channel, observed, total_budget, horizon, start_clock_hour)
-    return (
-        forecast.unique_reach
-        if metric == "unique_reach"
-        else forecast.clicks
-        if metric == "clicks"
-        else forecast.conversions
-    )
+) -> list[float]:
+    """Campaign KPI for every budget on the grid in one vectorised pass over the horizon.
+
+    Every grid point walks the same buckets with its own saturation state, so the state is a
+    vector indexed by grid point and the loop runs over buckets only. The arithmetic mirrors
+    :func:`planner.domain.response._forecast_step` element by element.
+    """
+    weights = _model_buckets(_hour_weights(channel, horizon, start_clock_hour))
+    total_weight = sum(weights)
+    size = len(budgets)
+    reach0 = min(float(observed.unique_reach), channel.audience_capacity)
+    if total_weight <= 0 or size == 0:
+        return [reach0 if metric == "unique_reach" else 0.0] * size
+    budget = np.asarray(budgets, dtype=float)
+    reach = np.full(size, reach0)
+    impressions_total = np.full(size, float(observed.impressions))
+    clicks = np.zeros(size)
+    conversions = np.zeros(size)
+    audience = channel.audience_capacity
+    threshold = channel.saturation_threshold
+    for weight in weights:
+        saturation = np.minimum(reach / audience, 1.0)
+        depth = np.maximum((saturation - threshold) / (1.0 - threshold), 0.0)
+        frequency = np.maximum(impressions_total / np.maximum(reach, 1.0), 1.0)
+        excess = np.maximum(frequency - 1.0, 0.0)
+        fatigue = channel.ctr_fatigue * depth + channel.frequency_fatigue * excess
+        cpm = channel.cpm * (1.0 + channel.price_growth * depth**2)
+        impressions = np.minimum(
+            channel.daily_capacity * weight, budget * weight / total_weight * 1_000.0 / cpm
+        )
+        hour_clicks = impressions * channel.ctr * np.exp(-fatigue)
+        new_probability = np.maximum(
+            (1.0 - depth) ** channel.reach_decay * np.exp(-channel.frequency_reach_decay * excess),
+            0.0,
+        )
+        reach = reach + np.minimum(impressions * new_probability, audience - reach)
+        impressions_total = impressions_total + impressions
+        clicks = clicks + hour_clicks
+        conversions = conversions + hour_clicks * channel.cr * np.exp(-CR_FATIGUE_RATIO * fatigue)
+    values = reach if metric == "unique_reach" else clicks if metric == "clicks" else conversions
+    return [float(value) for value in values]
 
 
 def _curve_points(capacity_micros: int) -> list[int]:
@@ -262,17 +302,14 @@ def _response_segments(
 ) -> tuple[ResponseSegment, ...]:
     capacity = _channel_capacity_micros(channel, horizon, start_clock_hour)
     points = _curve_points(capacity)
-    values = [
-        _campaign_kpi(
-            channel,
-            observed,
-            point / 1_000_000,
-            horizon,
-            start_clock_hour,
-            metric,
-        )
-        for point in points
-    ]
+    values = _kpi_curve(
+        channel,
+        observed,
+        [point / 1_000_000 for point in points],
+        horizon,
+        start_clock_hour,
+        metric,
+    )
     return _concave_segments(points, values)
 
 

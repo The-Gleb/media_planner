@@ -7,9 +7,11 @@ cannot leak world parameters; it only sharpens the public catalog benchmark towa
 market actually showed. Recent campaigns weigh more than old ones.
 """
 
+import json
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
+from functools import lru_cache
 
 from planner.domain.catalog import ChannelBenchmark
 from planner.domain.models import Horizon
@@ -374,6 +376,65 @@ def prior_strength(history: Sequence[PastCampaignChannel]) -> PriorStrength:
         impressions=BASE_PRIOR_IMPRESSIONS + min(impressions, MAX_HISTORY_PRIOR_IMPRESSIONS),
         clicks=BASE_PRIOR_CLICKS + min(clicks, MAX_HISTORY_PRIOR_CLICKS),
     )
+
+
+def history_key(history: Sequence[PastCampaignChannel]) -> str:
+    """Canonical text of a channel's history, used to memoise the prior across hourly replans."""
+    return json.dumps(
+        [
+            [
+                [
+                    [
+                        b.hours,
+                        b.requests,
+                        b.impressions,
+                        b.unique_reach,
+                        b.clicks,
+                        b.conversions,
+                        b.spent_micros,
+                    ]
+                    for b in c.bins
+                ],
+                [
+                    [
+                        d.day,
+                        d.hours,
+                        d.requests,
+                        d.impressions,
+                        d.unique_reach,
+                        d.clicks,
+                        d.conversions,
+                        d.spent_micros,
+                        d.reach_before,
+                        d.impressions_before,
+                    ]
+                    for d in c.daily
+                ],
+            ]
+            for c in history
+        ],
+        separators=(",", ":"),
+    )
+
+
+@lru_cache(maxsize=256)
+def _cached_prior(
+    channel: ChannelBenchmark, key: str, history: tuple[PastCampaignChannel, ...]
+) -> ChannelBenchmark:
+    return channel_prior(channel, history)
+
+
+def cached_channel_prior(
+    channel: ChannelBenchmark, history: Sequence[PastCampaignChannel]
+) -> ChannelBenchmark:
+    """``channel_prior`` memoised on the catalog channel and the history content.
+
+    The history of a campaign does not change between its hourly replans, while the prior costs
+    a forward replay per past campaign; the cache turns that into a dictionary lookup.
+    """
+    if not history:
+        return channel
+    return _cached_prior(channel, history_key(history), tuple(history))
 
 
 def channel_history(history: Sequence[PastCampaign], channel_id: str) -> list[PastCampaignChannel]:
