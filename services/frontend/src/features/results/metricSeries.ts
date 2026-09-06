@@ -1,15 +1,15 @@
 import type { HourlyResult, MetricKey, Observation } from '../../domain/types'
 import { formatMoney, parseMoney, toChartNumber } from '../../domain/numeric'
+import { channelColor, TOTAL_STROKE } from '../../app/palette'
+import { channelLabel } from '../../app/format'
 
-const COLORS = ['#0d6b58', '#bc5a26', '#315ca8', '#8b4aa0', '#927000', '#327a8a', '#c33f62', '#59636d']
-const DASHES = ['', '8 4', '3 3', '12 4 3 4']
 
 export interface SeriesDefinition { id: string; label: string; color: string; dash: string; aggregate: boolean }
 export type ChartRow = { hour: string } & Record<string, string | number | null>
 
 export function seriesDefinitions(channelIds: readonly string[], metric: MetricKey): SeriesDefinition[] {
-  const channels = channelIds.map((id, index) => ({ id, label: id, color: COLORS[index % COLORS.length], dash: DASHES[Math.floor(index / COLORS.length) % DASHES.length], aggregate: false }))
-  return [...channels, { id: 'aggregate', label: metric === 'unique_reach' ? 'Итого (без дедупликации)' : 'Итого', color: '#111827', dash: '10 4', aggregate: true }]
+  const channels = channelIds.map((id) => ({ id, label: channelLabel(id), color: channelColor(id, channelIds), dash: '', aggregate: false }))
+  return [...channels, { id: 'aggregate', label: metric === 'unique_reach' ? 'Итого (без дедупликации)' : 'Итого', color: TOTAL_STROKE, dash: '10 4', aggregate: true }]
 }
 
 type MetricSource = Observation | NonNullable<HourlyResult['aggregate']>

@@ -45,7 +45,7 @@ export function useCampaignController(metadata: WorldMetadata) {
         : buildTargetPlanRequest({ ...common, targetMetric: campaign.targetMetric, targetValue: campaign.targetValue })
       const result = await plannerClient.plan(request)
       if (!result.feasible) {
-        dispatch({ type: 'failed', error: `Цель недостижима в заданных условиях. Максимальный прогноз: ${result.reason.maxAchievable}; рекомендуемая цель: ${result.reason.recommendedTarget}.` })
+        dispatch({ type: 'infeasible', diagnosis: result })
         return
       }
       const plan = result

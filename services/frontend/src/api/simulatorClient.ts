@@ -9,6 +9,8 @@ export class SimulatorProblemError extends Error {
 }
 
 export interface ResponseWithETag<T> { data: T; etag: string | null }
+export interface AudienceSegment { segmentId: string; geo: string; gender: string; ageFrom: number; ageToExclusive: number }
+export interface AudienceSegments { engineVersion: string; worldConfigDigest: string; channels: { channelId: string; segments: AudienceSegment[] }[] }
 
 export class SimulatorClient {
   constructor(private readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis)) {}
@@ -21,6 +23,21 @@ export class SimulatorClient {
   async metadata() {
     const response = await this.request('/api/v1/world-metadata')
     return decodeWorldMetadata(await response.json())
+  }
+
+  /** Public synthetic segment catalogue; hidden capacities and multipliers are never exposed. */
+  async audienceSegments(): Promise<AudienceSegments> {
+    const response = await this.request('/api/v1/audience-segments')
+    const raw = await response.json() as Record<string, unknown>
+    if (typeof raw.engine_version !== 'string' || typeof raw.world_config_digest !== 'string' || !Array.isArray(raw.channels)) throw new Error('invalid_audience_segments')
+    return {
+      engineVersion: raw.engine_version, worldConfigDigest: raw.world_config_digest,
+      channels: raw.channels.map((channel) => {
+        const item = channel as Record<string, unknown>
+        const segments = Array.isArray(item.segments) ? item.segments as Record<string, unknown>[] : []
+        return { channelId: String(item.channel_id), segments: segments.map((segment) => ({ segmentId: String(segment.segment_id), geo: String(segment.geo), gender: String(segment.gender), ageFrom: Number(segment.age_from), ageToExclusive: Number(segment.age_to_exclusive) })) }
+      }),
+    }
   }
 
   async putSimulation(id: string, payload: SimulationConfigPayload, etag: string | null): Promise<ResponseWithETag<ReturnType<typeof decodeActiveRun>>> {
