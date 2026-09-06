@@ -53,6 +53,9 @@ tools/evaluation/results/*
 !tools/evaluation/results/tracking/**
 !tools/evaluation/results/experiment-a-planner.ipynb
 !tools/evaluation/results/planner/
+!tools/evaluation/results/experiment-b-traffic-manager.ipynb
+!tools/evaluation/results/tm/
+!tools/evaluation/results/tm/**
 
 # Long evaluation runs (durable scratch, regenerable)
 tools/evaluation/runs/

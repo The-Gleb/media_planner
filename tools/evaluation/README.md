@@ -110,3 +110,23 @@ uv run --group dev python ../../tools/evaluation/planner_eval.py --out ../../too
 
 The committed copy of the aggregates lives in `results/planner/`; `results/experiment-a-planner.ipynb`
 reads it and writes the figures to `results/figures/planner_*.png`.
+
+## Experiment B: traffic-manager quality (`tm_eval.py`)
+
+`tm_eval.py` keeps the approved plan fixed and varies only the live mode. Cells: the three
+modes over the four scripted shocks on warm (history 3) and cold (history 0) plans, a noisy
+world (`--random-events`), ablations of the live loop (`--no-recent`: replan without
+`current.recent_hours`; `--replan-every 6|24`), the shock timing (`--shock-start`) and clicks as
+a second KPI. Every live run is paired with its frozen twin (same world, seed, history, shock)
+into `pairs.json`: KPI uplift, share of the shock loss recovered, reaction latency (hours until
+the live plan cut the shocked channel's cap by 20 % relative to the same mode without the
+shock, from the `top_cap` column of the trajectories), budget use, reallocated share and the
+final deviation from the plan. `summary.md` aggregates the pairs per slice.
+
+```bash
+cd services/planner
+uv run --group dev python ../../tools/evaluation/tm_eval.py --out ../../tools/evaluation/runs/tm
+```
+
+The committed aggregates live in `results/tm/`; `results/experiment-b-traffic-manager.ipynb`
+reads them and writes `results/figures/tm_*.png`.

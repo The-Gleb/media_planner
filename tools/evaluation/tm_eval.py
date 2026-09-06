@@ -77,14 +77,20 @@ class Cell:
 CELLS = [
     Cell("modes-h3"),
     Cell("modes-h0", history_levels="0"),
-    Cell("noisy-h3", scenarios="none", random_events=True),
-    Cell("noisy-h0", history_levels="0", scenarios="none", random_events=True),
+    Cell("noisy-h3", scenarios="none", modes="frozen,adaptive_max", random_events=True),
+    Cell(
+        "noisy-h0",
+        history_levels="0",
+        scenarios="none",
+        modes="frozen,adaptive_max",
+        random_events=True,
+    ),
     Cell("ablate-no-recent-h3", scenarios="none,ctr_drop", modes="adaptive_max", no_recent=True),
     Cell("cadence-6h-h3", scenarios="none,ctr_drop", modes="adaptive_max", replan_every=6),
     Cell("cadence-24h-h3", scenarios="none,ctr_drop", modes="adaptive_max", replan_every=24),
     Cell("shock-early-h3", scenarios="ctr_drop", modes="frozen,adaptive_max", shock_start=120),
     Cell("shock-late-h3", scenarios="ctr_drop", modes="frozen,adaptive_max", shock_start=400),
-    Cell("clicks-h3", scenarios="none,ctr_drop", optimize="clicks"),
+    Cell("clicks-h3", scenarios="none,ctr_drop", modes="frozen,adaptive_max", optimize="clicks"),
 ]
 
 
