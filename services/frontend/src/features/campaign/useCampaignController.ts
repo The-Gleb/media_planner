@@ -20,10 +20,24 @@ export function useCampaignController(metadata: WorldMetadata) {
   const [state, reactDispatch] = useReducer(campaignReducer, metadata, createCampaignState)
   const ref = useRef(state)
   useEffect(() => { ref.current = state }, [state])
+  // Batched mode: the ref is the source of truth for the run loop; React only receives the
+  // accumulated state on flush, so a fast timelapse renders a few times per second instead of
+  // two or three times per simulated hour.
+  const batchRef = useRef<{ active: boolean; dirty: boolean; flushedAt: number }>({ active: false, dirty: false, flushedAt: 0 })
   const dispatch = useCallback((action: CampaignAction) => {
     ref.current = campaignReducer(ref.current, action)
+    if (batchRef.current.active) { batchRef.current.dirty = true; return }
     reactDispatch(action)
   }, [])
+  const flush = useCallback(() => {
+    if (!batchRef.current.dirty) return
+    batchRef.current.dirty = false
+    batchRef.current.flushedAt = Date.now()
+    reactDispatch({ type: 'replace', state: ref.current })
+  }, [])
+  const beginBatch = useCallback(() => { batchRef.current = { active: true, dirty: false, flushedAt: Date.now() } }, [])
+  const flushIfDue = useCallback((intervalMs: number) => { if (Date.now() - batchRef.current.flushedAt >= intervalMs) flush() }, [flush])
+  const endBatch = useCallback(() => { batchRef.current.active = false; flush() }, [flush])
 
   const createOrReset = useCallback(async () => {
     const current = ref.current
@@ -79,5 +93,5 @@ export function useCampaignController(metadata: WorldMetadata) {
 
   const clearHistory = useCallback(() => { dispatch({ type: 'clear-history' }); savePastCampaigns([]) }, [dispatch])
 
-  return { state, dispatch, getState: () => ref.current, createOrReset, clearHistory }
+  return { state, dispatch, getState: () => ref.current, createOrReset, clearHistory, beginBatch, flushIfDue, endBatch }
 }

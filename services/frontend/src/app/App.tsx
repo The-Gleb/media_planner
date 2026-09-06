@@ -19,6 +19,8 @@ import { useViewMode, ViewModeProvider, ViewModeToggle } from './viewMode'
 
 type Step = 'brief' | 'plan' | 'run' | 'world'
 
+const BATCH_FLUSH_MS = 300
+
 export function App() {
   return <ViewModeProvider><Shell /></ViewModeProvider>
 }
@@ -59,7 +61,7 @@ function Stepper({ step, setStep, planReady, runReady, expert }: { step: Step; s
 function ReadyDashboard({ metadata, plannerReady, step, setStep }: { metadata: WorldMetadata; plannerReady: boolean; step: Step; setStep: (step: Step) => void }) {
   const { expert } = useViewMode()
   const campaign = useCampaignController(metadata)
-  const { state, dispatch, getState, createOrReset, clearHistory } = campaign
+  const { state, dispatch, getState, createOrReset, clearHistory, beginBatch, flushIfDue, endBatch } = campaign
   const marketHistory = state.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, state.draft.simulation.worldSeed))
   const planning = usePlanningController(metadata.channelIds, dispatch)
   const [execution, setExecution] = useState<ExecutionStatus>('idle')
@@ -136,20 +138,24 @@ function ReadyDashboard({ metadata, plannerReady, step, setStep }: { metadata: W
     if (!current.session || current.planning !== 'idle' || ['stepping', 'running', 'stopping'].includes(execution) || current.session.status === 'finished') return
     stopRef.current = false
     setExecution('running')
+    // Without a playback delay the screen is refreshed a few times per second, not every hour.
+    const batched = playbackDelayRef.current === 0
+    if (batched) beginBatch()
     try {
       const outcome = await runRemaining({
         getSession: () => { const session = getState().session; if (!session) throw new Error('campaign_missing'); return session },
         createPending: () => nextPending(),
         submit: (session, pending) => submitPendingStep(simulatorClient, session, pending),
-        commit: commitAndReplan,
+        commit: async (pending, response) => { await commitAndReplan(pending, response); if (batched) flushIfDue(BATCH_FLUSH_MS) },
         shouldStop: () => stopRef.current,
         waitBeforeNext: async () => {
           const delay = playbackDelayRef.current
           if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay))
         },
       })
+      if (batched) endBatch()
       setExecution(outcome === 'stopped' ? 'stopped' : 'idle')
-    } catch (error) { fail(error, 'Автоматический прогон') }
+    } catch (error) { if (batched) endBatch(); fail(error, 'Автоматический прогон') }
   }
 
   async function retryReplan() {
