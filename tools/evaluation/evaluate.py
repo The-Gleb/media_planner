@@ -43,7 +43,8 @@ from zoneinfo import ZoneInfo
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SIMULATOR_BIN = REPO_ROOT / "services/simulator/bin/simulator"
-DEFAULT_WORLD_CONFIG = REPO_ROOT / "services/simulator/configs/world-config.mediaplan.json"
+DEFAULT_WORLD_CONFIG = REPO_ROOT / "services/simulator/configs/world-config.audience.json"
+DEFAULT_PLANNER_CONFIG = REPO_ROOT / "services/simulator/configs/world-config.mediaplan.json"
 MICROS = 1_000_000
 SCENARIOS = ("none", "ctr_drop", "cpm_spike", "supply_drop", "pause")
 MODES = ("frozen", "adaptive", "adaptive_max")
@@ -1156,7 +1157,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--simulator-bin", default=str(DEFAULT_SIMULATOR_BIN))
-    parser.add_argument("--world-config", default=str(DEFAULT_WORLD_CONFIG))
+    parser.add_argument(
+        "--world-config",
+        default=str(DEFAULT_WORLD_CONFIG),
+        help="Simulator world (Compose default)",
+    )
+    parser.add_argument(
+        "--planner-world-config",
+        default=str(DEFAULT_PLANNER_CONFIG),
+        help="public catalog the planner reads (Compose default)",
+    )
     parser.add_argument("--simulator-port", type=int, default=18080)
     parser.add_argument(
         "--simulator-url", default=None, help="running Simulator instead of spawning (1 worker)"
@@ -1175,7 +1185,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    os.environ.setdefault("PLANNER_WORLD_CONFIG", args.world_config)
+    os.environ["PLANNER_WORLD_CONFIG"] = args.planner_world_config
     brief = Brief(
         budget_micros=to_micros(args.budget),
         duration_hours=args.days * 24,
