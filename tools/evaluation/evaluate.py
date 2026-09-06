@@ -109,6 +109,7 @@ class Brief:
     history_random_events: bool
     history_budget_factors: tuple[float, ...]
     strategy: str = "optimized"
+    target_value: int | None = None
 
 
 @dataclass(frozen=True)
@@ -153,6 +154,8 @@ class RunResult:
     seconds: float
     channel_spend: dict[str, float] = field(default_factory=dict)
     channel_facts: dict[str, dict[str, int]] = field(default_factory=dict)
+    target: int | None = None
+    required_budget: float | None = None
 
 
 # --------------------------------------------------------------------------------------
@@ -724,20 +727,40 @@ def approve_plan(
     history: Sequence[dict[str, Any]],
 ) -> tuple[PlanView, dict[str, Any]]:
     simulation = simulation_context(brief, metadata, "eval-approval", 0, 0)
-    body = planner.plan(
-        plan_request(
-            brief,
-            simulation,
-            channels,
-            zero_facts(channels),
-            0,
-            None,
-            None,
-            history,
-            strategy=brief.strategy,
-        )
+    request = plan_request(
+        brief,
+        simulation,
+        channels,
+        zero_facts(channels),
+        0,
+        None,
+        None,
+        history,
+        strategy=brief.strategy,
     )
-    return PlanView(body, channels, brief.optimize, brief.budget_micros), body
+    if brief.target_value is not None:
+        # Task B: the planner finds the least budget whose forecast reaches the target; the
+        # campaign is then executed on that budget.
+        request.update(
+            {
+                "type": "target_kpi",
+                "strategy": "optimized",
+                "budget": None,
+                "optimize": None,
+                "target": {"metric": brief.optimize, "value": str(brief.target_value)},
+            }
+        )
+        request.pop("approved", None)
+    body = planner.plan(request)
+    if not body.get("feasible", True):
+        raise RuntimeError(
+            f"target {brief.target_value} {brief.optimize} is infeasible: max achievable "
+            f"{body['reason']['max_achievable']}"
+        )
+    budget_micros = (
+        to_micros(body["budget"]) if brief.target_value is not None else brief.budget_micros
+    )
+    return PlanView(body, channels, brief.optimize, budget_micros), body
 
 
 def run_campaign(
@@ -799,7 +822,7 @@ def run_campaign(
                 ]
             )
 
-    budget = brief.budget_micros / MICROS
+    budget = approved.budget_micros / MICROS
     dev_spend = final_dev(execution.plan_spend, execution.fact_spend)
     dev_kpi = final_dev(execution.plan_kpi, execution.fact_kpi)
     skip = brief.trajectory_skip_hours
@@ -824,8 +847,8 @@ def run_campaign(
         final_dev_kpi=dev_kpi,
         within_20=abs(dev_spend) <= 0.2 and abs(dev_kpi) <= 0.2,
         budget_utilization=execution.fact_spend[-1] / budget if budget else 0.0,
-        reallocated_share=execution.reallocated / brief.budget_micros
-        if brief.budget_micros
+        reallocated_share=execution.reallocated / approved.budget_micros
+        if approved.budget_micros
         else 0.0,
         replans=execution.replans,
         seconds=time.perf_counter() - started,
@@ -833,6 +856,8 @@ def run_campaign(
         channel_facts={
             c: {k: v for k, v in execution.facts[c].items() if k != "spent"} for c in channels
         },
+        target=brief.target_value,
+        required_budget=budget if brief.target_value is not None else None,
     )
 
 
@@ -886,7 +911,7 @@ def worker_main(
     process = None
     binary = None
     if not args_dict["simulator_url"]:
-        binary = harness_binary(Path(args_dict["simulator_bin"]), out_dir)
+        binary = Path(args_dict["harness_binary"])
         process = start_simulator(binary, Path(args_dict["world_config"]), port)
     simulator = SimulatorClient(
         args_dict["simulator_url"] or f"http://127.0.0.1:{port}", f"eval-worker-{index}"
@@ -1189,6 +1214,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default="optimized",
         help="how the evaluated campaign is planned",
     )
+    parser.add_argument(
+        "--target",
+        type=int,
+        default=None,
+        help="task B: plan the least budget for this KPI target instead of --budget",
+    )
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--simulator-bin", default=str(DEFAULT_SIMULATOR_BIN))
     parser.add_argument(
@@ -1237,6 +1268,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         history_random_events=not args.history_no_random_events,
         history_budget_factors=tuple(float(x) for x in args.history_budget_factors.split(",")),
         strategy=args.strategy,
+        target_value=args.target,
     )
     scenarios = [s for s in args.scenarios.split(",") if s]
     modes = [m for m in args.modes.split(",") if m]
@@ -1270,6 +1302,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             stale.unlink()
     workers = 1 if args.simulator_url else max(1, min(args.workers, len(specs)))
     args_dict = vars(args)
+    if not args.simulator_url:
+        # Copied once here: workers copying it concurrently raced against each other.
+        args_dict["harness_binary"] = str(harness_binary(Path(args.simulator_bin), out_dir))
     started = time.perf_counter()
     print(f"{len(specs)} runs on {workers} worker(s) -> {out_dir}", file=sys.stderr)
     if workers == 1:
