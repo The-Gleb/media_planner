@@ -19,6 +19,7 @@ const problemMessages: Record<string, string> = {
 }
 
 export function userError(error: unknown, operation: string): string {
+  if (error instanceof Error && error.message.startsWith('Аудитория')) return `${operation}: ${error.message}. Повторите построение плана.`
   if (error instanceof PlannerProblemError) {
     const message = error.problem.code === 'unsupported_plan_type'
       ? 'планирование по целевой метрике пока недоступно.'

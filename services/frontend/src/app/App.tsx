@@ -121,10 +121,10 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
   const mutating = state.busy || blocked || ['stepping', 'running', 'stopping'].includes(execution)
   return <>
     <ActualKPISummary facts={state.facts} currency={metadata.currency} finished={state.session?.status === 'finished'} />
-    <CampaignForm metadata={metadata} draft={state.draft} errors={state.fieldErrors} busy={mutating} hasSession={Boolean(state.session)} onChange={(draft) => dispatch({ type: 'draft', draft })} onSubmit={() => { pendingStepRef.current = null; setExecution('idle'); void createOrReset() }} />
+    <CampaignForm metadata={metadata} draft={state.draft} errors={state.fieldErrors} busy={mutating} hasSession={Boolean(state.session)} onChange={(draft) => dispatch({ type: 'draft', draft })} onSubmit={() => { planning.invalidate(); pendingStepRef.current = null; setExecution('idle'); void createOrReset() }} />
     {state.error && <section className="operation-error" role="alert"><strong>Операция не выполнена</strong><p>{state.error}</p></section>}
     <ReplanningStatus status={state.planning} onRetry={() => void retryReplan()} />
-    {state.completedRuns.length > 0 && state.activeDraft && <StrategyComparison previous={state.completedRuns.at(-1)!} current={{ strategy: state.activeDraft.campaign.strategy, optimize: state.activeDraft.campaign.optimize, facts: state.facts, finished: state.session?.status === 'finished' }} />}
+    {state.completedRuns.length > 0 && state.activeDraft && <StrategyComparison previous={state.completedRuns.at(-1)!} current={{ strategy: state.activeDraft.campaign.strategy, optimize: state.activeDraft.campaign.optimize, facts: state.facts, audience: state.session?.audience, finished: state.session?.status === 'finished' }} />}
     {state.session && state.activeDraft && state.activePlan && <>
       <PlanSummary plan={state.activePlan} />
       <AllocationTable plan={state.activePlan} currentHour={state.facts.currentHour} />

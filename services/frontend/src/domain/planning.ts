@@ -1,3 +1,4 @@
+import type { Audience } from './audience'
 import type { ChannelID, MoneyText, SimulationDraft } from './types'
 
 export type KPI = 'unique_reach' | 'clicks' | 'conversions'
@@ -19,11 +20,13 @@ export interface Allocation { channelId: ChannelID; hour: number; budgetCap: Mon
 export interface TargetKPI { metric: KPI; value: string }
 export interface ExpectedOutcome { spend: MoneyText; impressions: string; uniqueReach: string; clicks: string; conversions: string }
 export interface MediaPlan {
+  audience?: Audience
   requestId: string; stateRevision: number; planId: string; feasible: true; type: PlanType
   strategy: Strategy; optimize: KPI; currency: string; budget: MoneyText; horizon: Horizon
   expected: ExpectedOutcome | null; allocations: Allocation[]; requiredBudget: MoneyText | null; reason: null; target: TargetKPI | null
 }
 export interface InfeasibleTargetPlan {
+  audience?: Audience
   requestId: string; stateRevision: 0; planId: null; feasible: false; type: 'target_kpi'; strategy: 'optimized'; optimize: KPI
   currency: string; budget: null; horizon: Horizon; expected: ExpectedOutcome; allocations: []
   requiredBudget: null; target: TargetKPI
@@ -32,6 +35,7 @@ export interface InfeasibleTargetPlan {
 export type PlanResult = MediaPlan | InfeasibleTargetPlan
 export interface ActivePlan extends MediaPlan { index: ReadonlyMap<number, ReadonlyMap<ChannelID, MoneyText>> }
 export interface FixedBudgetPlanRequest {
+  audience?: Audience
   request_id: string; type: 'fixed_budget'; strategy: Strategy; horizon: { from_hour: number; to_hour: number }
   channels: string[]
   simulation: { simulation_id: string; world_seed: string; campaign_seed: string; start_hour: string; time_zone: string; currency: string; world_config_digest: string }
@@ -40,12 +44,14 @@ export interface FixedBudgetPlanRequest {
   budget: string; optimize: KPI; target: null
 }
 export interface TargetKPIPlanRequest {
+  audience?: Audience
   request_id: string; type: 'target_kpi'; strategy: 'optimized'; horizon: { from_hour: number; to_hour: number }
   channels: string[]; simulation: FixedBudgetPlanRequest['simulation']; market: { status: 'unavailable' }
   current: FixedBudgetPlanRequest['current']; budget: null; optimize: null; target: { metric: KPI; value: string }
 }
 export type PlanRequest = FixedBudgetPlanRequest | TargetKPIPlanRequest
 export interface PlanRequestInput {
+  audience?: Audience
   simulation: SimulationDraft; durationHours: number; channels: ChannelID[]; currency: string
   worldConfigDigest: string; budget: MoneyText; optimize: KPI; strategy?: Strategy; facts: CampaignFacts; requestId?: string
 }
@@ -58,6 +64,7 @@ export interface PendingPlanningRound {
   readonly targetPresentation: Pick<MediaPlan, 'type' | 'target' | 'expected' | 'requiredBudget'> | null
 }
 export interface CompletedRun {
+  audience?: Audience
   strategy: Strategy
   optimize: KPI
   planId: string

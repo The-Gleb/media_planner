@@ -33,3 +33,16 @@ root.
   explicitly a non-deduplicated channel sum.
 - Uniform and catalog-optimized runs can be compared sequentially. A completed first run remains in
   tab memory while reset starts the other strategy with the same immutable simulation and scenario.
+
+## Audience selection
+
+Use `docker compose up --build -d` from the root. The synthetic segmented world is enabled
+by default (recreating Simulator discards its in-memory run).
+The campaign form offers one shared geo/gender/age segment selection for all channels, or all audiences.
+Common segment dimensions are mapped to each channel's IDs; channels without segments need no selection.
+Selection is fixed for the run; editing a new draft only takes effect after reset.
+Catalogue failures block launch and offer retry. Legacy worlds need no selection.
+ActiveRun stores immutable segment selection and sends it directly to Simulator reset and every Step,
+including retries. Planner requests contain no audience and no echo is required, so pre-segmentation
+Planner versions work unchanged. Stale plan replies from an invalidated run cannot be applied. Charts remain channel-level aggregates.
+Browser proof: `AUDIENCE_E2E=1 DASHBOARD_BASE_URL=http://127.0.0.1:18081 npm run test:e2e -- audience-selection.spec.ts`.

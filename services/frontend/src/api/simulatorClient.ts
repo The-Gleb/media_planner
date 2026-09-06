@@ -1,3 +1,4 @@
+import { decodeAudienceCatalog } from './audienceCodecs'
 import { decodeActiveRun, decodeProblem, decodeStepResult, decodeWorldMetadata } from './codecs'
 import type { ProblemDetails, SimulationConfigPayload, StepPayload } from './types'
 
@@ -16,6 +17,11 @@ export class SimulatorClient {
   async ready(): Promise<boolean> {
     const response = await this.fetcher('/api/health/ready', { headers: { Accept: 'application/json' } })
     return response.ok
+  }
+
+  async audienceCatalog() {
+    try { const response = await this.request('/api/v1/audience-segments'); return decodeAudienceCatalog(await response.json()) }
+    catch (error) { if (error instanceof SimulatorProblemError && error.problem.status === 404) return null; throw error }
   }
 
   async metadata() {

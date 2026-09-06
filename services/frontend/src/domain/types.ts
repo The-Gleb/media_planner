@@ -1,3 +1,4 @@
+import type { Audience } from './audience'
 export type ChannelID = string
 export type MoneyText = string
 export type SimulationStatus = 'active' | 'finished'
@@ -44,6 +45,7 @@ export interface ScenarioDraft {
 }
 
 export interface CampaignDraft {
+  audience?: Audience
   durationHours: string
   planType: 'fixed_budget' | 'target_kpi'
   totalBudget: MoneyText
@@ -59,6 +61,7 @@ export interface LaunchDraft {
 }
 
 export interface ActiveRun {
+  audience?: Audience
   simulationId: string
   status: SimulationStatus
   currentHour: string
@@ -112,6 +115,7 @@ export interface ChannelBudget {
 }
 
 export interface PendingStep {
+  audience?: Audience
   stepId: string
   expectedHour: string
   actions: readonly ChannelBudget[]

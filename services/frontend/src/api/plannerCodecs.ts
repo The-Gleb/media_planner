@@ -1,3 +1,4 @@
+import { normalizeAudience } from '../domain/audience'
 import { parseMoney } from '../domain/numeric'
 import type { Allocation, ExpectedOutcome, KPI, MediaPlan, PlanResult, TargetKPI } from '../domain/planning'
 
@@ -18,13 +19,13 @@ function decodeExpected(raw:unknown):ExpectedOutcome { const value=object(raw,'e
 function decodeAllocations(raw:unknown):Allocation[]{if(!Array.isArray(raw)||raw.length<1||raw.length>43200)throw new Error('invalid_plan_allocations');const allocations=raw.map((rawItem)=>{const item=object(rawItem,'plan_allocation');exact(item,['channel_id','hour','budget_cap','expected'],'plan_allocation');if(typeof item.channel_id!=='string'||!CHANNEL.test(item.channel_id)||!integer(item.hour,0,2159)||!money6(item.budget_cap)||item.expected!==null)throw new Error('invalid_plan_allocation');return{channelId:item.channel_id,hour:item.hour as number,budgetCap:item.budget_cap,expected:null}});for(let i=1;i<allocations.length;i++){const a=allocations[i-1],b=allocations[i];if(a.hour>b.hour||(a.hour===b.hour&&a.channelId>=b.channelId))throw new Error('invalid_plan_order')}return allocations}
 
 export function decodePlanResult(raw: unknown): PlanResult {
-  const value=object(raw,'plan'); exact(value,KEYS,'plan')
+  const value=object(raw,'plan'); exact(value,value.audience === undefined ? KEYS : [...KEYS,'audience'],'plan')
   const horizon=object(value.horizon,'plan_horizon'); exact(horizon,['from_hour','to_hour'],'plan_horizon')
   if(typeof value.request_id!=='string'||!UUID.test(value.request_id)||!integer(value.state_revision,0,2160)
     ||!['fixed_budget','target_kpi'].includes(String(value.type))||!['uniform','optimized'].includes(String(value.strategy))
     ||!['unique_reach','clicks','conversions'].includes(String(value.optimize))||typeof value.currency!=='string'||!/^[A-Z]{3}$/.test(value.currency)
     ||!integer(horizon.from_hour,0,2159)||!integer(horizon.to_hour,1,2160)||(horizon.from_hour as number)>=(horizon.to_hour as number)) throw new Error('invalid_plan')
-  const common={requestId:value.request_id,stateRevision:value.state_revision as number,type:value.type as MediaPlan['type'],strategy:value.strategy as MediaPlan['strategy'],optimize:value.optimize as KPI,currency:value.currency,horizon:{fromHour:horizon.from_hour as number,toHour:horizon.to_hour as number}}
+  const common={...(value.audience === undefined ? {} : {audience:normalizeAudience(value.audience)}),requestId:value.request_id,stateRevision:value.state_revision as number,type:value.type as MediaPlan['type'],strategy:value.strategy as MediaPlan['strategy'],optimize:value.optimize as KPI,currency:value.currency,horizon:{fromHour:horizon.from_hour as number,toHour:horizon.to_hour as number}}
   if(value.feasible===false){
     if(value.type!=='target_kpi'||value.strategy!=='optimized'||value.state_revision!==0||value.plan_id!==null||value.budget!==null||value.required_budget!==null||!Array.isArray(value.allocations)||value.allocations.length!==0)throw new Error('invalid_infeasible_plan')
     const reason=object(value.reason,'reason');exact(reason,['code','detail','max_achievable','recommended_target'],'reason');if(reason.code!=='target_exceeds_capacity'||typeof reason.detail!=='string'||!count(reason.max_achievable)||!count(reason.recommended_target))throw new Error('invalid_reason')

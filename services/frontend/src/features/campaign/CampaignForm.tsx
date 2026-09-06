@@ -2,6 +2,8 @@ import type { LaunchDraft, SimulationDraft, WorldMetadata } from '../../domain/t
 import type { FieldErrors } from './validation'
 import { PlanningFields } from './PlanningFields'
 import { ScenarioFields } from './ScenarioFields'
+import { useState } from 'react'
+import { AudienceFields } from './AudienceFields'
 
 interface Props {
   metadata: WorldMetadata
@@ -14,6 +16,10 @@ interface Props {
 }
 
 export function CampaignForm({ metadata, draft, errors, busy, hasSession, onChange, onSubmit }: Props) {
+  const segmented = metadata.engineVersion === 'sim-v2-delivery'
+  const [audienceReady, setAudienceReady] = useState(false)
+  const [editAudience, setEditAudience] = useState(false)
+  const emptyAudience = Object.values(draft.campaign.audience ?? {}).some(s => s.segment_ids.length === 0)
   const setSimulation = (field: keyof SimulationDraft, value: string) => onChange({
     ...draft,
     simulation: { ...draft.simulation, [field]: value },
@@ -22,7 +28,7 @@ export function CampaignForm({ metadata, draft, errors, busy, hasSession, onChan
   return <section className="card" aria-labelledby="launch-form-title">
     <h2 id="launch-form-title">Настройка запуска</h2>
     {Object.keys(errors).length > 0 && <p className="error" role="alert">Проверьте отмеченные поля.</p>}
-    <form onSubmit={(event) => { event.preventDefault(); onSubmit() }} noValidate className="stack">
+    <form onSubmit={(event) => { event.preventDefault(); if (segmented && (!audienceReady || emptyAudience)) return; setEditAudience(false); onSubmit() }} noValidate className="stack">
       <fieldset>
         <legend><strong>Симуляция</strong></legend>
         <p className="field-hint">Мир и начальное состояние. После создания эти параметры сохраняются для повторных запусков кампании.</p>
@@ -45,7 +51,11 @@ export function CampaignForm({ metadata, draft, errors, busy, hasSession, onChan
         <PlanningFields value={draft.campaign} currency={metadata.currency} errors={errors} disabled={busy} onChange={(campaign) => onChange({ ...draft, campaign })} />
       </fieldset>
 
-      <div className="actions"><button type="submit" disabled={busy}>{busy ? 'Построение плана…' : hasSession ? 'Перепланировать, сбросить и запустить' : 'Построить план и запустить'}</button></div>
+      {segmented && <>
+        {hasSession && <button type="button" disabled={busy} onClick={() => setEditAudience(true)}>Изменить аудиторию для нового запуска</button>}
+        <AudienceFields digest={metadata.worldConfigDigest} value={draft.campaign.audience} onReady={setAudienceReady} disabled={busy || (hasSession && !editAudience)} onChange={audience => onChange({ ...draft, campaign: { ...draft.campaign, audience } })} />
+      </>}
+      <div className="actions"><button type="submit" disabled={busy || (segmented && (!audienceReady || emptyAudience))}>{busy ? 'Построение плана…' : hasSession ? 'Перепланировать, сбросить и запустить' : 'Построить план и запустить'}</button></div>
     </form>
   </section>
 }

@@ -10,6 +10,7 @@ export interface ProblemDetails {
 }
 
 export interface SimulationConfigPayload {
+  audience?: import('../domain/audience').Audience
   world_seed: string
   campaign_seed: string
   start_hour: string
@@ -20,6 +21,7 @@ export interface SimulationConfigPayload {
 }
 
 export interface StepPayload {
+  audience?: import('../domain/audience').Audience
   step_id: string
   actions: Array<{ channel_id: string; budget_cap: string }>
 }

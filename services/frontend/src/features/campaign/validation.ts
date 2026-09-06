@@ -1,5 +1,6 @@
 import type { LaunchDraft, WorldMetadata } from '../../domain/types'
 import { MAX_INT64, parseMoney } from '../../domain/numeric'
+import { normalizeAudience } from '../../domain/audience'
 
 export type FieldErrors = Record<string, string>
 const MIN_INT64 = -MAX_INT64 - 1n
@@ -15,6 +16,10 @@ function validInt64(value: string): boolean {
 export function validateDraft(draft: LaunchDraft, metadata: WorldMetadata): FieldErrors {
   const errors: FieldErrors = {}
   const { simulation, campaign } = draft
+  if (campaign.audience !== undefined) {
+    try { const audience = normalizeAudience(campaign.audience); if (Object.keys(audience).some(id => !metadata.channelIds.includes(id))) throw new Error('unknown_channel') }
+    catch { errors['campaign.audience'] = 'Выберите непустую аудиторию для существующих каналов.' }
+  }
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(simulation.simulationId)) errors['simulation.simulationId'] = '1–128 символов: латиница, цифры, точка, _ или -.'
   if (!validInt64(simulation.worldSeed)) errors['simulation.worldSeed'] = 'Введите целое число int64.'
   if (!validInt64(simulation.campaignSeed)) errors['simulation.campaignSeed'] = 'Введите целое число int64.'

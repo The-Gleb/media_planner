@@ -26,6 +26,7 @@ export function useCampaignController(metadata: WorldMetadata) {
 
   const createOrReset = useCallback(async () => {
     const current = ref.current
+    if (current.busy) return
     const errors = validateDraft(current.draft, metadata)
     if (Object.keys(errors).length) { dispatch({ type: 'invalid', errors }); return }
     const launch = structuredClone(current.draft)
@@ -53,6 +54,7 @@ export function useCampaignController(metadata: WorldMetadata) {
       const prior = ref.current.session
       const currentETag = prior?.simulationId === simulation.simulationId ? prior.etag : null
       const response = await simulatorClient.putSimulation(simulation.simulationId, {
+        ...(campaign.audience === undefined ? {} : { audience: campaign.audience }),
         world_seed: simulation.worldSeed, campaign_seed: simulation.campaignSeed,
         start_hour: new Date(simulation.startHour).toISOString().replace('.000Z', 'Z'),
         duration_hours: Number(campaign.durationHours), time_zone: simulation.timeZone,
@@ -63,7 +65,7 @@ export function useCampaignController(metadata: WorldMetadata) {
           multiplier: simulation.scenario.metric === 'pause' ? 0 : Number(simulation.scenario.multiplier),
         }] : [],
       }, currentETag)
-      dispatch({ type: 'created', session: response.data, activeDraft: activeLaunch, activePlan, facts })
+      dispatch({ type: 'created', session: { ...response.data, ...(campaign.audience === undefined ? {} : { audience: structuredClone(campaign.audience) }) }, activeDraft: activeLaunch, activePlan, facts })
     } catch (error) {
       const fieldErrors = error instanceof SimulatorProblemError
         ? Object.fromEntries((error.problem.errors ?? []).map((entry) => [apiFieldPaths[entry.field] ?? entry.field, entry.detail ?? entry.code]))

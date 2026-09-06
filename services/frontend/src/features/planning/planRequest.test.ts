@@ -20,6 +20,8 @@ describe('plan request', () => {
     expect(request.horizon).toEqual({ from_hour: 0, to_hour: 24 })
     expect(request.current).toMatchObject({ state_revision: 1, spent: '1.000001', unique_reach: '9', clicks: '4', conversions: '2' })
     expect(request.market).toEqual({ status: 'unavailable' })
+    const targeted = buildPlanRequest({ ...common(), budget: '12', optimize: 'clicks', audience: { social_1: { segment_ids: ['example'] } } })
+    expect(targeted).not.toHaveProperty('audience')
   })
 
   it('builds an initial optimized target request without a user budget', () => {
