@@ -9,5 +9,5 @@ test('target KPI mode estimates a budget and starts an executable campaign', asy
   await page.getByRole('button', { name: 'Построить план и запустить' }).click()
   await expect(page.getByText('Целевой KPI', { exact: true })).toBeVisible()
   await expect(page.getByText('Расчётный бюджет')).toBeVisible()
-  await expect(page.getByText(/Benchmark-прогноз/)).toBeVisible()
+  await expect(page.getByText(/Прогноз плана/)).toBeVisible()
 })
