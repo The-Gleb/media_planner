@@ -93,3 +93,20 @@ Metric definitions follow `docs/mathematical-model.md`, section 13. Final deviat
 `(fact_T − plan_T) / plan_T` at the last hour. Trajectory error is the mean of `|fact_t − plan_t| /
 plan_t` over hours after the first `--trajectory-skip-hours` (default 24), because the cumulative
 plan is close to zero at the start and a few stochastic conversions would dominate the mean.
+
+## Experiment A: planner accuracy (`planner_eval.py`)
+
+`planner_eval.py` runs the harness over a fixed grid of cells — knowledge source (history 0/1/3/5),
+KPI, budget (0.5/1.2/3 M), horizon (14/21 d), strategy, warm-up style and task B (`--target`:
+least budget for a KPI target, then frozen execution) — on world seeds 1–8 and campaign seeds 1–2,
+and aggregates the cells into `all_runs.json`, `calibration.json` (plan versus fact per run),
+`decomposition.json` (fact / plan per channel for impressions, CTR, CR and CPM) and `summary.md`:
+
+```bash
+cd services/planner
+uv run --group dev python ../../tools/evaluation/planner_eval.py --out ../../tools/evaluation/runs/planner
+uv run --group dev python ../../tools/evaluation/planner_eval.py --out ../../tools/evaluation/runs/planner --summarize-only
+```
+
+The committed copy of the aggregates lives in `results/planner/`; `results/experiment-a-planner.ipynb`
+reads it and writes the figures to `results/figures/planner_*.png`.

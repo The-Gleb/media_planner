@@ -384,6 +384,10 @@ def main() -> int:
         for r in rows
     ]
     (out_dir / "calibration.json").write_text(json.dumps(calibration))
+    decomposition = [
+        x for r in rows if r["cell"] == CELLS[0].name for x in channel_ratios(out_dir, CELLS[0], r)
+    ]
+    (out_dir / "decomposition.json").write_text(json.dumps(decomposition))
     summary = summarize(out_dir, rows)
     (out_dir / "summary.md").write_text(summary)
     print(summary)

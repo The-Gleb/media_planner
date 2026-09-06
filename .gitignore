@@ -51,6 +51,8 @@ tools/evaluation/results/*
 !tools/evaluation/results/figures/
 !tools/evaluation/results/tracking/
 !tools/evaluation/results/tracking/**
+!tools/evaluation/results/experiment-a-planner.ipynb
+!tools/evaluation/results/planner/
 
 # Long evaluation runs (durable scratch, regenerable)
 tools/evaluation/runs/
