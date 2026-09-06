@@ -51,7 +51,7 @@ services:
       SIMULATOR_LOG_LEVEL: info
       SIMULATOR_RELAX_PRECONDITIONS: "true"
     volumes:
-      - ./services/simulator/configs/world-config.mediaplan.json:/etc/media-planner/world-config.json:ro
+      - ./services/simulator/configs/world-config.audience.json:/etc/media-planner/world-config.json:ro
     ports:
       - 127.0.0.1:8080:8080
     expose:

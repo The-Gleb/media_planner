@@ -22,7 +22,7 @@ audience capacities, profiles, drift and shocks are intentionally excluded.
 
 ## Configuration
 
-`configs/world-config.mediaplan.json` is the Compose default. It defines eight channels:
+`configs/world-config.audience.json` is the Simulator Compose default. It defines eight channels:
 `social_1..3`, `programmatic`, `marketplace_1..3`, and `sms`, with channel-specific CPM, CTR, CR,
 supply, volatility and saturation ranges. It is strict JSON and is mounted read-only in Compose.
 The smaller `configs/world-config.json` remains a deterministic test fixture. The service refuses
@@ -75,3 +75,25 @@ conditional headers. Remove that variable or set it to `false` to test productio
 protection.
 
 See `specs/001-adaptive-media-planning/quickstart.md` for full contract examples and acceptance checks.
+
+## Segmented world (default)
+
+From the repository root: `docker compose up --build -d`.
+Recreating Simulator loses its in-memory run. Planner keeps `world-config.mediaplan.json`
+for channel benchmarks and does not need segment support.
+The synthetic `world-config.audience.json` uses sim-v2-delivery: eight geo/gender/age groups,
+each with independent warm/cold capacity and history. `GET /v1/audience-segments` exposes only
+IDs and dimensions. PUT/reset accepts optional `audience`; Step may confirm the same selection
+but cannot change it. Omission on Step uses the reset selection; null/empty selections are invalid.
+Public selection contains only segment_ids. Temperature is not accepted in PUT/Step.
+Internally warm/cold compete by history-based delivery score (priority4/1, saturation/fatigue floors0.05);
+a separate allocator buys target impression shares under CPM/supply/cap. These are synthetic constants,
+not a KPI optimizer. Saturated warm can receive repeat impressions. All pool counts/costs sum to the channel.
+Old sim-v1-segments configs require an explicit version change and fresh reset; seeds identify the new model.
+Responses retain channel aggregates and `ecpm`, with no segment details.
+
+Budgets are hourly caps, not deposited balances. Underdelivery is not charged or stored;
+only actual spend reduces the campaign's remaining budget in the caller.
+For rollback, finish the run and restore the old binary with its sim-v0 config; no in-memory
+state migration is supported. See `specs/004-audience-segments/quickstart.md` for tests and
+1-CPU latency/RSS checks (100/500 ms p95 for 8/128 segments, 256 MiB).

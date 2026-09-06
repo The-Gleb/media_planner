@@ -16,6 +16,7 @@ type scenarioEventDTO struct {
 }
 
 type simulationConfigDTO struct {
+	Audience            domain.Audience    `json:"audience,omitempty"`
 	WorldSeed           string             `json:"world_seed"`
 	CampaignSeed        string             `json:"campaign_seed"`
 	StartHour           domain.Hour        `json:"start_hour"`
@@ -39,6 +40,7 @@ func (d simulationConfigDTO) domain() (domain.SimulationConfig, error) {
 		events = append(events, domain.ScenarioEvent{ChannelID: event.ChannelID, Metric: event.Metric, StartIndex: event.StartIndex, DurationHours: event.DurationHours, Multiplier: event.Multiplier})
 	}
 	cfg := domain.SimulationConfig{WorldSeed: world, CampaignSeed: campaign, StartHour: d.StartHour, DurationHours: d.DurationHours, TimeZone: d.TimeZone, ScenarioEvents: events, DisableRandomEvents: d.DisableRandomEvents}
+	cfg.Audience = d.Audience
 	if err := cfg.Validate(); err != nil {
 		return domain.SimulationConfig{}, err
 	}
@@ -50,8 +52,9 @@ type channelActionDTO struct {
 	BudgetCap string           `json:"budget_cap"`
 }
 type stepRequestDTO struct {
-	StepID  string             `json:"step_id"`
-	Actions []channelActionDTO `json:"actions"`
+	Audience domain.Audience    `json:"audience,omitempty"`
+	StepID   string             `json:"step_id"`
+	Actions  []channelActionDTO `json:"actions"`
 }
 
 func (d stepRequestDTO) domainActions() ([]domain.ChannelAction, error) {

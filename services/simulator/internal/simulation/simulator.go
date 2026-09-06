@@ -21,6 +21,7 @@ type Engine struct {
 	current domain.Hour
 	steps   int
 	states  map[domain.ChannelID]runtimeState
+	pools   map[poolKey]runtimeState
 	events  map[domain.ChannelID][]EventSchedule
 	ready   bool
 }
@@ -28,6 +29,11 @@ type Engine struct {
 func New(model config.Loaded) *Engine { return &Engine{model: model} }
 
 func (e *Engine) Reset(cfg domain.SimulationConfig) error {
+	audience, err := config.ResolveAudience(e.model.Model, cfg.Audience)
+	if err != nil {
+		return err
+	}
+	cfg.Audience = audience
 	if err := cfg.Validate(); err != nil {
 		return err
 	}
@@ -61,6 +67,7 @@ func (e *Engine) Reset(cfg domain.SimulationConfig) error {
 	e.current = cfg.StartHour
 	e.steps = 0
 	e.states = states
+	e.pools = map[poolKey]runtimeState{}
 	e.events = events
 	e.ready = true
 	return nil
@@ -111,6 +118,9 @@ func (e *Engine) Step(actions []domain.ChannelAction) ([]domain.Observation, err
 			return nil, domain.NewError(domain.CodeValidation, "actions are invalid").WithField("actions["+strconv.Itoa(i)+"].budget_cap", "must_be_non_negative_finite")
 		}
 		budgets[a.ChannelID] = budget
+	}
+	if e.model.Model.EngineVersion == config.SegmentedEngineVersion {
+		return e.stepAudience(budgets)
 	}
 	newStates := make(map[domain.ChannelID]runtimeState, len(e.states))
 	for id, s := range e.states {

@@ -23,11 +23,12 @@ type BaseProbability struct {
 }
 
 type BaseConfig struct {
+	capacityPresent  bool
 	CPM              BasePositive    `json:"cpm"`
 	CTR              BaseProbability `json:"ctr"`
 	CR               BaseProbability `json:"cr"`
 	RequestsPerDay   BasePositive    `json:"requests_per_day"`
-	AudienceCapacity BasePositive    `json:"audience_capacity"`
+	AudienceCapacity BasePositive    `json:"audience_capacity,omitzero"`
 }
 
 type HourlyPattern struct {
@@ -103,6 +104,7 @@ type ShockPatterns struct {
 }
 
 type ChannelModelConfig struct {
+	Segments        []Segment        `json:"segments,omitempty"`
 	ID              domain.ChannelID `json:"id"`
 	Type            string           `json:"type"`
 	Base            BaseConfig       `json:"base"`

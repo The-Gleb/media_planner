@@ -20,7 +20,7 @@ func (a *API) step(w http.ResponseWriter, r *http.Request) {
 		writeProblem(w, r, err)
 		return
 	}
-	result, etag, err := a.registry.Step(id, input.StepID, r.Header.Get("If-Match"), actions)
+	result, etag, err := a.registry.Step(id, input.StepID, r.Header.Get("If-Match"), actions, input.Audience)
 	if err != nil {
 		writeProblem(w, r, err)
 		return

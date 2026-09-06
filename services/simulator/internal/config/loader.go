@@ -38,6 +38,9 @@ func Load(r io.Reader) (Loaded, error) {
 	if err := decoder.Decode(&extra); err != io.EOF {
 		return Loaded{}, fmt.Errorf("decode world config: trailing JSON value")
 	}
+	if err := validateSegments(&model); err != nil {
+		return Loaded{}, err
+	}
 	if err := validate(model); err != nil {
 		return Loaded{}, err
 	}
@@ -51,8 +54,11 @@ func Load(r io.Reader) (Loaded, error) {
 }
 
 func validate(model WorldModelConfig) error {
-	if model.EngineVersion != EngineVersion {
-		return invalid("engine_version", "must_equal_sim-v0")
+	if model.EngineVersion == "sim-v1-segments" {
+		return invalid("engine_version", "migrate_to_sim-v2-delivery_and_reset")
+	}
+	if model.EngineVersion != EngineVersion && model.EngineVersion != SegmentedEngineVersion {
+		return invalid("engine_version", "unsupported_engine_version")
 	}
 	if !currencyPattern.MatchString(model.Currency) {
 		return invalid("currency", "invalid_iso4217_code")
@@ -76,7 +82,11 @@ func validate(model WorldModelConfig) error {
 		if channel.Type == "" {
 			return invalid(prefix+".type", "required")
 		}
-		if err := validateChannel(prefix, channel); err != nil {
+		checked := channel
+		if model.EngineVersion == SegmentedEngineVersion {
+			checked.Base.AudienceCapacity = BasePositive{Distribution: "log_uniform", Range: FloatRange{Min: 1, Max: 1}}
+		}
+		if err := validateChannel(prefix, checked); err != nil {
 			return err
 		}
 	}
