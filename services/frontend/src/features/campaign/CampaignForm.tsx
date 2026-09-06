@@ -1,4 +1,5 @@
 import type { LaunchDraft, SimulationDraft, WorldMetadata } from '../../domain/types'
+import type { PastCampaignRecord } from '../../domain/history'
 import type { FieldErrors } from './validation'
 import { PlanningFields } from './PlanningFields'
 import { ScenarioFields } from './ScenarioFields'
@@ -9,11 +10,13 @@ interface Props {
   errors: FieldErrors
   busy: boolean
   hasSession: boolean
+  pastCampaigns?: readonly PastCampaignRecord[]
+  onClearHistory?: () => void
   onChange: (draft: LaunchDraft) => void
   onSubmit: () => void
 }
 
-export function CampaignForm({ metadata, draft, errors, busy, hasSession, onChange, onSubmit }: Props) {
+export function CampaignForm({ metadata, draft, errors, busy, hasSession, pastCampaigns = [], onClearHistory, onChange, onSubmit }: Props) {
   const setSimulation = (field: keyof SimulationDraft, value: string) => onChange({
     ...draft,
     simulation: { ...draft.simulation, [field]: value },
@@ -38,11 +41,11 @@ export function CampaignForm({ metadata, draft, errors, busy, hasSession, onChan
 
       <fieldset>
         <legend><strong>Кампания</strong></legend>
-        <p className="field-hint">План строится до запуска симуляции. Бюджет равномерно распределяется по всем часам и каналам.</p>
+        <p className="field-hint">План строится до запуска симуляции по публичному каталогу и, если включено, по истории прошлых кампаний на этом рынке.</p>
         <div className="form-grid campaign-fields">
           <Field id="durationHours" label="Длительность, часов" value={draft.campaign.durationHours} error={errors['campaign.durationHours']} onChange={(value) => onChange({ ...draft, campaign: { ...draft.campaign, durationHours: value } })} inputMode="numeric" disabled={busy} />
         </div>
-        <PlanningFields value={draft.campaign} currency={metadata.currency} errors={errors} disabled={busy} onChange={(campaign) => onChange({ ...draft, campaign })} />
+        <PlanningFields value={draft.campaign} currency={metadata.currency} errors={errors} disabled={busy} pastCampaigns={pastCampaigns} onClearHistory={onClearHistory} onChange={(campaign) => onChange({ ...draft, campaign })} />
       </fieldset>
 
       <div className="actions"><button type="submit" disabled={busy}>{busy ? 'Построение плана…' : hasSession ? 'Перепланировать, сбросить и запустить' : 'Построить план и запустить'}</button></div>

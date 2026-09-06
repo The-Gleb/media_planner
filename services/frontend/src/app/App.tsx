@@ -20,6 +20,8 @@ import { LatestObservations } from '../features/results/LatestObservations'
 import { StrategyComparison } from '../features/results/StrategyComparison'
 import { userError } from './messages'
 import { useServicesBootstrap } from './useServicesBootstrap'
+import { buildApprovedPayload, buildRecentHours, sameMarket, savePastCampaigns } from '../domain/history'
+import { PlanVsFact } from '../features/results/PlanVsFact'
 
 const MetricHistory = lazy(() => import('../features/results/MetricHistory').then((module) => ({ default: module.MetricHistory })))
 
@@ -34,7 +36,8 @@ export function App() {
 
 function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; plannerReady: boolean }) {
   const campaign = useCampaignController(metadata)
-  const { state, dispatch, getState, createOrReset } = campaign
+  const { state, dispatch, getState, createOrReset, clearHistory } = campaign
+  const marketHistory = state.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, state.draft.simulation.worldSeed))
   const planning = usePlanningController(metadata.channelIds, dispatch)
   const [execution, setExecution] = useState<ExecutionStatus>('idle')
   const [playbackDelayMs, setPlaybackDelayMs] = useState(500)
@@ -58,6 +61,16 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
     if (!current.session || !current.activeDraft || !current.activePlan) throw new Error('campaign_missing')
     const committed = commitHourlyResult(current.history, current.session, current.facts, pending, response.data, response.etag)
     pendingStepRef.current = null
+    const { execution: mode, useHistory } = current.activeDraft.campaign
+    if (mode === 'frozen' || committed.session.status === 'finished') {
+      dispatch({ type: 'facts-committed', ...committed, pendingRound: null })
+      if (committed.session.status === 'finished') savePastCampaigns(getState().pastCampaigns)
+      return
+    }
+    const history = useHistory
+      ? current.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, current.activeDraft!.simulation.worldSeed)).map((record) => record.payload)
+      : []
+    const tracking = mode === 'adaptive' && current.activePlan.strategy === 'optimized' && current.approvedPlan
     const request = buildPlanRequest({
       simulation: current.activeDraft.simulation,
       durationHours: Number(current.activeDraft.campaign.durationHours),
@@ -68,6 +81,9 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
       optimize: current.activePlan.optimize,
       strategy: current.activePlan.strategy,
       facts: committed.facts,
+      history,
+      recentHours: buildRecentHours(committed.history, metadata.channelIds),
+      approved: tracking ? buildApprovedPayload(current.approvedPlan!) : null,
     })
     const expectedPlanId = current.activePlan.strategy === 'uniform' ? current.activePlan.planId : null
     const round = planning.prepare(request, expectedPlanId, current.activePlan)
@@ -121,12 +137,13 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
   const mutating = state.busy || blocked || ['stepping', 'running', 'stopping'].includes(execution)
   return <>
     <ActualKPISummary facts={state.facts} currency={metadata.currency} finished={state.session?.status === 'finished'} />
-    <CampaignForm metadata={metadata} draft={state.draft} errors={state.fieldErrors} busy={mutating} hasSession={Boolean(state.session)} onChange={(draft) => dispatch({ type: 'draft', draft })} onSubmit={() => { pendingStepRef.current = null; setExecution('idle'); void createOrReset() }} />
+    <CampaignForm metadata={metadata} draft={state.draft} errors={state.fieldErrors} busy={mutating} hasSession={Boolean(state.session)} pastCampaigns={marketHistory} onClearHistory={clearHistory} onChange={(draft) => dispatch({ type: 'draft', draft })} onSubmit={() => { pendingStepRef.current = null; setExecution('idle'); void createOrReset() }} />
     {state.error && <section className="operation-error" role="alert"><strong>Операция не выполнена</strong><p>{state.error}</p></section>}
     <ReplanningStatus status={state.planning} onRetry={() => void retryReplan()} />
-    {state.completedRuns.length > 0 && state.activeDraft && <StrategyComparison previous={state.completedRuns.at(-1)!} current={{ strategy: state.activeDraft.campaign.strategy, optimize: state.activeDraft.campaign.optimize, facts: state.facts, finished: state.session?.status === 'finished' }} />}
+    {state.completedRuns.length > 0 && state.activeDraft && <StrategyComparison previous={state.completedRuns.at(-1)!} current={{ strategy: state.activeDraft.campaign.strategy, optimize: state.activeDraft.campaign.optimize, facts: state.facts, finished: state.session?.status === 'finished', execution: state.activeDraft.campaign.execution, historyCount: state.historyCount, planSpend: state.approvedPlan?.expected?.spend ?? null, planKpi: state.approvedPlan?.expected?.[state.activeDraft.campaign.optimize === 'unique_reach' ? 'uniqueReach' : state.activeDraft.campaign.optimize] ?? null }} />}
     {state.session && state.activeDraft && state.activePlan && <>
-      <PlanSummary plan={state.activePlan} />
+      <PlanSummary plan={state.activePlan} execution={state.activeDraft.campaign.execution} historyCount={state.historyCount} />
+      {state.approvedPlan && <PlanVsFact approved={state.approvedPlan} history={state.history} channelIds={state.session.channelIds} currency={state.session.currency} execution={state.activeDraft.campaign.execution} />}
       <AllocationTable plan={state.activePlan} currentHour={state.facts.currentHour} />
       <CampaignSummary session={state.session} activeDraft={state.activeDraft} />
       <section className="card stack timelapse-player" aria-labelledby="control-title"><div className="status-line"><div><p className="eyebrow">TIMELAPSE</p><h2 id="control-title">Ход кампании</h2></div><span className="status-badge" data-tone={execution === 'running' ? 'ok' : undefined}>{execution === 'running' ? 'В эфире' : state.session.status === 'finished' ? 'Завершена' : 'Ожидает'}</span></div><RunProgress session={state.session} status={execution} /><StepControls session={state.session} status={execution} blocked={blocked} playbackDelayMs={playbackDelayMs} onPlaybackDelayChange={(delay) => { playbackDelayRef.current = delay; setPlaybackDelayMs(delay) }} onStep={() => void oneHour()} onRun={() => void runToEnd()} onStop={() => { stopRef.current = true; setExecution('stopping') }} /></section>

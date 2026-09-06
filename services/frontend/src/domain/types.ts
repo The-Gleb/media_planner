@@ -51,7 +51,13 @@ export interface CampaignDraft {
   strategy: 'uniform' | 'optimized'
   targetMetric: 'unique_reach' | 'clicks' | 'conversions'
   targetValue: string
+  execution: ExecutionMode
+  useHistory: boolean
 }
+
+/** How the campaign is run after the plan is approved. */
+export type ExecutionMode = 'adaptive_max' | 'adaptive' | 'frozen'
+export const EXECUTION_MODES: readonly ExecutionMode[] = ['adaptive_max', 'adaptive', 'frozen']
 
 export interface LaunchDraft {
   simulation: SimulationDraft

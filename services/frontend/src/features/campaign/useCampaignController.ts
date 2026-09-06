@@ -3,6 +3,7 @@ import { plannerClient } from '../../api/plannerClient'
 import { SimulatorProblemError, simulatorClient } from '../../api/simulatorClient'
 import { userError } from '../../app/messages'
 import { zeroCampaignFacts } from '../../domain/campaignFacts'
+import { sameMarket, savePastCampaigns } from '../../domain/history'
 import type { WorldMetadata } from '../../domain/types'
 import { activatePlan } from '../planning/activePlan'
 import { buildPlanRequest, buildTargetPlanRequest } from '../planning/planRequest'
@@ -34,8 +35,11 @@ export function useCampaignController(metadata: WorldMetadata) {
       const { simulation, campaign } = launch
       const facts = zeroCampaignFacts(metadata.channelIds)
       const requestId = crypto.randomUUID()
+      const history = campaign.useHistory
+        ? current.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, simulation.worldSeed)).map((record) => record.payload)
+        : []
       const common = { simulation, durationHours: Number(campaign.durationHours), channels: metadata.channelIds,
-        currency: metadata.currency, worldConfigDigest: metadata.worldConfigDigest, facts, requestId }
+        currency: metadata.currency, worldConfigDigest: metadata.worldConfigDigest, facts, requestId, history }
       const request = campaign.planType === 'fixed_budget'
         ? buildPlanRequest({ ...common, budget: campaign.totalBudget, optimize: campaign.optimize, strategy: campaign.strategy })
         : buildTargetPlanRequest({ ...common, targetMetric: campaign.targetMetric, targetValue: campaign.targetValue })
@@ -63,7 +67,8 @@ export function useCampaignController(metadata: WorldMetadata) {
           multiplier: simulation.scenario.metric === 'pause' ? 0 : Number(simulation.scenario.multiplier),
         }] : [],
       }, currentETag)
-      dispatch({ type: 'created', session: response.data, activeDraft: activeLaunch, activePlan, facts })
+      dispatch({ type: 'created', session: response.data, activeDraft: activeLaunch, activePlan, facts, historyCount: history.length })
+      savePastCampaigns(ref.current.pastCampaigns)
     } catch (error) {
       const fieldErrors = error instanceof SimulatorProblemError
         ? Object.fromEntries((error.problem.errors ?? []).map((entry) => [apiFieldPaths[entry.field] ?? entry.field, entry.detail ?? entry.code]))
@@ -72,5 +77,7 @@ export function useCampaignController(metadata: WorldMetadata) {
     }
   }, [dispatch, metadata])
 
-  return { state, dispatch, getState: () => ref.current, createOrReset }
+  const clearHistory = useCallback(() => { dispatch({ type: 'clear-history' }); savePastCampaigns([]) }, [dispatch])
+
+  return { state, dispatch, getState: () => ref.current, createOrReset, clearHistory }
 }

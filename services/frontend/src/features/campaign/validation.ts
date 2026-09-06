@@ -1,4 +1,4 @@
-import type { LaunchDraft, WorldMetadata } from '../../domain/types'
+import { EXECUTION_MODES, type LaunchDraft, type WorldMetadata } from '../../domain/types'
 import { MAX_INT64, parseMoney } from '../../domain/numeric'
 
 export type FieldErrors = Record<string, string>
@@ -37,6 +37,7 @@ export function validateDraft(draft: LaunchDraft, metadata: WorldMetadata): Fiel
   }
   if (!['uniform', 'optimized'].includes(campaign.strategy)) errors['campaign.strategy'] = 'Выберите доступную стратегию.'
   if (!['unique_reach', 'clicks', 'conversions'].includes(campaign.optimize)) errors['campaign.optimize'] = 'Выберите поддерживаемую KPI.'
+  if (!EXECUTION_MODES.includes(campaign.execution)) errors['campaign.execution'] = 'Выберите режим исполнения.'
   if (campaign.planType === 'fixed_budget') {
     try { parseMoney(campaign.totalBudget) } catch { errors['campaign.totalBudget'] = 'Введите неотрицательную сумму, максимум 6 знаков после точки.' }
   } else if (!/^[1-9][0-9]*$/.test(campaign.targetValue)) {
@@ -58,6 +59,7 @@ export function initialDraft(metadata: WorldMetadata): LaunchDraft {
       durationHours: '168',
       planType: 'fixed_budget', totalBudget: '100000', optimize: 'unique_reach', strategy: 'uniform',
       targetMetric: 'unique_reach', targetValue: '10000',
+      execution: 'adaptive_max', useHistory: true,
     },
   }
 }
