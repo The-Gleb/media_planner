@@ -107,6 +107,7 @@ class Brief:
     history_mode: str
     history_random_events: bool
     history_budget_factors: tuple[float, ...]
+    strategy: str = "optimized"
 
 
 @dataclass(frozen=True)
@@ -723,7 +724,17 @@ def approve_plan(
 ) -> tuple[PlanView, dict[str, Any]]:
     simulation = simulation_context(brief, metadata, "eval-approval", 0, 0)
     body = planner.plan(
-        plan_request(brief, simulation, channels, zero_facts(channels), 0, None, None, history)
+        plan_request(
+            brief,
+            simulation,
+            channels,
+            zero_facts(channels),
+            0,
+            None,
+            None,
+            history,
+            strategy=brief.strategy,
+        )
     )
     return PlanView(body, channels, brief.optimize, brief.budget_micros), body
 
@@ -1137,6 +1148,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--random-events", action="store_true", help="keep Simulator random drift and shocks"
     )
+    parser.add_argument(
+        "--strategy",
+        choices=("optimized", "uniform"),
+        default="optimized",
+        help="how the evaluated campaign is planned",
+    )
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--simulator-bin", default=str(DEFAULT_SIMULATOR_BIN))
     parser.add_argument("--world-config", default=str(DEFAULT_WORLD_CONFIG))
@@ -1172,6 +1189,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         history_mode=args.history_mode,
         history_random_events=not args.history_no_random_events,
         history_budget_factors=tuple(float(x) for x in args.history_budget_factors.split(",")),
+        strategy=args.strategy,
     )
     scenarios = [s for s in args.scenarios.split(",") if s]
     modes = [m for m in args.modes.split(",") if m]

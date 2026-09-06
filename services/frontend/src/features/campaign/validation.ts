@@ -51,14 +51,14 @@ export function initialDraft(metadata: WorldMetadata): LaunchDraft {
   now.setUTCMinutes(0, 0, 0)
   return {
     simulation: {
-      simulationId: 'simulation-demo_1', worldSeed: '42001', campaignSeed: '77001',
+      simulationId: 'simulation-demo_1', worldSeed: '1', campaignSeed: '1',
       startHour: now.toISOString().replace('.000Z', 'Z'), timeZone: 'Europe/Moscow', disableRandomEvents: false,
-      scenario: { enabled: false, channelId: metadata.channelIds[0] ?? '', metric: 'ctr', startIndex: '84', durationHours: '24', multiplier: '0.6' },
+      scenario: { enabled: false, channelId: metadata.channelIds.includes('social_1') ? 'social_1' : metadata.channelIds[0] ?? '', metric: 'ctr', startIndex: '252', durationHours: '252', multiplier: '0.6' },
     },
     campaign: {
-      durationHours: '168',
-      planType: 'fixed_budget', totalBudget: '100000', optimize: 'unique_reach', strategy: 'uniform',
-      targetMetric: 'unique_reach', targetValue: '10000',
+      durationHours: '504',
+      planType: 'fixed_budget', totalBudget: '1200000', optimize: 'conversions', strategy: 'optimized',
+      targetMetric: 'clicks', targetValue: '50000',
       execution: 'adaptive_max', useHistory: true,
     },
   }

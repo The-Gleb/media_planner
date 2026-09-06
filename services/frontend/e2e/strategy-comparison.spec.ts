@@ -5,7 +5,7 @@ test.afterEach(async ({ request }) => clearSimulation(request))
 
 test('runs two strategies sequentially on the same seeded simulation and compares totals', async ({ page, request }) => {
   await clearSimulation(request)
-  await createCampaign(page, 1)
+  await createCampaign(page, 1, 'uniform')
   await page.getByRole('button', { name: 'Один час' }).click()
   await expect(page.getByText('Финал')).toBeVisible()
 
