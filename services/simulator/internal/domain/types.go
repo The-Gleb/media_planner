@@ -81,6 +81,7 @@ type ScenarioEvent struct {
 var scenarioMetrics = map[string]struct{}{"supply": {}, "cpm": {}, "ctr": {}, "cr": {}, "pause": {}}
 
 type SimulationConfig struct {
+	Audience            Audience        `json:"audience,omitempty"`
 	WorldSeed           int64           `json:"world_seed"`
 	CampaignSeed        int64           `json:"campaign_seed"`
 	StartHour           Hour            `json:"start_hour"`

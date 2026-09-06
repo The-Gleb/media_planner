@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"reflect"
 	"sort"
 	"strconv"
 	"sync"
@@ -113,6 +114,11 @@ func (r *Registry) Reset(id string, cfg domain.SimulationConfig, ifMatch string,
 	} else if r.requirePreconditions && !ifNoneMatch {
 		return SimulationState{}, "", false, domain.NewError(domain.CodePreconditionFailed, "creation requires If-None-Match: *")
 	}
+	selection, err := config.ResolveAudience(r.model.Model, cfg.Audience)
+	if err != nil {
+		return SimulationState{}, "", false, err
+	}
+	cfg.Audience = selection
 	engine := simulation.New(r.model)
 	if err := engine.Reset(cfg); err != nil {
 		return SimulationState{}, "", false, err
@@ -138,7 +144,7 @@ func (r *Registry) Current(id string) (CurrentState, string, error) {
 	return CurrentState{ID: id, Status: res.status, CurrentHour: res.engine.CurrentHour(), RemainingHours: res.cfg.DurationHours - res.steps()}, res.etag, nil
 }
 
-func (r *Registry) Step(id, stepID, ifMatch string, actions []domain.ChannelAction) (StepResult, string, error) {
+func (r *Registry) Step(id, stepID, ifMatch string, actions []domain.ChannelAction, audience ...domain.Audience) (StepResult, string, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	res, err := r.find(id)
@@ -149,6 +155,17 @@ func (r *Registry) Step(id, stepID, ifMatch string, actions []domain.ChannelActi
 	if err != nil {
 		return StepResult{}, "", err
 	}
+	effective := res.cfg.Audience
+	if len(audience) > 0 && audience[0] != nil {
+		effective, err = config.ResolveAudience(r.model.Model, audience[0])
+		if err != nil {
+			return StepResult{}, "", err
+		}
+	}
+	if effective != nil {
+		raw, _ := json.Marshal(effective)
+		hash += string(raw)
+	}
 	if cached, ok := res.cache[stepID]; ok {
 		if cached.hash != hash {
 			return StepResult{}, "", domain.NewError(domain.CodeStepIDReused, "step_id was used with different actions")
@@ -157,6 +174,9 @@ func (r *Registry) Step(id, stepID, ifMatch string, actions []domain.ChannelActi
 	}
 	if stepID == "" {
 		return StepResult{}, "", domain.NewError(domain.CodeValidation, "step_id is required").WithField("step_id", "required")
+	}
+	if !reflect.DeepEqual(effective, res.cfg.Audience) {
+		return StepResult{}, "", domain.NewError(domain.CodeValidation, "audience differs from reset").WithField("audience", "audience_mismatch")
 	}
 	if r.requirePreconditions && (ifMatch == "" || ifMatch != res.etag) {
 		return StepResult{}, "", domain.NewError(domain.CodePreconditionFailed, "stale or missing If-Match")

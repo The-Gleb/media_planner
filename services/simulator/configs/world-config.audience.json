@@ -1,0 +1,3519 @@
+{
+  "engine_version": "sim-v2-delivery",
+  "currency": "RUB",
+  "money_scale": 6,
+  "channels": [
+    {
+      "id": "social_1",
+      "type": "social",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 80,
+            "max": 150
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.007,
+            "max": 0.015
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.015,
+            "max": 0.04
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 300000,
+            "max": 530000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 17,
+            "max": 22
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 17,
+            "max": 23
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 18,
+            "max": 23
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 1,
+            "max": 1.25
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.9,
+            "max": 1.1
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.3,
+          "max": 1.2
+        },
+        "reach_decay_strength": {
+          "min": 1,
+          "max": 3
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.2,
+          "max": 1
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.04,
+          "max": 0.12
+        },
+        "cpm_sigma": {
+          "min": 0.03,
+          "max": 0.1
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 61237,
+          "cold_capacity": 244949,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "social_2",
+      "type": "social",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 120,
+            "max": 300
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.003,
+            "max": 0.011
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.015,
+            "max": 0.045
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 220000,
+            "max": 400000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 16,
+            "max": 22
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 17,
+            "max": 23
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 18,
+            "max": 23
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 1,
+            "max": 1.25
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.9,
+            "max": 1.1
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.3,
+          "max": 1.2
+        },
+        "reach_decay_strength": {
+          "min": 1,
+          "max": 3
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.2,
+          "max": 1
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.04,
+          "max": 0.12
+        },
+        "cpm_sigma": {
+          "min": 0.03,
+          "max": 0.1
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 43301,
+          "cold_capacity": 173205,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "social_3",
+      "type": "social",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 60,
+            "max": 130
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.0025,
+            "max": 0.008
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.01,
+            "max": 0.035
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 260000,
+            "max": 470000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 18,
+            "max": 23
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 17,
+            "max": 23
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 18,
+            "max": 23
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 1,
+            "max": 1.25
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.9,
+            "max": 1.1
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.3,
+          "max": 1.2
+        },
+        "reach_decay_strength": {
+          "min": 1,
+          "max": 3
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.2,
+          "max": 1
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.04,
+          "max": 0.12
+        },
+        "cpm_sigma": {
+          "min": 0.03,
+          "max": 0.1
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 51234,
+          "cold_capacity": 204939,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "programmatic",
+      "type": "programmatic",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 15,
+            "max": 120
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.0015,
+            "max": 0.008
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.01,
+            "max": 0.03
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 900000,
+            "max": 1600000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 10,
+            "max": 22
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 11,
+            "max": 22
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 10,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 10,
+            "max": 20
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 0.9,
+            "max": 1.1
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.9,
+            "max": 1.1
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.2,
+          "max": 0.8
+        },
+        "reach_decay_strength": {
+          "min": 0.8,
+          "max": 2
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.1,
+          "max": 0.6
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.08,
+          "max": 0.25
+        },
+        "cpm_sigma": {
+          "min": 0.05,
+          "max": 0.2
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 193649,
+          "cold_capacity": 774596,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "marketplace_1",
+      "type": "marketplace",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 130,
+            "max": 300
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.0025,
+            "max": 0.012
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.03,
+            "max": 0.09
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 330000,
+            "max": 600000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 11,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 11,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 1,
+            "max": 1.3
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.8,
+          "max": 2
+        },
+        "reach_decay_strength": {
+          "min": 1.5,
+          "max": 3.5
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.3,
+          "max": 1.2
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.04,
+          "max": 0.12
+        },
+        "cpm_sigma": {
+          "min": 0.03,
+          "max": 0.1
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 47433,
+          "cold_capacity": 189738,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "marketplace_2",
+      "type": "marketplace",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 180,
+            "max": 420
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.003,
+            "max": 0.011
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.0375,
+            "max": 0.105
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 450000,
+            "max": 810000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 11,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 11,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 1,
+            "max": 1.3
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.8,
+          "max": 2
+        },
+        "reach_decay_strength": {
+          "min": 1.5,
+          "max": 3.5
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.3,
+          "max": 1.2
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.04,
+          "max": 0.12
+        },
+        "cpm_sigma": {
+          "min": 0.03,
+          "max": 0.1
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 60465,
+          "cold_capacity": 241869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "marketplace_3",
+      "type": "marketplace",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 150,
+            "max": 500
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.001,
+            "max": 0.008
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.045,
+            "max": 0.12
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 180000,
+            "max": 321000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 11,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 11,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 12,
+            "max": 21
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 1,
+            "max": 1.3
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.8,
+          "max": 2
+        },
+        "reach_decay_strength": {
+          "min": 1.5,
+          "max": 3.5
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.3,
+          "max": 1.2
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.04,
+          "max": 0.12
+        },
+        "cpm_sigma": {
+          "min": 0.03,
+          "max": 0.1
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 23715,
+          "cold_capacity": 94869,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "sms",
+      "type": "sms",
+      "base": {
+        "cpm": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 1800,
+            "max": 3200
+          }
+        },
+        "ctr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.05,
+            "max": 0.25
+          }
+        },
+        "cr": {
+          "distribution": "logit_uniform",
+          "range": {
+            "min": 0.01,
+            "max": 0.06
+          }
+        },
+        "requests_per_day": {
+          "distribution": "log_uniform",
+          "range": {
+            "min": 38000,
+            "max": 66000
+          }
+        }
+      },
+      "hourly_patterns": {
+        "supply": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 9,
+            "max": 19
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.6,
+            "max": 1.4
+          }
+        },
+        "cpm": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 9,
+            "max": 19
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 5
+          },
+          "peak_amplitude": {
+            "min": 0.1,
+            "max": 0.4
+          }
+        },
+        "ctr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 10,
+            "max": 19
+          },
+          "peak_width_hours": {
+            "min": 2,
+            "max": 6
+          },
+          "peak_amplitude": {
+            "min": 0.05,
+            "max": 0.3
+          }
+        },
+        "cr": {
+          "peaks_count": {
+            "min": 1,
+            "max": 2
+          },
+          "peak_center_hour": {
+            "min": 10,
+            "max": 19
+          },
+          "peak_width_hours": {
+            "min": 3,
+            "max": 7
+          },
+          "peak_amplitude": {
+            "min": 0.02,
+            "max": 0.2
+          }
+        }
+      },
+      "weekday_patterns": {
+        "supply": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "weekend_modifier": {
+            "min": 0.7,
+            "max": 0.95
+          }
+        },
+        "cpm": {
+          "variation": {
+            "min": 0.02,
+            "max": 0.1
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1.15
+          }
+        },
+        "ctr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.95,
+            "max": 1.15
+          }
+        },
+        "cr": {
+          "variation": {
+            "min": 0.01,
+            "max": 0.08
+          },
+          "weekend_modifier": {
+            "min": 0.85,
+            "max": 1
+          }
+        }
+      },
+      "saturation": {
+        "start_threshold": {
+          "min": 0.25,
+          "max": 0.5
+        },
+        "price_growth_strength": {
+          "min": 0.2,
+          "max": 0.6
+        },
+        "reach_decay_strength": {
+          "min": 2,
+          "max": 4
+        },
+        "frequency_reach_decay_strength": {
+          "min": 0.05,
+          "max": 0.3
+        },
+        "ctr_fatigue_strength": {
+          "min": 0.6,
+          "max": 1.5
+        },
+        "frequency_fatigue_strength": {
+          "min": 0.03,
+          "max": 0.2
+        }
+      },
+      "volatility": {
+        "requests_sigma": {
+          "min": 0.04,
+          "max": 0.12
+        },
+        "cpm_sigma": {
+          "min": 0.03,
+          "max": 0.1
+        }
+      },
+      "drift": {
+        "supply": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.2
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cpm": {
+          "probability": 0.25,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.25
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "ctr": {
+          "probability": 0.2,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.15
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        },
+        "cr": {
+          "probability": 0.15,
+          "log_strength": {
+            "min": 0.02,
+            "max": 0.12
+          },
+          "duration_hours": {
+            "min": 12,
+            "max": 72
+          }
+        }
+      },
+      "shocks": {
+        "supply": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.3,
+            "max": 1.8
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cpm": {
+          "probability": 0.2,
+          "multiplier": {
+            "min": 0.7,
+            "max": 1.7
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "ctr": {
+          "probability": 0.15,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "cr": {
+          "probability": 0.1,
+          "multiplier": {
+            "min": 0.5,
+            "max": 1.4
+          },
+          "duration_hours": {
+            "min": 1,
+            "max": 12
+          }
+        },
+        "pause": {
+          "probability": 0.05,
+          "duration_hours": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      },
+      "segments": [
+        {
+          "id": "moscow_female_25_34",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_35_44",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_25_34",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_35_44",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_25_34",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_35_44",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_25_34",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 25,
+          "age_to_exclusive": 35,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_35_44",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 35,
+          "age_to_exclusive": 45,
+          "warm_capacity": 6123,
+          "cold_capacity": 24495,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        }
+      ]
+    }
+  ]
+}
