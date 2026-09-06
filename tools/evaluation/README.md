@@ -17,9 +17,16 @@ approved optimized plan (revision 0)
             approved target)      cumulative calibration)
 ```
 
-`adaptive` sends the last 72 committed hours (`current.recent_hours`) and the approved plan
-(`approved`: KPI target and channel budgets) with every replanning request; `adaptive_max` sends the
-recent hours but no approved plan, so Planner maximises the remaining KPI as before.
+Both live modes send the last 72 committed hours (`current.recent_hours`) with every replanning
+request. `adaptive_max` is the primary live algorithm: it maximises the remaining KPI every hour.
+`adaptive` additionally sends the approved plan (`approved`: KPI target and channel budgets) and
+keeps the approved channel mix while the projected finish is on plan, moving budget only to get
+back on plan or to spend what a paused channel cannot take; it is the conservative variant that
+reshuffles ~2 % of the budget instead of ~30 %.
+
+Two roles, two questions, and `summary.md` is split accordingly: the planner is judged by the
+symmetric forecast error under frozen execution; the traffic manager by the KPI delivered on the
+approved plan relative to frozen execution, with budget use and reallocation as context.
 
 Both modes run on the same `world_seed`, `campaign_seed` and controlled shock, so the paired
 difference is attributable to hourly replanning alone. History warm-up plays `--history-levels`

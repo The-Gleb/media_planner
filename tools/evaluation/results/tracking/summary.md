@@ -1,45 +1,44 @@
-# Media Planner evaluation: history, frozen and adaptive
+# Media Planner evaluation
 
 Budget 1,200,000, horizon 504 h, KPI `conversions`, replan every 1 h, random market events off, history levels 3 (frozen warm-up campaigns), 60 runs.
 
-## Per history level, scenario and mode
+## Planner: forecast accuracy under frozen execution
 
-| History | Scenario | Mode | Runs | Final dev spend p50 | Final dev KPI p50 | |Final dev KPI| p90 | Within 20% | Trajectory error spend p50 | Trajectory error KPI p50 | Reallocated p50 |
-|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3 | none | frozen | 4 | -0.1% | +3.6% | 6.4% | 100% | 0.9% | 3.7% | 0.0% |
-| 3 | none | adaptive | 4 | -0.0% | +3.8% | 7.8% | 100% | 0.5% | 3.8% | 2.1% |
-| 3 | none | adaptive_max | 4 | -0.0% | +4.6% | 9.0% | 100% | 0.6% | 4.7% | 31.6% |
-| 3 | ctr_drop | frozen | 4 | -0.1% | -8.2% | 9.5% | 100% | 0.9% | 4.8% | 0.0% |
-| 3 | ctr_drop | adaptive | 4 | -0.0% | -4.7% | 4.9% | 100% | 0.6% | 3.9% | 28.7% |
-| 3 | ctr_drop | adaptive_max | 4 | -0.0% | -3.2% | 4.9% | 100% | 0.6% | 3.6% | 38.1% |
-| 3 | cpm_spike | frozen | 4 | -0.1% | -6.6% | 7.9% | 100% | 0.9% | 4.4% | 0.0% |
-| 3 | cpm_spike | adaptive | 4 | -0.0% | -3.7% | 4.5% | 100% | 0.6% | 3.5% | 25.4% |
-| 3 | cpm_spike | adaptive_max | 4 | -0.0% | -3.1% | 4.2% | 100% | 0.5% | 3.4% | 37.3% |
-| 3 | supply_drop | frozen | 4 | -6.0% | -2.9% | 7.3% | 100% | 3.0% | 4.8% | 0.0% |
-| 3 | supply_drop | adaptive | 4 | -0.0% | +2.4% | 5.3% | 100% | 1.1% | 3.9% | 12.2% |
-| 3 | supply_drop | adaptive_max | 4 | -0.0% | +4.0% | 5.8% | 100% | 0.7% | 4.6% | 38.4% |
-| 3 | pause | frozen | 4 | -9.5% | -4.4% | 6.6% | 100% | 6.5% | 5.5% | 0.0% |
-| 3 | pause | adaptive | 4 | -0.0% | +2.6% | 6.8% | 100% | 1.2% | 2.9% | 34.9% |
-| 3 | pause | adaptive_max | 4 | -0.0% | +2.9% | 6.9% | 100% | 0.7% | 3.0% | 40.8% |
+The approved plan is executed exactly as approved, so the deviation of the fact from the plan is the planner's forecast error. Symmetric: over-forecasting reserves money for nothing, under-forecasting hides achievable KPI.
 
-## Cold vs warm (same seeds, shock and mode; warm − cold)
+| History | Scenario | Runs | Final dev spend p50 | Final dev KPI p50 | |Final dev KPI| p90 | Within 20% | Trajectory error KPI p50 |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 3 | none | 4 | -0.1% | +3.6% | 6.4% | 100% | 3.7% |
+| 3 | ctr_drop | 4 | -0.1% | -8.2% | 9.5% | 100% | 4.8% |
+| 3 | cpm_spike | 4 | -0.1% | -6.6% | 7.9% | 100% | 4.4% |
+| 3 | supply_drop | 4 | -6.0% | -2.9% | 7.3% | 100% | 4.8% |
+| 3 | pause | 4 | -9.5% | -4.4% | 6.6% | 100% | 5.5% |
 
-| Warm history | Scenario | Mode | Pairs | Δ |final dev KPI| p50 | Δ |final dev spend| p50 | Warm closer at the end (KPI) | Warm within 20% | Cold within 20% |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
+## Traffic manager: KPI delivered on the approved plan
 
-## Frozen vs adaptive (same seeds, shock and history; adaptive − frozen)
+Same plan, same world, same shock; the live mode is the only difference. KPI uplift is the fact KPI of the live mode relative to frozen execution; budget use is fact spend over the approved budget; reallocated is the share of budget moved away from approved caps; closeness is the absolute final deviation from the plan.
 
-| History | Scenario | Adaptive kind | Pairs | Δ |final dev KPI| p50 | Δ KPI shortfall p50 | Δ |final dev spend| p50 | Adaptive closer at the end (KPI) | Δ trajectory error KPI p50 |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-| 3 | none | adaptive | 4 | +0.3% | +0.0% | -0.1% | 25% | +0.2% |
-| 3 | none | adaptive_max | 4 | +1.5% | +0.0% | -0.1% | 25% | +0.7% |
-| 3 | ctr_drop | adaptive | 4 | -3.6% | -3.6% | -0.0% | 100% | -0.6% |
-| 3 | ctr_drop | adaptive_max | 4 | -3.6% | -3.6% | -0.1% | 100% | -0.5% |
-| 3 | cpm_spike | adaptive | 4 | -2.9% | -2.9% | -0.1% | 100% | -0.6% |
-| 3 | cpm_spike | adaptive_max | 4 | -3.1% | -3.1% | -0.1% | 100% | -0.4% |
-| 3 | supply_drop | adaptive | 4 | -2.1% | -3.1% | -5.5% | 75% | +0.0% |
-| 3 | supply_drop | adaptive_max | 4 | -1.5% | -3.4% | -6.0% | 50% | +0.3% |
-| 3 | pause | adaptive | 4 | -1.6% | -4.4% | -9.2% | 50% | -2.3% |
-| 3 | pause | adaptive_max | 4 | -1.3% | -4.4% | -9.1% | 50% | -2.1% |
+| History | Scenario | Live mode | Pairs | KPI uplift vs frozen p50 | More KPI than frozen | Budget use p50 | Reallocated p50 | Closeness to plan p50 | Frozen closeness p50 |
+|---:|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 3 | none | adaptive | 4 | +0.3% | 75% | 100.0% | 2.1% | 3.8% | 3.6% |
+| 3 | none | adaptive_max | 4 | +1.4% | 75% | 100.0% | 31.6% | 4.6% | 3.6% |
+| 3 | ctr_drop | adaptive | 4 | +3.9% | 100% | 100.0% | 28.7% | 4.7% | 8.2% |
+| 3 | ctr_drop | adaptive_max | 4 | +3.9% | 100% | 100.0% | 38.1% | 3.2% | 8.2% |
+| 3 | cpm_spike | adaptive | 4 | +3.1% | 100% | 100.0% | 25.4% | 3.7% | 6.6% |
+| 3 | cpm_spike | adaptive_max | 4 | +3.3% | 100% | 100.0% | 37.3% | 3.1% | 6.6% |
+| 3 | supply_drop | adaptive | 4 | +3.5% | 75% | 99.5% | 12.2% | 2.4% | 6.6% |
+| 3 | supply_drop | adaptive_max | 4 | +5.1% | 100% | 100.0% | 38.4% | 4.0% | 6.6% |
+| 3 | pause | adaptive | 4 | +7.6% | 100% | 99.7% | 34.9% | 2.6% | 4.4% |
+| 3 | pause | adaptive_max | 4 | +8.4% | 100% | 100.0% | 40.8% | 2.9% | 4.4% |
 
-Final dev is the signed deviation of the cumulative fact from the approved plan at the end of the campaign, (fact − plan) / plan; the case threshold of 20% applies to its absolute value for spend and KPI at once (column Within 20%). Trajectory error is the mean of |fact_t − plan_t| / plan_t over hours after the first 24 h. History N means the plan was built with the observable facts of N earlier campaigns on the same world seed; 0 is the public catalog alone. Reallocated is the share of the budget moved away from approved caps. Mode adaptive tracks the approved plan (moves budget only when the projected finish leaves the plan); adaptive_max is the earlier behaviour that maximises the remaining KPI every hour. KPI shortfall counts only underdelivery.
+## Live modes head to head (same seeds, shock and history)
+
+| History | Scenario | Pairs | adaptive KPI p50 | adaptive_max KPI p50 | Best mode by KPI |
+|---:|---|---:|---:|---:|---|
+| 3 | none | 4 | 2,436 | 2,476 | adaptive_max (3/4) |
+| 3 | ctr_drop | 4 | 2,194 | 2,190 | adaptive_max (3/4) |
+| 3 | cpm_spike | 4 | 2,212 | 2,219 | adaptive_max (3/4) |
+| 3 | supply_drop | 4 | 2,361 | 2,396 | adaptive_max (4/4) |
+| 3 | pause | 4 | 2,416 | 2,426 | adaptive_max (4/4) |
+
+Final dev is (fact − plan) / plan at the end of the campaign; the case threshold of 20% applies to its absolute value for spend and KPI at once (Within 20%). Trajectory error is the mean of |fact_t − plan_t| / plan_t over hours after the first 24 h. History N means the plan was built with the observable facts of N earlier campaigns on the same world seed; 0 is the public catalog alone. Live modes: adaptive_max maximises the remaining KPI every hour (primary live algorithm); adaptive keeps the approved channel mix while the projected finish is on plan and moves budget only to get back on plan or to spend what a paused channel cannot take (conservative variant).

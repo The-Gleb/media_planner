@@ -945,9 +945,11 @@ def _group(results: list[RunResult], **match: object) -> list[RunResult]:
 
 
 def summarize(results: list[RunResult], brief: Brief) -> str:
+    """Two roles, two questions: how honest is the plan, how much KPI does live execution deliver."""
     levels = sorted({r.history for r in results})
+    live_modes = [m for m in MODES if m != "frozen" and any(r.mode == m for r in results)]
     lines: list[str] = []
-    lines.append("# Media Planner evaluation: history, frozen and adaptive\n")
+    lines.append("# Media Planner evaluation\n")
     lines.append(
         f"Budget {brief.budget_micros / MICROS:,.0f}, horizon {brief.duration_hours} h, "
         f"KPI `{brief.optimize}`, replan every {brief.replan_every} h, "
@@ -955,99 +957,116 @@ def summarize(results: list[RunResult], brief: Brief) -> str:
         f"{', '.join(map(str, levels))} ({brief.history_mode} warm-up campaigns), "
         f"{len(results)} runs.\n"
     )
-    lines.append("## Per history level, scenario and mode\n")
+
+    lines.append("## Planner: forecast accuracy under frozen execution\n")
     lines.append(
-        "| History | Scenario | Mode | Runs | Final dev spend p50 | Final dev KPI p50 "
-        "| |Final dev KPI| p90 | Within 20% | Trajectory error spend p50 "
-        "| Trajectory error KPI p50 | Reallocated p50 |"
+        "The approved plan is executed exactly as approved, so the deviation of the fact from the "
+        "plan is the planner's forecast error. Symmetric: over-forecasting reserves money for "
+        "nothing, under-forecasting hides achievable KPI.\n"
     )
-    lines.append("|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+    lines.append(
+        "| History | Scenario | Runs | Final dev spend p50 | Final dev KPI p50 "
+        "| |Final dev KPI| p90 | Within 20% | Trajectory error KPI p50 |"
+    )
+    lines.append("|---:|---|---:|---:|---:|---:|---:|---:|")
     for level in levels:
         for scenario in SCENARIOS:
-            for mode in MODES:
-                group = _group(results, history=level, scenario=scenario, mode=mode)
-                if not group:
-                    continue
-                lines.append(
-                    f"| {level} | {scenario} | {mode} | {len(group)} "
-                    f"| {_median(r.final_dev_spend for r in group):+.1%} "
-                    f"| {_median(r.final_dev_kpi for r in group):+.1%} "
-                    f"| {quantile([r.final_ape_kpi for r in group], 0.9):.1%} "
-                    f"| {sum(r.within_20 for r in group) / len(group):.0%} "
-                    f"| {quantile([r.mape_spend for r in group], 0.5):.1%} "
-                    f"| {quantile([r.mape_kpi for r in group], 0.5):.1%} "
-                    f"| {_median(r.reallocated_share for r in group):.1%} |"
-                )
+            group = _group(results, history=level, scenario=scenario, mode="frozen")
+            if not group:
+                continue
+            lines.append(
+                f"| {level} | {scenario} | {len(group)} "
+                f"| {_median(r.final_dev_spend for r in group):+.1%} "
+                f"| {_median(r.final_dev_kpi for r in group):+.1%} "
+                f"| {quantile([r.final_ape_kpi for r in group], 0.9):.1%} "
+                f"| {sum(r.within_20 for r in group) / len(group):.0%} "
+                f"| {quantile([r.mape_kpi for r in group], 0.5):.1%} |"
+            )
 
     by_key = {(r.history, r.scenario, r.world_seed, r.campaign_seed, r.mode): r for r in results}
-
-    lines.append("\n## Cold vs warm (same seeds, shock and mode; warm − cold)\n")
+    lines.append("\n## Traffic manager: KPI delivered on the approved plan\n")
     lines.append(
-        "| Warm history | Scenario | Mode | Pairs | Δ |final dev KPI| p50 | Δ |final dev spend| p50 "
-        "| Warm closer at the end (KPI) | Warm within 20% | Cold within 20% |"
+        "Same plan, same world, same shock; the live mode is the only difference. KPI uplift is "
+        "the fact KPI of the live mode relative to frozen execution; budget use is fact spend "
+        "over the approved budget; reallocated is the share of budget moved away from approved "
+        "caps; closeness is the absolute final deviation from the plan.\n"
     )
-    lines.append("|---:|---|---|---:|---:|---:|---:|---:|---:|")
-    if 0 in levels:
-        for level in levels:
-            if level == 0:
-                continue
-            for scenario in SCENARIOS:
-                for mode in MODES:
-                    pairs = [
-                        (by_key[(0, scenario, r.world_seed, r.campaign_seed, mode)], r)
-                        for r in _group(results, history=level, scenario=scenario, mode=mode)
-                        if (0, scenario, r.world_seed, r.campaign_seed, mode) in by_key
-                    ]
-                    if not pairs:
-                        continue
-                    delta_kpi = [w.final_ape_kpi - c.final_ape_kpi for c, w in pairs]
-                    delta_spend = [w.final_ape_spend - c.final_ape_spend for c, w in pairs]
-                    lines.append(
-                        f"| {level} | {scenario} | {mode} | {len(pairs)} "
-                        f"| {_median(delta_kpi):+.1%} | {_median(delta_spend):+.1%} "
-                        f"| {sum(d < 0 for d in delta_kpi) / len(pairs):.0%} "
-                        f"| {sum(w.within_20 for _, w in pairs) / len(pairs):.0%} "
-                        f"| {sum(c.within_20 for c, _ in pairs) / len(pairs):.0%} |"
-                    )
-
-    lines.append("\n## Frozen vs adaptive (same seeds, shock and history; adaptive − frozen)\n")
     lines.append(
-        "| History | Scenario | Adaptive kind | Pairs | Δ |final dev KPI| p50 | Δ KPI shortfall p50 "
-        "| Δ |final dev spend| p50 | Adaptive closer at the end (KPI) | Δ trajectory error KPI p50 |"
+        "| History | Scenario | Live mode | Pairs | KPI uplift vs frozen p50 | More KPI than frozen "
+        "| Budget use p50 | Reallocated p50 | Closeness to plan p50 | Frozen closeness p50 |"
     )
-    lines.append("|---:|---|---|---:|---:|---:|---:|---:|---:|")
+    lines.append("|---:|---|---|---:|---:|---:|---:|---:|---:|---:|")
     for level in levels:
         for scenario in SCENARIOS:
-            for kind in ("adaptive", "adaptive_max"):
+            for mode in live_modes:
                 pairs = [
                     (by_key[(level, scenario, r.world_seed, r.campaign_seed, "frozen")], r)
-                    for r in _group(results, history=level, scenario=scenario, mode=kind)
+                    for r in _group(results, history=level, scenario=scenario, mode=mode)
                     if (level, scenario, r.world_seed, r.campaign_seed, "frozen") in by_key
                 ]
                 if not pairs:
                     continue
-                delta_final_kpi = [a.final_ape_kpi - f.final_ape_kpi for f, a in pairs]
-                delta_short = [shortfall(a) - shortfall(f) for f, a in pairs]
-                delta_final_spend = [a.final_ape_spend - f.final_ape_spend for f, a in pairs]
-                delta_traj_kpi = [a.mape_kpi - f.mape_kpi for f, a in pairs]
+                uplift = [a.fact_kpi / f.fact_kpi - 1.0 for f, a in pairs if f.fact_kpi > 0]
                 lines.append(
-                    f"| {level} | {scenario} | {kind} | {len(pairs)} "
-                    f"| {_median(delta_final_kpi):+.1%} | {_median(delta_short):+.1%} "
-                    f"| {_median(delta_final_spend):+.1%} "
-                    f"| {sum(d < 0 for d in delta_final_kpi) / len(pairs):.0%} "
-                    f"| {_median(delta_traj_kpi):+.1%} |"
+                    f"| {level} | {scenario} | {mode} | {len(pairs)} "
+                    f"| {_median(uplift):+.1%} "
+                    f"| {sum(u > 0 for u in uplift) / len(pairs):.0%} "
+                    f"| {_median(a.budget_utilization for _, a in pairs):.1%} "
+                    f"| {_median(a.reallocated_share for _, a in pairs):.1%} "
+                    f"| {_median(a.final_ape_kpi for _, a in pairs):.1%} "
+                    f"| {_median(f.final_ape_kpi for f, _ in pairs):.1%} |"
                 )
+
+    if len(live_modes) >= 2:
+        lines.append("\n## Live modes head to head (same seeds, shock and history)\n")
+        lines.append(
+            "| History | Scenario | Pairs | "
+            + " | ".join(f"{m} KPI p50" for m in live_modes)
+            + " | Best mode by KPI |"
+        )
+        lines.append("|---:|---|---:|" + "---:|" * len(live_modes) + "---|")
+        for level in levels:
+            for scenario in SCENARIOS:
+                keys = {
+                    (r.world_seed, r.campaign_seed)
+                    for r in _group(results, history=level, scenario=scenario, mode=live_modes[0])
+                }
+                keys = {
+                    k
+                    for k in keys
+                    if all((level, scenario, k[0], k[1], m) in by_key for m in live_modes)
+                }
+                if not keys:
+                    continue
+                medians = {
+                    m: _median(by_key[(level, scenario, w, c, m)].fact_kpi for w, c in keys)
+                    for m in live_modes
+                }
+                wins = {
+                    m: sum(
+                        max(live_modes, key=lambda x: by_key[(level, scenario, w, c, x)].fact_kpi)
+                        == m
+                        for w, c in keys
+                    )
+                    for m in live_modes
+                }
+                best = max(wins, key=lambda m: wins[m])
+                lines.append(
+                    f"| {level} | {scenario} | {len(keys)} | "
+                    + " | ".join(f"{medians[m]:,.0f}" for m in live_modes)
+                    + f" | {best} ({wins[best]}/{len(keys)}) |"
+                )
+
     lines.append(
-        "\nFinal dev is the signed deviation of the cumulative fact from the approved plan at the end "
-        "of the campaign, (fact − plan) / plan; the case threshold of 20% applies to its absolute "
-        "value for spend and KPI at once (column Within 20%). Trajectory error is the mean of "
-        f"|fact_t − plan_t| / plan_t over hours after the first {brief.trajectory_skip_hours} h. "
-        "History N means the plan was built with the observable facts of N earlier campaigns on "
-        "the same world seed; 0 is the public catalog alone. Reallocated is the share of the "
-        "budget moved away from approved caps. Mode adaptive tracks the approved plan (moves "
-        "budget only when the projected finish leaves the plan); adaptive_max is the earlier "
-        "behaviour that maximises the remaining KPI every hour. KPI shortfall counts only "
-        "underdelivery."
+        "\nFinal dev is (fact − plan) / plan at the end of the campaign; the case threshold of 20% "
+        "applies to its absolute value for spend and KPI at once (Within 20%). Trajectory error "
+        f"is the mean of |fact_t − plan_t| / plan_t over hours after the first "
+        f"{brief.trajectory_skip_hours} h. History N means the plan was built with the observable "
+        "facts of N earlier campaigns on the same world seed; 0 is the public catalog alone. "
+        "Live modes: adaptive_max maximises the remaining KPI every hour (primary live "
+        "algorithm); adaptive keeps the approved channel mix while the projected finish is on "
+        "plan and moves budget only to get back on plan or to spend what a paused channel cannot "
+        "take (conservative variant)."
     )
     return "\n".join(lines) + "\n"
 
@@ -1129,6 +1148,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--planner-url", default=None, help="running Planner instead of the in-process app"
     )
     parser.add_argument("--out", default=str(REPO_ROOT / "tools/evaluation/results"))
+    parser.add_argument(
+        "--summarize-only",
+        action="store_true",
+        help="rewrite summary.md from an existing runs.json in --out without running anything",
+    )
     return parser.parse_args(argv)
 
 
@@ -1165,6 +1189,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     ]
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
+    if args.summarize_only:
+        with (out_dir / "runs.json").open() as handle:
+            stored = [RunResult(**item) for item in json.load(handle)]
+        summary = summarize(stored, brief)
+        (out_dir / "summary.md").write_text(summary)
+        print(summary)
+        return 0
     for stale in out_dir.glob("worker-*.jsonl"):
         stale.unlink()
     workers = 1 if args.simulator_url else max(1, min(args.workers, len(specs)))
