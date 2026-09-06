@@ -3,7 +3,18 @@ import { formatMoney, parseMoney } from '../../domain/numeric'
 
 export type DailySpendRow = { hour: string } & Record<string, string | number>
 
+const localCache = new Map<string, { date: string; hour: number }>()
 function localDateAndHour(iso: string, timeZone: string): { date: string; hour: number } {
+  const key = timeZone + '|' + iso
+  const hit = localCache.get(key)
+  if (hit) return hit
+  const computed = computeLocalDateAndHour(iso, timeZone)
+  if (localCache.size > 8192) localCache.clear()
+  localCache.set(key, computed)
+  return computed
+}
+
+function computeLocalDateAndHour(iso: string, timeZone: string): { date: string; hour: number } {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',

@@ -76,7 +76,7 @@ export function CampaignStep(props: Props) {
 
     {completedRuns.length > 0 && <StrategyComparison previous={completedRuns.at(-1)!} current={{ strategy: activeDraft.campaign.strategy, optimize: activeDraft.campaign.optimize, facts, finished, execution: mode, historyCount, planSpend: approvedPlan.expected?.spend ?? null, planKpi: approvedPlan.expected?.[kpi === 'unique_reach' ? 'uniqueReach' : kpi] ?? null }} />}
 
-    <PlanVsFact approved={approvedPlan} history={history} channelIds={session.channelIds} currency={session.currency} execution={mode} />
+    <PlanVsFact approved={approvedPlan} history={history} channelIds={session.channelIds} currency={session.currency} execution={mode} running={running} />
 
     <ReallocationPanel approved={approvedPlan} current={activePlan} revisions={planRevisions} facts={facts} channelIds={session.channelIds} currency={session.currency} mode={mode} expert={expert} />
 

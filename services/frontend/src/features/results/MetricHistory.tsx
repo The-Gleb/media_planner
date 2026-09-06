@@ -7,10 +7,12 @@ import { chartRows, metricUnit, seriesDefinitions } from './metricSeries'
 import { MetricChart } from './MetricChart'
 import { ExactValueInspector } from './ExactValueInspector'
 import { DailySpendChart } from './DailySpendChart'
+import { useThrottled } from './useThrottled'
 
 export function MetricHistory({ history, channelIds, currency, timeZone, running, showInspector = true, showDailySpend = true }: { history: HourlyResult[]; channelIds: string[]; currency: string; timeZone: string; running: boolean; showInspector?: boolean; showDailySpend?: boolean }) {
   const [metric, setMetric] = useState<MetricKey>('conversions')
-  const deferredHistory = useDeferredValue(history)
+  const throttledHistory = useThrottled(history, running)
+  const deferredHistory = useDeferredValue(throttledHistory)
   const renderedHistory = running ? deferredHistory : history
   const definitions = useMemo(() => seriesDefinitions(channelIds, metric), [channelIds, metric])
   const [hidden, setHidden] = useState<Set<string>>(() => new Set())

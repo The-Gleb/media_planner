@@ -1,3 +1,4 @@
+import { useThrottled } from './useThrottled'
 import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { HourlyResult } from '../../domain/types'
@@ -14,7 +15,8 @@ export function DailySpendChart({ history, channelIds, currency, timeZone, runni
   timeZone: string
   running: boolean
 }) {
-  const days = useMemo(() => spendDays(history, timeZone), [history, timeZone])
+  const renderedHistory = useThrottled(history, running)
+  const days = useMemo(() => spendDays(renderedHistory, timeZone), [renderedHistory, timeZone])
   const latestDay = days.at(-1) ?? ''
   const [selection, setSelection] = useState(LATEST)
   const selectedDay = selection === LATEST || !days.includes(selection) ? latestDay : selection
