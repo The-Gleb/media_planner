@@ -110,6 +110,8 @@ class Brief:
     history_budget_factors: tuple[float, ...]
     strategy: str = "optimized"
     target_value: int | None = None
+    shock_start: int | None = None
+    send_recent: bool = True
 
 
 @dataclass(frozen=True)
@@ -156,6 +158,9 @@ class RunResult:
     channel_facts: dict[str, dict[str, int]] = field(default_factory=dict)
     target: int | None = None
     required_budget: float | None = None
+    shock_start: int | None = None
+    top_channel: str | None = None
+    top_spend_after: float | None = None
 
 
 # --------------------------------------------------------------------------------------
@@ -355,11 +360,11 @@ def zero_facts(channels: Sequence[str]) -> dict[str, dict[str, int]]:
 
 
 def scenario_events(
-    scenario: str, channel: str, duration: int, pause_hours: int
+    scenario: str, channel: str, duration: int, pause_hours: int, start: int | None = None
 ) -> list[dict[str, Any]]:
     if scenario == "none":
         return []
-    start = duration // 2
+    start = duration // 2 if start is None else min(max(start, 0), duration - 1)
     if scenario == "pause":
         return [
             {
@@ -466,6 +471,8 @@ class Execution:
     daily: dict[str, list[dict[str, int]]]
     replans: int
     reallocated: int
+    top_caps: list[float] = field(default_factory=list)
+    top_spend: list[float] = field(default_factory=list)
 
 
 def _local(observed_hour: str, time_zone: str) -> datetime:
@@ -491,6 +498,7 @@ def execute_campaign(
     history: Sequence[dict[str, Any]],
     dataset: Any,
     dataset_tags: Mapping[str, object],
+    tracked: str | None = None,
 ) -> Execution:
     duration = brief.duration_hours
     reset_payload: dict[str, Any] = {
@@ -525,10 +533,14 @@ def execute_campaign(
     current = approved
     replans = 0
     reallocated = 0
+    top_caps: list[float] = []
+    top_spend: list[float] = []
     for hour in range(duration):
         actions = current.actions(hour)
         for c in channels:
             reallocated += abs(current.caps[hour][c] - approved.caps[hour][c])
+        if tracked is not None:
+            top_caps.append(current.caps[hour][tracked] / MICROS)
         response = simulator.step(actions)
         local = _local(response["observed_hour"], brief.time_zone)
         hour_row: dict[str, Any] = {"hour": hour, "channels": {}}
@@ -570,6 +582,8 @@ def execute_campaign(
             for key in FACT_KEYS:
                 day_row[key] += int(observation[key])
             record["spent"] += spend
+            if channel_id == tracked:
+                top_spend.append(spend / MICROS)
             hour_row["channels"][channel_id] = {
                 "spent": observation["spend"],
                 **{key: str(observation[key]) for key in FACT_KEYS},
@@ -596,13 +610,23 @@ def execute_campaign(
                 response["observed_hour"],
                 history,
                 budget_micros=approved.budget_micros,
-                recent=recent,
+                recent=recent if brief.send_recent else (),
                 approved=approved_payload,
             )
             current = PlanView(planner.plan(body), channels, brief.optimize, approved.budget_micros)
             replans += 1
     return Execution(
-        plan_spend, plan_kpi, fact_spend, fact_kpi, facts, bins, daily, replans, reallocated
+        plan_spend,
+        plan_kpi,
+        fact_spend,
+        fact_kpi,
+        facts,
+        bins,
+        daily,
+        replans,
+        reallocated,
+        top_caps,
+        top_spend,
     )
 
 
@@ -781,7 +805,10 @@ def run_campaign(
         brief, metadata, simulator.simulation_id, spec.world_seed, spec.campaign_seed
     )
     shocked = approved.top_channel if spec.scenario != "none" else None
-    events = scenario_events(spec.scenario, approved.top_channel, duration, brief.pause_hours)
+    events = scenario_events(
+        spec.scenario, approved.top_channel, duration, brief.pause_hours, brief.shock_start
+    )
+    shock_start = int(events[0]["start_index"]) if events else None
     execution = execute_campaign(
         brief=brief,
         channels=channels,
@@ -805,12 +832,23 @@ def run_campaign(
             "scenario": spec.scenario,
             "mode": spec.mode,
         },
+        tracked=approved.top_channel,
     )
 
     trajectories_dir.mkdir(parents=True, exist_ok=True)
     with (trajectories_dir / f"{spec.run_id}.csv").open("w", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["hour", "plan_spend", "fact_spend", "plan_kpi", "fact_kpi"])
+        writer.writerow(
+            [
+                "hour",
+                "plan_spend",
+                "fact_spend",
+                "plan_kpi",
+                "fact_kpi",
+                "top_cap",
+                "top_spend",
+            ]
+        )
         for hour in range(duration):
             writer.writerow(
                 [
@@ -819,8 +857,11 @@ def run_campaign(
                     f"{execution.fact_spend[hour]:.2f}",
                     f"{execution.plan_kpi[hour]:.3f}",
                     f"{execution.fact_kpi[hour]:.0f}",
+                    f"{execution.top_caps[hour]:.2f}",
+                    f"{execution.top_spend[hour]:.2f}",
                 ]
             )
+    top_after = sum(execution.top_spend[shock_start:]) if shock_start is not None else None
 
     budget = approved.budget_micros / MICROS
     dev_spend = final_dev(execution.plan_spend, execution.fact_spend)
@@ -858,6 +899,9 @@ def run_campaign(
         },
         target=brief.target_value,
         required_budget=budget if brief.target_value is not None else None,
+        shock_start=shock_start,
+        top_channel=approved.top_channel,
+        top_spend_after=top_after,
     )
 
 
@@ -1200,6 +1244,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--replan-every", type=int, default=1, help="hours between replans")
     parser.add_argument("--pause-hours", type=int, default=72)
     parser.add_argument(
+        "--shock-start",
+        type=int,
+        default=None,
+        help="hour the scenario shock starts (default: middle of the campaign)",
+    )
+    parser.add_argument(
+        "--no-recent",
+        action="store_true",
+        help="ablation: replan without current.recent_hours, so calibration sees no live facts",
+    )
+    parser.add_argument(
         "--trajectory-skip-hours",
         type=int,
         default=24,
@@ -1263,6 +1318,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         replan_every=args.replan_every,
         pause_hours=args.pause_hours,
         random_events=args.random_events,
+        shock_start=args.shock_start,
+        send_recent=not args.no_recent,
         trajectory_skip_hours=args.trajectory_skip_hours,
         history_mode=args.history_mode,
         history_random_events=not args.history_no_random_events,
