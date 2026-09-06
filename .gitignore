@@ -49,6 +49,8 @@ tools/evaluation/results/*
 !tools/evaluation/results/history/
 !tools/evaluation/results/analysis.ipynb
 !tools/evaluation/results/figures/
+!tools/evaluation/results/tracking/
+!tools/evaluation/results/tracking/**
 
 # Long evaluation runs (durable scratch, regenerable)
 tools/evaluation/runs/

@@ -1,0 +1,5582 @@
+[
+  {
+    "run_id": "w1-c1-h3-none-adaptive",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199997.942485,
+    "fact_kpi": 3644.0,
+    "mape_spend": 0.0005702087935141526,
+    "mape_kpi": 0.044543676923634486,
+    "final_ape_spend": 1.7145958333276212e-06,
+    "final_ape_kpi": 0.06155742101853835,
+    "final_dev_spend": -1.7145958333276212e-06,
+    "final_dev_kpi": 0.06155742101853835,
+    "within_20": true,
+    "budget_utilization": 0.9999982854041667,
+    "reallocated_share": 0.009659456120833333,
+    "replans": 503,
+    "seconds": 512.5992520050004,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 78916.319668,
+      "sms": 679245.12386,
+      "social_1": 441836.498957,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5055275,
+        "unique_reach": 3783143,
+        "clicks": 10964,
+        "conversions": 176
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 251754,
+        "unique_reach": 198251,
+        "clicks": 56639,
+        "conversions": 2020
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4414807,
+        "unique_reach": 2159880,
+        "clicks": 47298,
+        "conversions": 1448
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-none-adaptive_max",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive_max",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199994.807499,
+    "fact_kpi": 3642.0,
+    "mape_spend": 0.004425680089147827,
+    "mape_kpi": 0.04549631946944938,
+    "final_ape_spend": 4.32708416657988e-06,
+    "final_ape_kpi": 0.060974787966387674,
+    "final_dev_spend": -4.32708416657988e-06,
+    "final_dev_kpi": 0.060974787966387674,
+    "within_20": true,
+    "budget_utilization": 0.9999956729158335,
+    "reallocated_share": 0.3842990289675,
+    "replans": 503,
+    "seconds": 512.5778784670001,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 105915.928767,
+      "sms": 560326.576674,
+      "social_1": 533752.302058,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 6736362,
+        "unique_reach": 4324149,
+        "clicks": 14542,
+        "conversions": 225
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 205693,
+        "unique_reach": 181606,
+        "clicks": 48372,
+        "conversions": 1732
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 5234798,
+        "unique_reach": 2215451,
+        "clicks": 54515,
+        "conversions": 1685
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-none-frozen",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "frozen",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199277.522348,
+    "fact_kpi": 3648.0,
+    "mape_spend": 0.0005882240705617891,
+    "mape_kpi": 0.04324859683584792,
+    "final_ape_spend": 0.0006020647100000254,
+    "final_ape_kpi": 0.06272268712283971,
+    "final_dev_spend": -0.0006020647100000254,
+    "final_dev_kpi": 0.06272268712283971,
+    "within_20": true,
+    "budget_utilization": 0.99939793529,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0658606630004215,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 78912.351471,
+      "sms": 678553.777748,
+      "social_1": 441811.393129,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5071015,
+        "unique_reach": 3789168,
+        "clicks": 11018,
+        "conversions": 176
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 251560,
+        "unique_reach": 198187,
+        "clicks": 56610,
+        "conversions": 2025
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4415243,
+        "unique_reach": 2159929,
+        "clicks": 47332,
+        "conversions": 1447
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-none-adaptive",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199999.871068,
+    "fact_kpi": 3146.0,
+    "mape_spend": 0.034970611034123016,
+    "mape_kpi": 0.07777480652453955,
+    "final_ape_spend": 0.024130360914907542,
+    "final_ape_kpi": 0.08530896302162157,
+    "final_dev_spend": 0.024130360914907542,
+    "final_dev_kpi": 0.08530896302162157,
+    "within_20": true,
+    "budget_utilization": 0.9999998925566668,
+    "reallocated_share": 0.047380245508333335,
+    "replans": 503,
+    "seconds": 515.4551809160002,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 172737.578396,
+      "sms": 438.646319,
+      "social_1": 1026823.646353,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5668071,
+        "unique_reach": 3660486,
+        "clicks": 28143,
+        "conversions": 266
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 155,
+        "unique_reach": 155,
+        "clicks": 20,
+        "conversions": 1
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 8265127,
+        "unique_reach": 3162004,
+        "clicks": 92824,
+        "conversions": 2879
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-none-adaptive_max",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive_max",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199999.888856,
+    "fact_kpi": 3194.0,
+    "mape_spend": 0.029681803001473384,
+    "mape_kpi": 0.08119568832814497,
+    "final_ape_spend": 0.024130376095934835,
+    "final_ape_kpi": 0.10186803175176709,
+    "final_dev_spend": 0.024130376095934835,
+    "final_dev_kpi": 0.10186803175176709,
+    "within_20": true,
+    "budget_utilization": 0.99999990738,
+    "reallocated_share": 0.16698836089583333,
+    "replans": 503,
+    "seconds": 510.9879952250003,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 119234.446944,
+      "sms": 6662.912507,
+      "social_1": 1074102.529405,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 3936655,
+        "unique_reach": 3105419,
+        "clicks": 20216,
+        "conversions": 212
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 2593,
+        "unique_reach": 2593,
+        "clicks": 246,
+        "conversions": 10
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 8584434,
+        "unique_reach": 3177878,
+        "clicks": 95642,
+        "conversions": 2972
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-none-frozen",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "frozen",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1170864.212915,
+    "fact_kpi": 3084.0,
+    "mape_spend": 0.016578264225780084,
+    "mape_kpi": 0.06949294819238462,
+    "final_ape_spend": 0.0007352351731727489,
+    "final_ape_kpi": 0.06392016591185026,
+    "final_dev_spend": -0.0007352351731727489,
+    "final_dev_kpi": 0.06392016591185026,
+    "within_20": true,
+    "budget_utilization": 0.9757201774291667,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0880920490008066,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 172797.61702,
+      "sms": 0.0,
+      "social_1": 998066.595895,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5693223,
+        "unique_reach": 3666765,
+        "clicks": 28278,
+        "conversions": 261
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 8065358,
+        "unique_reach": 3151451,
+        "clicks": 91002,
+        "conversions": 2823
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-none-adaptive",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199999.68543,
+    "fact_kpi": 1495.0,
+    "mape_spend": 0.009684520157420905,
+    "mape_kpi": 0.028776221430364946,
+    "final_ape_spend": 2.6214166660793127e-07,
+    "final_ape_kpi": 0.002690254169511168,
+    "final_dev_spend": -2.6214166660793127e-07,
+    "final_dev_kpi": 0.002690254169511168,
+    "within_20": true,
+    "budget_utilization": 0.9999997378583334,
+    "reallocated_share": 0.03161465687166667,
+    "replans": 503,
+    "seconds": 519.4147195629994,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 246548.302366,
+      "marketplace_3": 0.0,
+      "programmatic": 13748.381693,
+      "sms": 0.0,
+      "social_1": 824540.138438,
+      "social_2": 0.0,
+      "social_3": 115162.862933
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 888916,
+        "unique_reach": 686191,
+        "clicks": 5173,
+        "conversions": 296
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 502889,
+        "unique_reach": 502889,
+        "clicks": 949,
+        "conversions": 11
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 6417446,
+        "unique_reach": 1620514,
+        "clicks": 38684,
+        "conversions": 1065
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1503444,
+        "unique_reach": 1478510,
+        "clicks": 5496,
+        "conversions": 123
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-none-adaptive_max",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive_max",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199995.228442,
+    "fact_kpi": 1503.0,
+    "mape_spend": 0.006580470325597942,
+    "mape_kpi": 0.029779240016716054,
+    "final_ape_spend": 3.9762983333397036e-06,
+    "final_ape_kpi": 0.00805582074700688,
+    "final_dev_spend": -3.9762983333397036e-06,
+    "final_dev_kpi": 0.00805582074700688,
+    "within_20": true,
+    "budget_utilization": 0.9999960237016666,
+    "reallocated_share": 0.3633362480183333,
+    "replans": 503,
+    "seconds": 516.2168447140002,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 279382.628284,
+      "marketplace_3": 0.0,
+      "programmatic": 46619.145055,
+      "sms": 0.0,
+      "social_1": 747755.56144,
+      "social_2": 0.0,
+      "social_3": 126237.893663
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 985864,
+        "unique_reach": 707239,
+        "clicks": 5684,
+        "conversions": 334
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 1676897,
+        "unique_reach": 1676897,
+        "clicks": 3146,
+        "conversions": 30
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 5884866,
+        "unique_reach": 1604453,
+        "clicks": 36665,
+        "conversions": 1012
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1647938,
+        "unique_reach": 1592523,
+        "clicks": 5984,
+        "conversions": 127
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-none-frozen",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "frozen",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1188915.662225,
+    "fact_kpi": 1492.0,
+    "mape_spend": 0.022848938896517942,
+    "mape_kpi": 0.030796935947000663,
+    "final_ape_spend": 0.009236948145833255,
+    "final_ape_kpi": 0.000678166702950276,
+    "final_dev_spend": -0.009236948145833255,
+    "final_dev_kpi": 0.000678166702950276,
+    "within_20": true,
+    "budget_utilization": 0.9907630518541668,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.049455143999694,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 249167.987684,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 0.0,
+      "social_1": 823075.031545,
+      "social_2": 0.0,
+      "social_3": 116672.642996
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 897194,
+        "unique_reach": 688169,
+        "clicks": 5207,
+        "conversions": 296
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 6409900,
+        "unique_reach": 1620295,
+        "clicks": 38646,
+        "conversions": 1073
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1523471,
+        "unique_reach": 1494923,
+        "clicks": 5562,
+        "conversions": 123
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-none-adaptive",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199997.582562,
+    "fact_kpi": 1726.0,
+    "mape_spend": 0.0003982764899001272,
+    "mape_kpi": 0.031384653165975135,
+    "final_ape_spend": 2.0145316666457803e-06,
+    "final_ape_kpi": 0.013786607420303817,
+    "final_dev_spend": -2.0145316666457803e-06,
+    "final_dev_kpi": 0.013786607420303817,
+    "within_20": true,
+    "budget_utilization": 0.9999979854683334,
+    "reallocated_share": 0.009527125980833334,
+    "replans": 503,
+    "seconds": 515.447184525,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138849.715945,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 637245.481173,
+      "social_1": 176812.889792,
+      "social_2": 247089.495652,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419654,
+        "unique_reach": 355180,
+        "clicks": 3778,
+        "conversions": 134
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 225584,
+        "unique_reach": 165123,
+        "clicks": 18245,
+        "conversions": 1006
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1811898,
+        "unique_reach": 1673591,
+        "clicks": 13978,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1031407,
+        "unique_reach": 765845,
+        "clicks": 10568,
+        "conversions": 332
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-none-adaptive_max",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "adaptive_max",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199881.935592,
+    "fact_kpi": 1757.0,
+    "mape_spend": 0.0010315965064547966,
+    "mape_kpi": 0.047558567013482884,
+    "final_ape_spend": 9.838700666674413e-05,
+    "final_ape_kpi": 0.031994825745929205,
+    "final_dev_spend": -9.838700666674413e-05,
+    "final_dev_kpi": 0.031994825745929205,
+    "within_20": true,
+    "budget_utilization": 0.9999016129933332,
+    "reallocated_share": 0.26961588832666666,
+    "replans": 503,
+    "seconds": 514.6493142070003,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 142519.391434,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 581631.670674,
+      "social_1": 184550.042808,
+      "social_2": 291180.830676,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 428484,
+        "unique_reach": 358870,
+        "clicks": 3940,
+        "conversions": 146
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 206123,
+        "unique_reach": 158851,
+        "clicks": 17096,
+        "conversions": 955
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1870317,
+        "unique_reach": 1708964,
+        "clicks": 14491,
+        "conversions": 280
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1210481,
+        "unique_reach": 817395,
+        "clicks": 12095,
+        "conversions": 376
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-none-frozen",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "none",
+    "mode": "frozen",
+    "shocked_channel": null,
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199099.925516,
+    "fact_kpi": 1720.0,
+    "mape_spend": 0.0007697717612651659,
+    "mape_kpi": 0.02904464913876975,
+    "final_ape_spend": 0.0007500620699999854,
+    "final_ape_kpi": 0.010262436131473098,
+    "final_dev_spend": -0.0007500620699999854,
+    "final_dev_kpi": 0.010262436131473098,
+    "within_20": true,
+    "budget_utilization": 0.99924993793,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0990459019994887,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138766.062445,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 636516.448505,
+      "social_1": 176788.451123,
+      "social_2": 247028.963443,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419422,
+        "unique_reach": 355061,
+        "clicks": 3773,
+        "conversions": 133
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 225307,
+        "unique_reach": 165036,
+        "clicks": 18247,
+        "conversions": 1005
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1812042,
+        "unique_reach": 1673658,
+        "clicks": 13977,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1030963,
+        "unique_reach": 765760,
+        "clicks": 10581,
+        "conversions": 328
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-ctr_drop-adaptive",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199868.802006,
+    "fact_kpi": 3328.0,
+    "mape_spend": 0.001275566357369341,
+    "mape_kpi": 0.029377857526506273,
+    "final_ape_spend": 0.00010933166166670465,
+    "final_ape_kpi": 0.030498601221269035,
+    "final_dev_spend": -0.00010933166166670465,
+    "final_dev_kpi": -0.030498601221269035,
+    "within_20": true,
+    "budget_utilization": 0.9998906683383333,
+    "reallocated_share": 0.14726104455666666,
+    "replans": 503,
+    "seconds": 521.2725461889995,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 110159.258683,
+      "sms": 610578.029049,
+      "social_1": 479131.514274,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 6955063,
+        "unique_reach": 4378217,
+        "clicks": 14736,
+        "conversions": 234
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 228138,
+        "unique_reach": 190467,
+        "clicks": 43687,
+        "conversions": 1568
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4752881,
+        "unique_reach": 2184860,
+        "clicks": 50089,
+        "conversions": 1526
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-ctr_drop-adaptive_max",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199826.737595,
+    "fact_kpi": 3381.0,
+    "mape_spend": 0.005052570094388109,
+    "mape_kpi": 0.024964664824304393,
+    "final_ape_spend": 0.00014438533749994045,
+    "final_ape_kpi": 0.015058825339276022,
+    "final_dev_spend": -0.00014438533749994045,
+    "final_dev_kpi": -0.015058825339276022,
+    "within_20": true,
+    "budget_utilization": 0.9998556146625001,
+    "reallocated_share": 0.42126658867666666,
+    "replans": 503,
+    "seconds": 515.2864577540004,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 124966.239263,
+      "sms": 514782.731375,
+      "social_1": 560077.766957,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 7864964,
+        "unique_reach": 4581651,
+        "clicks": 16701,
+        "conversions": 265
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 188642,
+        "unique_reach": 173691,
+        "clicks": 38236,
+        "conversions": 1373
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 5455457,
+        "unique_reach": 2227575,
+        "clicks": 56271,
+        "conversions": 1743
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-ctr_drop-frozen",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199277.522348,
+    "fact_kpi": 3287.0,
+    "mape_spend": 0.0005882240705617891,
+    "mape_kpi": 0.02922387687604251,
+    "final_ape_spend": 0.0006020647100000254,
+    "final_ape_kpi": 0.04244257879035797,
+    "final_dev_spend": -0.0006020647100000254,
+    "final_dev_kpi": -0.04244257879035797,
+    "within_20": true,
+    "budget_utilization": 0.99939793529,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0552802330003033,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 78912.351471,
+      "sms": 678553.777748,
+      "social_1": 441811.393129,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5071015,
+        "unique_reach": 3789168,
+        "clicks": 11018,
+        "conversions": 176
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 251560,
+        "unique_reach": 198187,
+        "clicks": 46298,
+        "conversions": 1664
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4415243,
+        "unique_reach": 2159929,
+        "clicks": 47332,
+        "conversions": 1447
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-ctr_drop-adaptive",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199997.739319,
+    "fact_kpi": 2764.0,
+    "mape_spend": 0.035652016094910643,
+    "mape_kpi": 0.04736950305979333,
+    "final_ape_spend": 0.0241285415906513,
+    "final_ape_kpi": 0.04647362562245327,
+    "final_dev_spend": 0.0241285415906513,
+    "final_dev_kpi": -0.04647362562245327,
+    "within_20": true,
+    "budget_utilization": 0.9999981160991666,
+    "reallocated_share": 0.33035070245166664,
+    "replans": 503,
+    "seconds": 519.5300358630002,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 172760.080009,
+      "sms": 144908.686842,
+      "social_1": 882328.972468,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5781072,
+        "unique_reach": 3689292,
+        "clicks": 28565,
+        "conversions": 275
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 55841,
+        "unique_reach": 55841,
+        "clicks": 4618,
+        "conversions": 189
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 7249075,
+        "unique_reach": 3102833,
+        "clicks": 72510,
+        "conversions": 2300
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-ctr_drop-adaptive_max",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199738.039844,
+    "fact_kpi": 2747.0,
+    "mape_spend": 0.031016328268510127,
+    "mape_kpi": 0.04848132508114666,
+    "final_ape_spend": 0.023906903135953495,
+    "final_ape_kpi": 0.052338295797713145,
+    "final_dev_spend": 0.023906903135953495,
+    "final_dev_kpi": -0.052338295797713145,
+    "within_20": true,
+    "budget_utilization": 0.99978169987,
+    "reallocated_share": 0.34044706559666665,
+    "replans": 503,
+    "seconds": 511.6897575059993,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 192494.388386,
+      "sms": 122443.15444,
+      "social_1": 884800.497018,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 6314816,
+        "unique_reach": 3810904,
+        "clicks": 30619,
+        "conversions": 297
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 47179,
+        "unique_reach": 47179,
+        "clicks": 3779,
+        "conversions": 156
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 7252923,
+        "unique_reach": 3103138,
+        "clicks": 72754,
+        "conversions": 2294
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-ctr_drop-frozen",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1170864.212915,
+    "fact_kpi": 2670.0,
+    "mape_spend": 0.016578264225780084,
+    "mape_kpi": 0.05322631007088253,
+    "final_ape_spend": 0.0007352351731727489,
+    "final_ape_kpi": 0.07890180188565493,
+    "final_dev_spend": -0.0007352351731727489,
+    "final_dev_kpi": -0.07890180188565493,
+    "within_20": true,
+    "budget_utilization": 0.9757201774291667,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0588656939999055,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 172797.61702,
+      "sms": 0.0,
+      "social_1": 998066.595895,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5693223,
+        "unique_reach": 3666765,
+        "clicks": 28278,
+        "conversions": 261
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 8065358,
+        "unique_reach": 3151451,
+        "clicks": 76685,
+        "conversions": 2409
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-ctr_drop-adaptive",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199850.277136,
+    "fact_kpi": 1417.0,
+    "mape_spend": 0.01098282245115603,
+    "mape_kpi": 0.04234703131938908,
+    "final_ape_spend": 0.0001247690533332449,
+    "final_ape_kpi": 0.049624019961072026,
+    "final_dev_spend": -0.0001247690533332449,
+    "final_dev_kpi": -0.049624019961072026,
+    "within_20": true,
+    "budget_utilization": 0.9998752309466667,
+    "reallocated_share": 0.53660018428,
+    "replans": 503,
+    "seconds": 530.0939418739999,
+    "channel_spend": {
+      "marketplace_1": 44537.834448,
+      "marketplace_2": 370913.790634,
+      "marketplace_3": 0.0,
+      "programmatic": 69180.38581,
+      "sms": 0.0,
+      "social_1": 539476.262257,
+      "social_2": 0.0,
+      "social_3": 175742.003987
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 313834,
+        "unique_reach": 286511,
+        "clicks": 916,
+        "conversions": 40
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 1251891,
+        "unique_reach": 746909,
+        "clicks": 6835,
+        "conversions": 387
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 2499571,
+        "unique_reach": 2499571,
+        "clicks": 4507,
+        "conversions": 44
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 4449635,
+        "unique_reach": 1545733,
+        "clicks": 27812,
+        "conversions": 779
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 2230202,
+        "unique_reach": 1953068,
+        "clicks": 7662,
+        "conversions": 167
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-ctr_drop-adaptive_max",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199872.634423,
+    "fact_kpi": 1458.0,
+    "mape_spend": 0.006052355961666557,
+    "mape_kpi": 0.03215720880626122,
+    "final_ape_spend": 0.00010613798083330039,
+    "final_ape_kpi": 0.0221254912514065,
+    "final_dev_spend": -0.00010613798083330039,
+    "final_dev_kpi": -0.0221254912514065,
+    "within_20": true,
+    "budget_utilization": 0.9998938620191667,
+    "reallocated_share": 0.63397773695,
+    "replans": 503,
+    "seconds": 516.0388769130004,
+    "channel_spend": {
+      "marketplace_1": 45720.71749,
+      "marketplace_2": 375326.593025,
+      "marketplace_3": 0.0,
+      "programmatic": 85368.804629,
+      "sms": 0.0,
+      "social_1": 517111.149403,
+      "social_2": 0.0,
+      "social_3": 176345.369876
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 334689,
+        "unique_reach": 297522,
+        "clicks": 966,
+        "conversions": 49
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 1264083,
+        "unique_reach": 748604,
+        "clicks": 6966,
+        "conversions": 409
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 3105410,
+        "unique_reach": 3094016,
+        "clicks": 5630,
+        "conversions": 53
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 4273585,
+        "unique_reach": 1536506,
+        "clicks": 27496,
+        "conversions": 774
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 2245530,
+        "unique_reach": 1961029,
+        "clicks": 7677,
+        "conversions": 173
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-ctr_drop-frozen",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1188915.662225,
+    "fact_kpi": 1343.0,
+    "mape_spend": 0.022848938896517942,
+    "mape_kpi": 0.0600052726226358,
+    "final_ape_spend": 0.009236948145833255,
+    "final_ape_kpi": 0.09925551080290736,
+    "final_dev_spend": -0.009236948145833255,
+    "final_dev_kpi": -0.09925551080290736,
+    "within_20": true,
+    "budget_utilization": 0.9907630518541668,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.064796643999216,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 249167.987684,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 0.0,
+      "social_1": 823075.031545,
+      "social_2": 0.0,
+      "social_3": 116672.642996
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 897194,
+        "unique_reach": 688169,
+        "clicks": 5207,
+        "conversions": 296
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 6409900,
+        "unique_reach": 1620295,
+        "clicks": 33136,
+        "conversions": 924
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1523471,
+        "unique_reach": 1494923,
+        "clicks": 5562,
+        "conversions": 123
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-ctr_drop-adaptive",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199545.488138,
+    "fact_kpi": 1623.0,
+    "mape_spend": 0.0008462558255913412,
+    "mape_kpi": 0.03584561318875121,
+    "final_ape_spend": 0.00037875988499998735,
+    "final_ape_kpi": 0.04671166637129021,
+    "final_dev_spend": -0.00037875988499998735,
+    "final_dev_kpi": -0.04671166637129021,
+    "within_20": true,
+    "budget_utilization": 0.999621240115,
+    "reallocated_share": 0.24371353851916666,
+    "replans": 503,
+    "seconds": 515.704028051,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 141328.472738,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 530106.625481,
+      "social_1": 207416.190291,
+      "social_2": 320694.199628,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 424489,
+        "unique_reach": 357209,
+        "clicks": 3893,
+        "conversions": 142
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 188222,
+        "unique_reach": 152476,
+        "clicks": 13714,
+        "conversions": 772
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 2102168,
+        "unique_reach": 1835505,
+        "clicks": 15843,
+        "conversions": 295
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1322537,
+        "unique_reach": 844183,
+        "clicks": 13269,
+        "conversions": 414
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-ctr_drop-adaptive_max",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199832.357756,
+    "fact_kpi": 1632.0,
+    "mape_spend": 0.0014027092632573012,
+    "mape_kpi": 0.038848655662187544,
+    "final_ape_spend": 0.00013970186999998988,
+    "final_ape_kpi": 0.04142540943804413,
+    "final_dev_spend": -0.00013970186999998988,
+    "final_dev_kpi": -0.04142540943804413,
+    "within_20": true,
+    "budget_utilization": 0.99986029813,
+    "reallocated_share": 0.28518252278,
+    "replans": 503,
+    "seconds": 514.6119820739987,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 146566.866357,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 532483.632075,
+      "social_1": 213030.353565,
+      "social_2": 307751.505759,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 438673,
+        "unique_reach": 362914,
+        "clicks": 4003,
+        "conversions": 149
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 189131,
+        "unique_reach": 152798,
+        "clicks": 13775,
+        "conversions": 778
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 2151407,
+        "unique_reach": 1859459,
+        "clicks": 16226,
+        "conversions": 311
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1274351,
+        "unique_reach": 833023,
+        "clicks": 12755,
+        "conversions": 394
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-ctr_drop-frozen",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "ctr_drop",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199099.925516,
+    "fact_kpi": 1556.0,
+    "mape_spend": 0.0007697717612651659,
+    "mape_kpi": 0.042259119385178526,
+    "final_ape_spend": 0.0007500620699999854,
+    "final_ape_kpi": 0.08606491242989991,
+    "final_dev_spend": -0.0007500620699999854,
+    "final_dev_kpi": -0.08606491242989991,
+    "within_20": true,
+    "budget_utilization": 0.99924993793,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0762845879999077,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138766.062445,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 636516.448505,
+      "social_1": 176788.451123,
+      "social_2": 247028.963443,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419422,
+        "unique_reach": 355061,
+        "clicks": 3773,
+        "conversions": 133
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 225307,
+        "unique_reach": 165036,
+        "clicks": 15079,
+        "conversions": 841
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1812042,
+        "unique_reach": 1673658,
+        "clicks": 13977,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1030963,
+        "unique_reach": 765760,
+        "clicks": 10581,
+        "conversions": 328
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-cpm_spike-adaptive",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199996.223051,
+    "fact_kpi": 3365.0,
+    "mape_spend": 0.0011435082258407774,
+    "mape_kpi": 0.025720558875924386,
+    "final_ape_spend": 3.147457500065987e-06,
+    "final_ape_kpi": 0.019719889756481458,
+    "final_dev_spend": -3.147457500065987e-06,
+    "final_dev_kpi": -0.019719889756481458,
+    "within_20": true,
+    "budget_utilization": 0.9999968525424999,
+    "reallocated_share": 0.10563619664166667,
+    "replans": 503,
+    "seconds": 517.8551848199995,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 80878.243925,
+      "sms": 677665.847537,
+      "social_1": 441452.131589,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5154296,
+        "unique_reach": 3822353,
+        "clicks": 11244,
+        "conversions": 188
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 205703,
+        "unique_reach": 181671,
+        "clicks": 48276,
+        "conversions": 1723
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4407233,
+        "unique_reach": 2159388,
+        "clicks": 47283,
+        "conversions": 1454
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-cpm_spike-adaptive_max",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199827.261556,
+    "fact_kpi": 3398.0,
+    "mape_spend": 0.004638578478227617,
+    "mape_kpi": 0.024359497642588376,
+    "final_ape_spend": 0.00014394870333334743,
+    "final_ape_kpi": 0.010106444395995244,
+    "final_dev_spend": -0.00014394870333334743,
+    "final_dev_kpi": -0.010106444395995244,
+    "within_20": true,
+    "budget_utilization": 0.9998560512966667,
+    "reallocated_share": 0.403280929915,
+    "replans": 503,
+    "seconds": 513.3135228610008,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 112708.972126,
+      "sms": 510648.393206,
+      "social_1": 576469.896224,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 7066422,
+        "unique_reach": 4405123,
+        "clicks": 15135,
+        "conversions": 237
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 160550,
+        "unique_reach": 156877,
+        "clicks": 38973,
+        "conversions": 1390
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 5604293,
+        "unique_reach": 2235387,
+        "clicks": 57240,
+        "conversions": 1771
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-cpm_spike-frozen",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199092.553616,
+    "fact_kpi": 3353.0,
+    "mape_spend": 0.0006410901091189948,
+    "mape_kpi": 0.02505204912375355,
+    "final_ape_spend": 0.0007562053199999113,
+    "final_ape_kpi": 0.023215688069385537,
+    "final_dev_spend": -0.0007562053199999113,
+    "final_dev_kpi": -0.023215688069385537,
+    "within_20": true,
+    "budget_utilization": 0.9992437946800001,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0841187379992334,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 78912.351471,
+      "sms": 678368.809016,
+      "social_1": 441811.393129,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5071015,
+        "unique_reach": 3789168,
+        "clicks": 11018,
+        "conversions": 176
+      },
+      "sms": {
+        "requests": 900055,
+        "impressions": 205136,
+        "unique_reach": 181479,
+        "clicks": 48146,
+        "conversions": 1730
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4415243,
+        "unique_reach": 2159929,
+        "clicks": 47332,
+        "conversions": 1447
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-cpm_spike-adaptive",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199875.21243,
+    "fact_kpi": 2780.0,
+    "mape_spend": 0.03728667835021298,
+    "mape_kpi": 0.046944559206990324,
+    "final_ape_spend": 0.02402397199020499,
+    "final_ape_kpi": 0.04095393604573809,
+    "final_dev_spend": 0.02402397199020499,
+    "final_dev_kpi": -0.04095393604573809,
+    "within_20": true,
+    "budget_utilization": 0.9998960103583334,
+    "reallocated_share": 0.24056806498416666,
+    "replans": 503,
+    "seconds": 512.9912095689997,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 179864.258657,
+      "sms": 70263.561874,
+      "social_1": 949747.391899,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5976834,
+        "unique_reach": 3736475,
+        "clicks": 29203,
+        "conversions": 283
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 26206,
+        "unique_reach": 26206,
+        "clicks": 2101,
+        "conversions": 93
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 6490297,
+        "unique_reach": 3046650,
+        "clicks": 76875,
+        "conversions": 2404
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-cpm_spike-adaptive_max",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199999.929364,
+    "fact_kpi": 2773.0,
+    "mape_spend": 0.033276777270219327,
+    "mape_kpi": 0.04823557901532436,
+    "final_ape_spend": 0.024130410667165723,
+    "final_ape_kpi": 0.04336880023555098,
+    "final_dev_spend": 0.024130410667165723,
+    "final_dev_kpi": -0.04336880023555098,
+    "within_20": true,
+    "budget_utilization": 0.9999999411366667,
+    "reallocated_share": 0.34335587835416664,
+    "replans": 503,
+    "seconds": 509.66811529000006,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 156458.856574,
+      "sms": 114444.723318,
+      "social_1": 929096.349472,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5234551,
+        "unique_reach": 3547132,
+        "clicks": 26160,
+        "conversions": 247
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 41582,
+        "unique_reach": 41582,
+        "clicks": 3230,
+        "conversions": 147
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 6414967,
+        "unique_reach": 3040482,
+        "clicks": 76306,
+        "conversions": 2379
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-cpm_spike-frozen",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1174066.320881,
+    "fact_kpi": 2718.0,
+    "mape_spend": 0.0177030973948771,
+    "mape_kpi": 0.049904865351223376,
+    "final_ape_spend": 0.0019975784428732397,
+    "final_ape_kpi": 0.0623427331555094,
+    "final_dev_spend": 0.0019975784428732397,
+    "final_dev_kpi": -0.0623427331555094,
+    "within_20": true,
+    "budget_utilization": 0.9783886007341667,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.1313398479996977,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 172797.61702,
+      "sms": 0.0,
+      "social_1": 1001268.703861,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5693223,
+        "unique_reach": 3666765,
+        "clicks": 28278,
+        "conversions": 261
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 9002530,
+        "impressions": 6711451,
+        "unique_reach": 3064097,
+        "clicks": 78805,
+        "conversions": 2457
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-cpm_spike-adaptive",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199814.615243,
+    "fact_kpi": 1422.0,
+    "mape_spend": 0.010172990034934718,
+    "mape_kpi": 0.03987770345093072,
+    "final_ape_spend": 0.00015448729750001803,
+    "final_ape_kpi": 0.0462705408501372,
+    "final_dev_spend": -0.00015448729750001803,
+    "final_dev_kpi": -0.0462705408501372,
+    "within_20": true,
+    "budget_utilization": 0.9998455127025,
+    "reallocated_share": 0.5621687322,
+    "replans": 503,
+    "seconds": 529.8165696860005,
+    "channel_spend": {
+      "marketplace_1": 41267.269426,
+      "marketplace_2": 402801.733372,
+      "marketplace_3": 0.0,
+      "programmatic": 68654.903692,
+      "sms": 0.0,
+      "social_1": 520059.907763,
+      "social_2": 0.0,
+      "social_3": 167030.80099
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 282245,
+        "unique_reach": 267942,
+        "clicks": 824,
+        "conversions": 36
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 1342396,
+        "unique_reach": 757058,
+        "clicks": 7283,
+        "conversions": 419
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 2494686,
+        "unique_reach": 2494686,
+        "clicks": 4506,
+        "conversions": 45
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 3986856,
+        "unique_reach": 1519457,
+        "clicks": 27539,
+        "conversions": 773
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 2156504,
+        "unique_reach": 1915131,
+        "clicks": 7513,
+        "conversions": 149
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-cpm_spike-adaptive_max",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199894.252057,
+    "fact_kpi": 1431.0,
+    "mape_spend": 0.0062703663311219566,
+    "mape_kpi": 0.03465357148544111,
+    "final_ape_spend": 8.812328583328053e-05,
+    "final_ape_kpi": 0.040234278450454526,
+    "final_dev_spend": -8.812328583328053e-05,
+    "final_dev_kpi": -0.040234278450454526,
+    "within_20": true,
+    "budget_utilization": 0.9999118767141667,
+    "reallocated_share": 0.6852636501975,
+    "replans": 503,
+    "seconds": 516.8269514710009,
+    "channel_spend": {
+      "marketplace_1": 42236.742305,
+      "marketplace_2": 410874.292884,
+      "marketplace_3": 0.0,
+      "programmatic": 85826.99958,
+      "sms": 0.0,
+      "social_1": 489931.075749,
+      "social_2": 0.0,
+      "social_3": 171025.141539
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 290482,
+        "unique_reach": 273036,
+        "clicks": 853,
+        "conversions": 37
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 1361191,
+        "unique_reach": 759102,
+        "clicks": 7379,
+        "conversions": 424
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 3126376,
+        "unique_reach": 3113697,
+        "clicks": 5739,
+        "conversions": 56
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 3862999,
+        "unique_reach": 1511660,
+        "clicks": 26977,
+        "conversions": 761
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 2197648,
+        "unique_reach": 1936698,
+        "clicks": 7610,
+        "conversions": 153
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-cpm_spike-frozen",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1189173.943673,
+    "fact_kpi": 1368.0,
+    "mape_spend": 0.022787067737443545,
+    "mape_kpi": 0.057257892019735336,
+    "final_ape_spend": 0.009021713605833356,
+    "final_ape_kpi": 0.08248811524823325,
+    "final_dev_spend": -0.009021713605833356,
+    "final_dev_kpi": -0.08248811524823325,
+    "within_20": true,
+    "budget_utilization": 0.9909782863941666,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0590563409987226,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 249167.987684,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 0.0,
+      "social_1": 823333.312993,
+      "social_2": 0.0,
+      "social_3": 116672.642996
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 897194,
+        "unique_reach": 688169,
+        "clicks": 5207,
+        "conversions": 296
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7971676,
+        "impressions": 5342171,
+        "unique_reach": 1585236,
+        "clicks": 34068,
+        "conversions": 949
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1523471,
+        "unique_reach": 1494923,
+        "clicks": 5562,
+        "conversions": 123
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-cpm_spike-adaptive",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199773.118247,
+    "fact_kpi": 1645.0,
+    "mape_spend": 0.0009257523157575121,
+    "mape_kpi": 0.03049227180131799,
+    "final_ape_spend": 0.00018906812749997092,
+    "final_ape_kpi": 0.0337897049789109,
+    "final_dev_spend": -0.00018906812749997092,
+    "final_dev_kpi": -0.0337897049789109,
+    "within_20": true,
+    "budget_utilization": 0.9998109318725,
+    "reallocated_share": 0.26705324234083333,
+    "replans": 503,
+    "seconds": 510.37044425399927,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138671.54259,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 510189.995848,
+      "social_1": 208818.283819,
+      "social_2": 342093.29599,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419071,
+        "unique_reach": 355205,
+        "clicks": 3807,
+        "conversions": 140
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 155688,
+        "unique_reach": 138040,
+        "clicks": 13773,
+        "conversions": 772
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 2116997,
+        "unique_reach": 1842878,
+        "clicks": 15937,
+        "conversions": 294
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1396252,
+        "unique_reach": 859893,
+        "clicks": 13938,
+        "conversions": 439
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-cpm_spike-adaptive_max",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199778.270723,
+    "fact_kpi": 1665.0,
+    "mape_spend": 0.0011854509209814964,
+    "mape_kpi": 0.033050462535355256,
+    "final_ape_spend": 0.00018477439750005337,
+    "final_ape_kpi": 0.02204246734947517,
+    "final_dev_spend": -0.00018477439750005337,
+    "final_dev_kpi": -0.02204246734947517,
+    "within_20": true,
+    "budget_utilization": 0.9998152256024999,
+    "reallocated_share": 0.32179745007416666,
+    "replans": 503,
+    "seconds": 512.4648812949999,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 133632.478533,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 509528.878733,
+      "social_1": 193743.011511,
+      "social_2": 362873.901946,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 404352,
+        "unique_reach": 349053,
+        "clicks": 3692,
+        "conversions": 138
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 155805,
+        "unique_reach": 138109,
+        "clicks": 13778,
+        "conversions": 777
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1960759,
+        "unique_reach": 1760334,
+        "clicks": 15000,
+        "conversions": 285
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1471663,
+        "unique_reach": 874720,
+        "clicks": 14702,
+        "conversions": 465
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-cpm_spike-frozen",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "cpm_spike",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1198881.692053,
+    "fact_kpi": 1583.0,
+    "mape_spend": 0.0008325098667422078,
+    "mape_kpi": 0.03885085769390893,
+    "final_ape_spend": 0.0009319232891666858,
+    "final_ape_kpi": 0.07020614163016167,
+    "final_dev_spend": -0.0009319232891666858,
+    "final_dev_kpi": -0.07020614163016167,
+    "within_20": true,
+    "budget_utilization": 0.9990680767108333,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.1039264310002181,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138766.062445,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 636298.215042,
+      "social_1": 176788.451123,
+      "social_2": 247028.963443,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419422,
+        "unique_reach": 355061,
+        "clicks": 3773,
+        "conversions": 133
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 994522,
+        "impressions": 183530,
+        "unique_reach": 150602,
+        "clicks": 15627,
+        "conversions": 868
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1812042,
+        "unique_reach": 1673658,
+        "clicks": 13977,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1030963,
+        "unique_reach": 765760,
+        "clicks": 10581,
+        "conversions": 328
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-supply_drop-adaptive",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199998.717696,
+    "fact_kpi": 3644.0,
+    "mape_spend": 0.0005791653336002161,
+    "mape_kpi": 0.044543676923634486,
+    "final_ape_spend": 1.0685866667578617e-06,
+    "final_ape_kpi": 0.06155742101853835,
+    "final_dev_spend": -1.0685866667578617e-06,
+    "final_dev_kpi": 0.06155742101853835,
+    "within_20": true,
+    "budget_utilization": 0.9999989314133333,
+    "reallocated_share": 0.0096739475425,
+    "replans": 503,
+    "seconds": 513.6685667419997,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 78916.319668,
+      "sms": 679245.899071,
+      "social_1": 441836.498957,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5055275,
+        "unique_reach": 3783143,
+        "clicks": 10964,
+        "conversions": 176
+      },
+      "sms": {
+        "requests": 680574,
+        "impressions": 251744,
+        "unique_reach": 198248,
+        "clicks": 56634,
+        "conversions": 2020
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4414807,
+        "unique_reach": 2159880,
+        "clicks": 47298,
+        "conversions": 1448
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-supply_drop-adaptive_max",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199830.400749,
+    "fact_kpi": 3649.0,
+    "mape_spend": 0.004311960059469106,
+    "mape_kpi": 0.04617021102136924,
+    "final_ape_spend": 0.00014133270916664818,
+    "final_ape_kpi": 0.06301400364891506,
+    "final_dev_spend": -0.00014133270916664818,
+    "final_dev_kpi": 0.06301400364891506,
+    "within_20": true,
+    "budget_utilization": 0.9998586672908334,
+    "reallocated_share": 0.37962465108666665,
+    "replans": 503,
+    "seconds": 513.4695845759998,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 107974.409333,
+      "sms": 556415.637417,
+      "social_1": 535440.353999,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 6816859,
+        "unique_reach": 4345016,
+        "clicks": 14714,
+        "conversions": 232
+      },
+      "sms": {
+        "requests": 680574,
+        "impressions": 204065,
+        "unique_reach": 180902,
+        "clicks": 48095,
+        "conversions": 1718
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 5247785,
+        "unique_reach": 2216247,
+        "clicks": 54599,
+        "conversions": 1699
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-supply_drop-frozen",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199211.669585,
+    "fact_kpi": 3648.0,
+    "mape_spend": 0.0006080050113897604,
+    "mape_kpi": 0.04324859683584792,
+    "final_ape_spend": 0.0006569420124999791,
+    "final_ape_kpi": 0.06272268712283971,
+    "final_dev_spend": -0.0006569420124999791,
+    "final_dev_kpi": 0.06272268712283971,
+    "within_20": true,
+    "budget_utilization": 0.9993430579875,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0853079870012152,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 78912.351471,
+      "sms": 678487.924985,
+      "social_1": 441811.393129,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5071015,
+        "unique_reach": 3789168,
+        "clicks": 11018,
+        "conversions": 176
+      },
+      "sms": {
+        "requests": 680574,
+        "impressions": 251526,
+        "unique_reach": 198181,
+        "clicks": 56605,
+        "conversions": 2025
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4415243,
+        "unique_reach": 2159929,
+        "clicks": 47332,
+        "conversions": 1447
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-supply_drop-adaptive",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1187497.099039,
+    "fact_kpi": 2996.0,
+    "mape_spend": 0.03442239860711482,
+    "mape_kpi": 0.05170228509504129,
+    "final_ape_spend": 0.013459969409697873,
+    "final_ape_kpi": 0.03356187323991679,
+    "final_dev_spend": 0.013459969409697873,
+    "final_dev_kpi": 0.03356187323991679,
+    "within_20": true,
+    "budget_utilization": 0.9895809158658333,
+    "reallocated_share": 0.35861065303083334,
+    "replans": 503,
+    "seconds": 543.2445436690004,
+    "channel_spend": {
+      "marketplace_1": 355.599511,
+      "marketplace_2": 379.52049,
+      "marketplace_3": 134.371115,
+      "programmatic": 199516.652032,
+      "sms": 196197.841616,
+      "social_1": 790258.17583,
+      "social_2": 428.972718,
+      "social_3": 225.965727
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 2753,
+        "unique_reach": 2753,
+        "clicks": 4,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 1219,
+        "unique_reach": 1219,
+        "clicks": 6,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 345,
+        "unique_reach": 345,
+        "clicks": 3,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 6616138,
+        "unique_reach": 3872302,
+        "clicks": 32338,
+        "conversions": 309
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 75239,
+        "unique_reach": 74970,
+        "clicks": 6139,
+        "conversions": 258
+      },
+      "social_1": {
+        "requests": 6752957,
+        "impressions": 6565475,
+        "unique_reach": 3052677,
+        "clicks": 77567,
+        "conversions": 2429
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 2835,
+        "unique_reach": 2835,
+        "clicks": 21,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 2291,
+        "unique_reach": 2291,
+        "clicks": 4,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-supply_drop-adaptive_max",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199499.124531,
+    "fact_kpi": 3030.0,
+    "mape_spend": 0.03093018810855497,
+    "mape_kpi": 0.055089815344955134,
+    "final_ape_spend": 0.023703002759270023,
+    "final_ape_kpi": 0.04529121359043654,
+    "final_dev_spend": 0.023703002759270023,
+    "final_dev_kpi": 0.04529121359043654,
+    "within_20": true,
+    "budget_utilization": 0.9995826037758333,
+    "reallocated_share": 0.38746639243166664,
+    "replans": 503,
+    "seconds": 514.0027447890006,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 220656.502228,
+      "sms": 186161.99201,
+      "social_1": 792680.630293,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 7214042,
+        "unique_reach": 3984072,
+        "clicks": 34695,
+        "conversions": 342
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 71325,
+        "unique_reach": 71325,
+        "clicks": 5923,
+        "conversions": 251
+      },
+      "social_1": {
+        "requests": 6752957,
+        "impressions": 6582323,
+        "unique_reach": 3053989,
+        "clicks": 77752,
+        "conversions": 2437
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-supply_drop-frozen",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 959237.812531,
+    "fact_kpi": 2681.0,
+    "mape_spend": 0.07560082552139967,
+    "mape_kpi": 0.05218227076157303,
+    "final_ape_spend": 0.18134610608226398,
+    "final_ape_kpi": 0.07510701530166325,
+    "final_dev_spend": -0.18134610608226398,
+    "final_dev_kpi": -0.07510701530166325,
+    "within_20": true,
+    "budget_utilization": 0.7993648437758334,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0469111960010196,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 172797.61702,
+      "sms": 0.0,
+      "social_1": 786440.195511,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5693223,
+        "unique_reach": 3666765,
+        "clicks": 28278,
+        "conversions": 261
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 6752957,
+        "impressions": 6538669,
+        "unique_reach": 3050561,
+        "clicks": 77304,
+        "conversions": 2420
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-supply_drop-adaptive",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1187924.021841,
+    "fact_kpi": 1482.0,
+    "mape_spend": 0.021861563585148513,
+    "mape_kpi": 0.03389739533647043,
+    "final_ape_spend": 0.010063315132499945,
+    "final_ape_kpi": 0.006028791518919364,
+    "final_dev_spend": -0.010063315132499945,
+    "final_dev_kpi": -0.006028791518919364,
+    "within_20": true,
+    "budget_utilization": 0.9899366848675001,
+    "reallocated_share": 0.23465056772916668,
+    "replans": 503,
+    "seconds": 546.4167822789996,
+    "channel_spend": {
+      "marketplace_1": 867.034554,
+      "marketplace_2": 319006.279538,
+      "marketplace_3": 462.972,
+      "programmatic": 37698.920664,
+      "sms": 761.108259,
+      "social_1": 685399.775141,
+      "social_2": 452.223662,
+      "social_3": 143275.708023
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 5850,
+        "unique_reach": 5850,
+        "clicks": 13,
+        "conversions": 1
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 1108860,
+        "unique_reach": 727827,
+        "clicks": 6170,
+        "conversions": 348
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 3033,
+        "unique_reach": 3033,
+        "clicks": 25,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 1337594,
+        "unique_reach": 1337594,
+        "clicks": 2534,
+        "conversions": 28
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 326,
+        "unique_reach": 326,
+        "clicks": 35,
+        "conversions": 1
+      },
+      "social_1": {
+        "requests": 5971428,
+        "impressions": 5446352,
+        "unique_reach": 1589129,
+        "clicks": 34584,
+        "conversions": 962
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 2402,
+        "unique_reach": 2402,
+        "clicks": 4,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1867560,
+        "unique_reach": 1745192,
+        "clicks": 6662,
+        "conversions": 142
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-supply_drop-adaptive_max",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199546.437649,
+    "fact_kpi": 1497.0,
+    "mape_spend": 0.009318437270029147,
+    "mape_kpi": 0.028730246819349537,
+    "final_ape_spend": 0.000377968625833358,
+    "final_ape_kpi": 0.004031645813885096,
+    "final_dev_spend": -0.000377968625833358,
+    "final_dev_kpi": 0.004031645813885096,
+    "within_20": true,
+    "budget_utilization": 0.9996220313741666,
+    "reallocated_share": 0.4313169255491667,
+    "replans": 503,
+    "seconds": 517.7705020150006,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 290797.318037,
+      "marketplace_3": 0.0,
+      "programmatic": 111484.845022,
+      "sms": 0.0,
+      "social_1": 643519.18882,
+      "social_2": 0.0,
+      "social_3": 153745.08577
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 1026358,
+        "unique_reach": 714621,
+        "clicks": 5839,
+        "conversions": 340
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 3970685,
+        "unique_reach": 3837739,
+        "clicks": 7453,
+        "conversions": 78
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 5971428,
+        "impressions": 5157655,
+        "unique_reach": 1578056,
+        "clicks": 33332,
+        "conversions": 933
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 2003428,
+        "unique_reach": 1829180,
+        "clicks": 7079,
+        "conversions": 146
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-supply_drop-frozen",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1056056.391741,
+    "fact_kpi": 1389.0,
+    "mape_spend": 0.05856991312908067,
+    "mape_kpi": 0.052809425191577386,
+    "final_ape_spend": 0.11995300688249991,
+    "final_ape_kpi": 0.06840350298230702,
+    "final_dev_spend": -0.11995300688249991,
+    "final_dev_kpi": -0.06840350298230702,
+    "within_20": true,
+    "budget_utilization": 0.8800469931175001,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0743266530007531,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 249167.987684,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 0.0,
+      "social_1": 690215.761061,
+      "social_2": 0.0,
+      "social_3": 116672.642996
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 897194,
+        "unique_reach": 688169,
+        "clicks": 5207,
+        "conversions": 296
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 5971428,
+        "impressions": 5479544,
+        "unique_reach": 1590347,
+        "clicks": 34714,
+        "conversions": 970
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1523471,
+        "unique_reach": 1494923,
+        "clicks": 5562,
+        "conversions": 123
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-supply_drop-adaptive",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199997.582562,
+    "fact_kpi": 1726.0,
+    "mape_spend": 0.0003982764899001272,
+    "mape_kpi": 0.031384653165975135,
+    "final_ape_spend": 2.0145316666457803e-06,
+    "final_ape_kpi": 0.013786607420303817,
+    "final_dev_spend": -2.0145316666457803e-06,
+    "final_dev_kpi": 0.013786607420303817,
+    "within_20": true,
+    "budget_utilization": 0.9999979854683334,
+    "reallocated_share": 0.009527125980833334,
+    "replans": 503,
+    "seconds": 513.6984857950001,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138849.715945,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 637245.481173,
+      "social_1": 176812.889792,
+      "social_2": 247089.495652,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419654,
+        "unique_reach": 355180,
+        "clicks": 3778,
+        "conversions": 134
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 754449,
+        "impressions": 225584,
+        "unique_reach": 165123,
+        "clicks": 18245,
+        "conversions": 1006
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1811898,
+        "unique_reach": 1673591,
+        "clicks": 13978,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1031407,
+        "unique_reach": 765845,
+        "clicks": 10568,
+        "conversions": 332
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-supply_drop-adaptive_max",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199857.27133,
+    "fact_kpi": 1762.0,
+    "mape_spend": 0.001144547572034254,
+    "mape_kpi": 0.04620145343300262,
+    "final_ape_spend": 0.00011894055833341554,
+    "final_ape_kpi": 0.03493163515328814,
+    "final_dev_spend": -0.00011894055833341554,
+    "final_dev_kpi": 0.03493163515328814,
+    "within_20": true,
+    "budget_utilization": 0.9998810594416666,
+    "reallocated_share": 0.2490873849275,
+    "replans": 503,
+    "seconds": 516.7861984070005,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 137721.625794,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 580968.479968,
+      "social_1": 190553.267582,
+      "social_2": 290613.897986,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 414685,
+        "unique_reach": 353297,
+        "clicks": 3824,
+        "conversions": 144
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 754449,
+        "impressions": 205905,
+        "unique_reach": 158897,
+        "clicks": 17065,
+        "conversions": 954
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1932766,
+        "unique_reach": 1744764,
+        "clicks": 14936,
+        "conversions": 288
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1207983,
+        "unique_reach": 816753,
+        "clicks": 12198,
+        "conversions": 376
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-supply_drop-frozen",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "supply_drop",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199099.925516,
+    "fact_kpi": 1720.0,
+    "mape_spend": 0.0007697717612651659,
+    "mape_kpi": 0.02904464913876975,
+    "final_ape_spend": 0.0007500620699999854,
+    "final_ape_kpi": 0.010262436131473098,
+    "final_dev_spend": -0.0007500620699999854,
+    "final_dev_kpi": 0.010262436131473098,
+    "within_20": true,
+    "budget_utilization": 0.99924993793,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0745346790008625,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138766.062445,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 636516.448505,
+      "social_1": 176788.451123,
+      "social_2": 247028.963443,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419422,
+        "unique_reach": 355061,
+        "clicks": 3773,
+        "conversions": 133
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 754449,
+        "impressions": 225307,
+        "unique_reach": 165036,
+        "clicks": 18247,
+        "conversions": 1005
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1812042,
+        "unique_reach": 1673658,
+        "clicks": 13977,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1030963,
+        "unique_reach": 765760,
+        "clicks": 10581,
+        "conversions": 328
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-pause-adaptive",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199997.149569,
+    "fact_kpi": 3573.0,
+    "mape_spend": 0.006818943015966892,
+    "mape_kpi": 0.027601297479197016,
+    "final_ape_spend": 2.3753591667627918e-06,
+    "final_ape_kpi": 0.04087394766718923,
+    "final_dev_spend": -2.3753591667627918e-06,
+    "final_dev_kpi": 0.04087394766718923,
+    "within_20": true,
+    "budget_utilization": 0.9999976246408332,
+    "reallocated_share": 0.2995703383725,
+    "replans": 503,
+    "seconds": 526.4737039669999,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 90191.117893,
+      "sms": 670416.129999,
+      "social_1": 439389.901677,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5786357,
+        "unique_reach": 4049807,
+        "clicks": 12432,
+        "conversions": 208
+      },
+      "sms": {
+        "requests": 779996,
+        "impressions": 246989,
+        "unique_reach": 196699,
+        "clicks": 55342,
+        "conversions": 1940
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4376896,
+        "unique_reach": 2157120,
+        "clicks": 46922,
+        "conversions": 1425
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-pause-adaptive_max",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1199991.389964,
+    "fact_kpi": 3575.0,
+    "mape_spend": 0.005203475503714371,
+    "mape_kpi": 0.027044257535211134,
+    "final_ape_spend": 7.175029999925755e-06,
+    "final_ape_kpi": 0.04145658071933991,
+    "final_dev_spend": -7.175029999925755e-06,
+    "final_dev_kpi": 0.04145658071933991,
+    "within_20": true,
+    "budget_utilization": 0.9999928249700001,
+    "reallocated_share": 0.4611773820508333,
+    "replans": 503,
+    "seconds": 512.9668411300008,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 95054.86274,
+      "sms": 580246.368766,
+      "social_1": 524690.158458,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 6047763,
+        "unique_reach": 4132542,
+        "clicks": 13037,
+        "conversions": 209
+      },
+      "sms": {
+        "requests": 779996,
+        "impressions": 211065,
+        "unique_reach": 184067,
+        "clicks": 48702,
+        "conversions": 1715
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 5142984,
+        "unique_reach": 2210197,
+        "clicks": 53575,
+        "conversions": 1651
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w1-c1-h3-pause-frozen",
+    "world_seed": 1,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 3432.6923140000013,
+    "fact_spend": 1102355.834536,
+    "fact_kpi": 3370.0,
+    "mape_spend": 0.04803615338983192,
+    "mape_kpi": 0.04130574519362138,
+    "final_ape_spend": 0.08137013788666674,
+    "final_ape_kpi": 0.01826330712610476,
+    "final_dev_spend": -0.08137013788666674,
+    "final_dev_kpi": -0.01826330712610476,
+    "within_20": true,
+    "budget_utilization": 0.9186298621133333,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.1055270150009164,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 78912.351471,
+      "sms": 581632.089936,
+      "social_1": 441811.393129,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3381957,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3704072,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1575547,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 27182921,
+        "impressions": 5071015,
+        "unique_reach": 3789168,
+        "clicks": 11018,
+        "conversions": 176
+      },
+      "sms": {
+        "requests": 779996,
+        "impressions": 215309,
+        "unique_reach": 185768,
+        "clicks": 49719,
+        "conversions": 1747
+      },
+      "social_1": {
+        "requests": 7486538,
+        "impressions": 4415243,
+        "unique_reach": 2159929,
+        "clicks": 47332,
+        "conversions": 1447
+      },
+      "social_2": {
+        "requests": 5253277,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 8050023,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-pause-adaptive",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1193586.497905,
+    "fact_kpi": 3130.0,
+    "mape_spend": 0.02990915075375171,
+    "mape_kpi": 0.06021699345779655,
+    "final_ape_spend": 0.018656918516735017,
+    "final_ape_kpi": 0.0797892734449064,
+    "final_dev_spend": 0.018656918516735017,
+    "final_dev_kpi": 0.0797892734449064,
+    "within_20": true,
+    "budget_utilization": 0.9946554149208334,
+    "reallocated_share": 0.3991859499325,
+    "replans": 503,
+    "seconds": 529.0652321819998,
+    "channel_spend": {
+      "marketplace_1": 96.790083,
+      "marketplace_2": 168.838631,
+      "marketplace_3": 0.0,
+      "programmatic": 170086.426387,
+      "sms": 127588.778754,
+      "social_1": 895506.723071,
+      "social_2": 0.0,
+      "social_3": 138.940979
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 967,
+        "unique_reach": 967,
+        "clicks": 3,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 488,
+        "unique_reach": 488,
+        "clicks": 2,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5708358,
+        "unique_reach": 3672708,
+        "clicks": 28138,
+        "conversions": 273
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 50169,
+        "unique_reach": 50169,
+        "clicks": 4019,
+        "conversions": 196
+      },
+      "social_1": {
+        "requests": 7722607,
+        "impressions": 7324438,
+        "unique_reach": 3107724,
+        "clicks": 84655,
+        "conversions": 2661
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 1848,
+        "unique_reach": 1848,
+        "clicks": 6,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-pause-adaptive_max",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1199999.865164,
+    "fact_kpi": 3134.0,
+    "mape_spend": 0.027026086215312103,
+    "mape_kpi": 0.061354920252613826,
+    "final_ape_spend": 0.024130355876185606,
+    "final_ape_kpi": 0.08116919583908519,
+    "final_dev_spend": 0.024130355876185606,
+    "final_dev_kpi": 0.08116919583908519,
+    "within_20": true,
+    "budget_utilization": 0.9999998876366667,
+    "reallocated_share": 0.391732390845,
+    "replans": 503,
+    "seconds": 507.01247657099884,
+    "channel_spend": {
+      "marketplace_1": 128.764347,
+      "marketplace_2": 149.117726,
+      "marketplace_3": 0.0,
+      "programmatic": 170580.074234,
+      "sms": 137282.025502,
+      "social_1": 891716.280937,
+      "social_2": 0.0,
+      "social_3": 143.602418
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 1261,
+        "unique_reach": 1261,
+        "clicks": 4,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 431,
+        "unique_reach": 431,
+        "clicks": 2,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5660723,
+        "unique_reach": 3661121,
+        "clicks": 27741,
+        "conversions": 268
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 53773,
+        "unique_reach": 53773,
+        "clicks": 4330,
+        "conversions": 206
+      },
+      "social_1": {
+        "requests": 7722607,
+        "impressions": 7296328,
+        "unique_reach": 3105881,
+        "clicks": 84416,
+        "conversions": 2660
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 1910,
+        "unique_reach": 1910,
+        "clicks": 6,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w2-c1-h3-pause-frozen",
+    "world_seed": 2,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1171725.706868,
+    "plan_kpi": 2898.7137370000005,
+    "fact_spend": 1025121.46288,
+    "fact_kpi": 2830.0,
+    "mape_spend": 0.08998150067554998,
+    "mape_kpi": 0.05293229676976242,
+    "final_ape_spend": 0.12511822786569254,
+    "final_ape_kpi": 0.023704906118503167,
+    "final_dev_spend": -0.12511822786569254,
+    "final_dev_kpi": -0.023704906118503167,
+    "within_20": true,
+    "budget_utilization": 0.8542678857333333,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.052580613999453,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 0.0,
+      "marketplace_3": 0.0,
+      "programmatic": 172797.61702,
+      "sms": 0.0,
+      "social_1": 852323.84586,
+      "social_2": 0.0,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 2396166,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3291810,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_3": {
+        "requests": 1441615,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 26665436,
+        "impressions": 5693223,
+        "unique_reach": 3666765,
+        "clicks": 28278,
+        "conversions": 261
+      },
+      "sms": {
+        "requests": 1069452,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 7722607,
+        "impressions": 7021943,
+        "unique_reach": 3087041,
+        "clicks": 81796,
+        "conversions": 2569
+      },
+      "social_2": {
+        "requests": 6452607,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 5761218,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-pause-adaptive",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1192787.460186,
+    "fact_kpi": 1507.0,
+    "mape_spend": 0.01639379922273632,
+    "mape_kpi": 0.02973321971078271,
+    "final_ape_spend": 0.006010449845000015,
+    "final_ape_kpi": 0.010738604035754737,
+    "final_dev_spend": -0.006010449845000015,
+    "final_dev_kpi": 0.010738604035754737,
+    "within_20": true,
+    "budget_utilization": 0.993989550155,
+    "reallocated_share": 0.39482888373,
+    "replans": 503,
+    "seconds": 533.2198276600002,
+    "channel_spend": {
+      "marketplace_1": 13600.417749,
+      "marketplace_2": 247407.997722,
+      "marketplace_3": 0.0,
+      "programmatic": 44601.021719,
+      "sms": 0.0,
+      "social_1": 772595.135292,
+      "social_2": 0.0,
+      "social_3": 114582.887704
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 95703,
+        "unique_reach": 95703,
+        "clicks": 329,
+        "conversions": 12
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 891310,
+        "unique_reach": 687226,
+        "clicks": 5291,
+        "conversions": 307
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 1642999,
+        "unique_reach": 1642999,
+        "clicks": 3018,
+        "conversions": 37
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 6811975,
+        "impressions": 6052981,
+        "unique_reach": 1609700,
+        "clicks": 37370,
+        "conversions": 1034
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1497866,
+        "unique_reach": 1473609,
+        "clicks": 5470,
+        "conversions": 117
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-pause-adaptive_max",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive_max",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1199993.27293,
+    "fact_kpi": 1516.0,
+    "mape_spend": 0.008480869048541086,
+    "mape_kpi": 0.030962036271729956,
+    "final_ape_spend": 5.605891666685541e-06,
+    "final_ape_kpi": 0.01677486643543741,
+    "final_dev_spend": -5.605891666685541e-06,
+    "final_dev_kpi": 0.01677486643543741,
+    "within_20": true,
+    "budget_utilization": 0.9999943941083334,
+    "reallocated_share": 0.424665309455,
+    "replans": 503,
+    "seconds": 491.1391499600013,
+    "channel_spend": {
+      "marketplace_1": 15290.886516,
+      "marketplace_2": 257564.414432,
+      "marketplace_3": 0.0,
+      "programmatic": 63500.689852,
+      "sms": 0.0,
+      "social_1": 730758.227201,
+      "social_2": 0.0,
+      "social_3": 132879.054929
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 106862,
+        "unique_reach": 106862,
+        "clicks": 365,
+        "conversions": 12
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 927410,
+        "unique_reach": 695499,
+        "clicks": 5422,
+        "conversions": 319
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 2305798,
+        "unique_reach": 2305798,
+        "clicks": 4262,
+        "conversions": 45
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 6811975,
+        "impressions": 5765867,
+        "unique_reach": 1600607,
+        "clicks": 36295,
+        "conversions": 1010
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1747206,
+        "unique_reach": 1664099,
+        "clicks": 6261,
+        "conversions": 130
+      }
+    }
+  },
+  {
+    "run_id": "w3-c1-h3-pause-frozen",
+    "world_seed": 3,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "frozen",
+    "shocked_channel": "social_1",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1490.988861,
+    "fact_spend": 1069659.231133,
+    "fact_kpi": 1394.0,
+    "mape_spend": 0.08165619989162527,
+    "mape_kpi": 0.0689338419919882,
+    "final_ape_spend": 0.10861730738916667,
+    "final_ape_kpi": 0.0650500238713722,
+    "final_dev_spend": -0.10861730738916667,
+    "final_dev_kpi": -0.0650500238713722,
+    "within_20": true,
+    "budget_utilization": 0.8913826926108334,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0649573750015406,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 249167.987684,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 0.0,
+      "social_1": 703818.600453,
+      "social_2": 0.0,
+      "social_3": 116672.642996
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3309963,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3680118,
+        "impressions": 897194,
+        "unique_reach": 688169,
+        "clicks": 5207,
+        "conversions": 296
+      },
+      "marketplace_3": {
+        "requests": 2105189,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24409851,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 1131019,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_1": {
+        "requests": 6811975,
+        "impressions": 5597344,
+        "unique_reach": 1594699,
+        "clicks": 35237,
+        "conversions": 975
+      },
+      "social_2": {
+        "requests": 5765584,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "social_3": {
+        "requests": 7561592,
+        "impressions": 1523471,
+        "unique_reach": 1494923,
+        "clicks": 5562,
+        "conversions": 123
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-pause-adaptive",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199998.301531,
+    "fact_kpi": 1702.0,
+    "mape_spend": 0.004106639103042029,
+    "mape_kpi": 0.024087729084893802,
+    "final_ape_spend": 1.4153908332809807e-06,
+    "final_ape_kpi": 0.0003100777350190625,
+    "final_dev_spend": -1.4153908332809807e-06,
+    "final_dev_kpi": -0.0003100777350190625,
+    "within_20": true,
+    "budget_utilization": 0.9999985846091667,
+    "reallocated_share": 0.3030170803316667,
+    "replans": 503,
+    "seconds": 520.170192558,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138847.876165,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 637212.364181,
+      "social_1": 176811.091202,
+      "social_2": 247088.095406,
+      "social_3": 38.874577
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419639,
+        "unique_reach": 355369,
+        "clicks": 3808,
+        "conversions": 143
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 867396,
+        "impressions": 224135,
+        "unique_reach": 164578,
+        "clicks": 18102,
+        "conversions": 977
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1805841,
+        "unique_reach": 1669769,
+        "clicks": 13753,
+        "conversions": 246
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1021640,
+        "unique_reach": 763169,
+        "clicks": 10558,
+        "conversions": 336
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 389,
+        "unique_reach": 389,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-pause-adaptive_max",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "adaptive_max",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1199912.06747,
+    "fact_kpi": 1717.0,
+    "mape_spend": 0.00374665790447525,
+    "mape_kpi": 0.028168844091313018,
+    "final_ape_spend": 7.327710833342281e-05,
+    "final_ape_kpi": 0.008500350487057738,
+    "final_dev_spend": -7.327710833342281e-05,
+    "final_dev_kpi": 0.008500350487057738,
+    "within_20": true,
+    "budget_utilization": 0.9999267228916666,
+    "reallocated_share": 0.33637958414083335,
+    "replans": 503,
+    "seconds": 517.2112735290011,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 136578.936473,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 593583.560438,
+      "social_1": 173825.879923,
+      "social_2": 295674.722549,
+      "social_3": 248.968087
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 413243,
+        "unique_reach": 352907,
+        "clicks": 3829,
+        "conversions": 145
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 867396,
+        "impressions": 209080,
+        "unique_reach": 159882,
+        "clicks": 17183,
+        "conversions": 931
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1772211,
+        "unique_reach": 1649077,
+        "clicks": 13458,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1216867,
+        "unique_reach": 819210,
+        "clicks": 12428,
+        "conversions": 387
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 2717,
+        "unique_reach": 2717,
+        "clicks": 4,
+        "conversions": 0
+      }
+    }
+  },
+  {
+    "run_id": "w4-c1-h3-pause-frozen",
+    "world_seed": 4,
+    "campaign_seed": 1,
+    "history": 3,
+    "scenario": "pause",
+    "mode": "frozen",
+    "shocked_channel": "sms",
+    "budget": 1200000.0,
+    "plan_spend": 1200000.0,
+    "plan_kpi": 1702.527916,
+    "fact_spend": 1108173.130727,
+    "fact_kpi": 1589.0,
+    "mape_spend": 0.045444124438931845,
+    "mape_kpi": 0.05680835200765387,
+    "final_ape_spend": 0.07652239106083328,
+    "final_ape_kpi": 0.06668197034133096,
+    "final_dev_spend": -0.07652239106083328,
+    "final_dev_kpi": -0.06668197034133096,
+    "within_20": true,
+    "budget_utilization": 0.9234776089391667,
+    "reallocated_share": 0.0,
+    "replans": 0,
+    "seconds": 1.0667443799993634,
+    "channel_spend": {
+      "marketplace_1": 0.0,
+      "marketplace_2": 138766.062445,
+      "marketplace_3": 0.0,
+      "programmatic": 0.0,
+      "sms": 545589.653716,
+      "social_1": 176788.451123,
+      "social_2": 247028.963443,
+      "social_3": 0.0
+    },
+    "channel_facts": {
+      "marketplace_1": {
+        "requests": 3295409,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "marketplace_2": {
+        "requests": 3783741,
+        "impressions": 419422,
+        "unique_reach": 355061,
+        "clicks": 3773,
+        "conversions": 133
+      },
+      "marketplace_3": {
+        "requests": 1545706,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "programmatic": {
+        "requests": 24259134,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      },
+      "sms": {
+        "requests": 867396,
+        "impressions": 192576,
+        "unique_reach": 154102,
+        "clicks": 16156,
+        "conversions": 874
+      },
+      "social_1": {
+        "requests": 9473661,
+        "impressions": 1812042,
+        "unique_reach": 1673658,
+        "clicks": 13977,
+        "conversions": 254
+      },
+      "social_2": {
+        "requests": 5297439,
+        "impressions": 1030963,
+        "unique_reach": 765760,
+        "clicks": 10581,
+        "conversions": 328
+      },
+      "social_3": {
+        "requests": 9002093,
+        "impressions": 0,
+        "unique_reach": 0,
+        "clicks": 0,
+        "conversions": 0
+      }
+    }
+  }
+]
