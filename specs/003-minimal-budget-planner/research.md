@@ -164,3 +164,22 @@ feedback loop, preventing silent spend increases.
 **Alternatives considered**: Re-solving the required total budget after every observed hour was
 rejected because it lets model changes increase financial commitment without a new approval. Treating
 capacity failure as HTTP validation failure was rejected because infeasibility is a valid domain result.
+
+## Saturating Response Curves and Explicit Reserve
+
+**Decision**: Build each channel's budget-to-KPI curve over its horizon-specific useful spend
+capacity. Effective CPM grows with audience saturation, while CTR, CR and new-reach probability decay
+with saturation and excess frequency. Sample 128 quadratically spaced points, project finite
+differences onto non-negative non-increasing marginal slopes, and water-fill those segments in
+deterministic channel order. Stop when every available marginal gain is effectively zero and return
+the remaining approved amount as `unallocated_budget`.
+
+**Rationale**: A fixed number of budget-relative segments made resolution worse as the requested
+budget grew and forced every last micro into some channel. Horizon-derived curve capacity makes the
+response independent of an arbitrarily large request, the concavity projection supplies the
+precondition used by greedy water-filling, and an explicit reserve preserves the accounting identity
+without pretending saturated spend is useful.
+
+**Alternatives considered**: A hard cap alone creates a discontinuity and does not describe CPM/CTR/CR
+degradation. Always allocating 100% hides waste. Letting task B increase budget during execution was
+kept out: reserve changes allocation inside the already approved task-A budget only.

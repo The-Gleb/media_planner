@@ -39,6 +39,8 @@ root.
 Use `docker compose up --build -d` from the root. The synthetic segmented world is enabled
 by default (recreating Simulator discards its in-memory run).
 The campaign form offers one shared geo/gender/age segment selection for all channels, or all audiences.
+In the business/expert dashboard, this selection is in the Brief step in both modes.
+After calculation, approve the media plan to open campaign controls; return to the brief to edit the audience before reset.
 Common segment dimensions are mapped to each channel's IDs; channels without segments need no selection.
 Selection is fixed for the run; editing a new draft only takes effect after reset.
 Catalogue failures block launch and offer retry. Legacy worlds need no selection.

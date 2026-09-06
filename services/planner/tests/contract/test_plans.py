@@ -21,6 +21,7 @@ def test_documented_uniform_plan(client: TestClient, fixed_request: dict[str, An
         "optimize": "unique_reach",
         "currency": "RUB",
         "budget": "12.000000",
+        "unallocated_budget": "0.000000",
         "horizon": {"from_hour": 0, "to_hour": 2},
         "expected": None,
         "allocations": body["allocations"],
@@ -92,6 +93,24 @@ def test_channel_and_campaign_totals_must_be_exact(
     assert response.status_code == 422
 
 
+def test_campaign_spend_cannot_exceed_approved_budget(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    fixed_request["current"].update(
+        {
+            "current_hour": 1,
+            "state_revision": 1,
+            "last_step_id": "2917c89e-4936-4ddf-b167-90555465cb01",
+            "last_observed_at": "2026-09-03T06:00:00Z",
+            "spent": "13.000000",
+        }
+    )
+    fixed_request["current"]["channels"]["search_1"]["spent"] = "13.000000"
+    response = client.post("/v1/plans", json=fixed_request)
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation_failed"
+
+
 def test_request_id_does_not_change_plan_id(
     client: TestClient, fixed_request: dict[str, Any]
 ) -> None:
@@ -104,7 +123,7 @@ def test_request_id_does_not_change_plan_id(
     assert second["allocations"] == first["allocations"]
 
 
-def test_optimized_strategy_uses_catalog_and_keeps_exact_budget(
+def test_optimized_strategy_uses_catalog_and_accounts_for_reserve(
     client: TestClient, fixed_request: dict[str, Any]
 ) -> None:
     channels = ["programmatic", "social_1", "marketplace_3"]
@@ -120,7 +139,7 @@ def test_optimized_strategy_uses_catalog_and_keeps_exact_budget(
     assert body["strategy"] == "optimized"
     assert sum(
         money_to_micros(item["budget_cap"]) for item in body["allocations"]
-    ) == money_to_micros(body["budget"])
+    ) + money_to_micros(body["unallocated_budget"]) == money_to_micros(body["budget"])
     totals = {
         channel: sum(
             money_to_micros(item["budget_cap"])
@@ -130,3 +149,151 @@ def test_optimized_strategy_uses_catalog_and_keeps_exact_budget(
         for channel in channels
     }
     assert len(set(totals.values())) > 1
+
+
+def test_catalog_plans_return_hourly_and_total_expectations(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    channels = ["programmatic", "social_1", "sms"]
+    zero = next(iter(fixed_request["current"]["channels"].values()))
+    fixed_request["strategy"] = "optimized"
+    fixed_request["optimize"] = "conversions"
+    fixed_request["channels"] = channels
+    fixed_request["horizon"] = {"from_hour": 0, "to_hour": 48}
+    fixed_request["current"]["channels"] = {channel: dict(zero) for channel in channels}
+    fixed_request["budget"] = "100000.000000"
+
+    body = client.post("/v1/plans", json=fixed_request).json()
+    assert body["expected"] is not None
+    assert set(body["expected"]) == {
+        "spend",
+        "impressions",
+        "unique_reach",
+        "clicks",
+        "conversions",
+    }
+    hourly = [item["expected"] for item in body["allocations"]]
+    assert all(item is not None for item in hourly)
+    for item, allocation in zip(hourly, body["allocations"], strict=True):
+        assert money_to_micros(item["spend"]) <= money_to_micros(allocation["budget_cap"])
+    spend = sum(money_to_micros(item["spend"]) for item in hourly)
+    assert spend == money_to_micros(body["expected"]["spend"])
+    clicks = sum(float(item["clicks"]) for item in hourly)
+    assert int(body["expected"]["clicks"]) == int(clicks)
+
+
+def test_replan_keeps_committed_hours_without_expectations(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    channels = ["programmatic", "social_1"]
+    fixed_request["strategy"] = "optimized"
+    fixed_request["channels"] = channels
+    fixed_request["horizon"] = {"from_hour": 0, "to_hour": 24}
+    fixed_request["budget"] = "10000.000000"
+    fixed_request["current"] = {
+        "current_hour": 6,
+        "state_revision": 6,
+        "last_step_id": "2917c89e-4936-4ddf-b167-90555465cb01",
+        "last_observed_at": "2026-09-03T11:00:00Z",
+        "spent": "2000.000000",
+        "unique_reach": "20000",
+        "clicks": "150",
+        "conversions": "3",
+        "channels": {
+            "programmatic": {
+                "spent": "1500.000000",
+                "requests": "300000",
+                "impressions": "30000",
+                "unique_reach": "15000",
+                "clicks": "100",
+                "conversions": "2",
+            },
+            "social_1": {
+                "spent": "500.000000",
+                "requests": "50000",
+                "impressions": "5000",
+                "unique_reach": "5000",
+                "clicks": "50",
+                "conversions": "1",
+            },
+        },
+    }
+    body = client.post("/v1/plans", json=fixed_request).json()
+    past = [item for item in body["allocations"] if item["hour"] < 6]
+    future = [item for item in body["allocations"] if item["hour"] >= 6]
+    assert len(past) == 12 and all(item["expected"] is None for item in past)
+    assert all(item["expected"] is not None for item in future)
+    future_spend = sum(money_to_micros(item["expected"]["spend"]) for item in future)
+    assert money_to_micros(body["expected"]["spend"]) == 2_000_000_000 + future_spend
+    assert int(body["expected"]["conversions"]) >= 3
+
+
+def _history_entry(channels: list[str], hours: int = 336) -> dict[str, Any]:
+    per_bin = hours // 24
+    bins = [
+        {
+            "hour": hour,
+            "hours": per_bin,
+            "requests": str(per_bin * 20_000),
+            "impressions": str(per_bin * 4_000),
+            "unique_reach": str(per_bin * 3_000),
+            "clicks": str(per_bin * 60),
+            "conversions": str(per_bin * 3),
+            "spent": f"{per_bin * 400}.000000",
+        }
+        for hour in range(24)
+    ]
+    return {"horizon_hours": hours, "channels": {channel: {"bins": bins} for channel in channels}}
+
+
+def test_history_changes_optimized_plan_and_fingerprint(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    channels = ["programmatic", "social_1"]
+    zero = next(iter(fixed_request["current"]["channels"].values()))
+    fixed_request["strategy"] = "optimized"
+    fixed_request["optimize"] = "conversions"
+    fixed_request["channels"] = channels
+    fixed_request["horizon"] = {"from_hour": 0, "to_hour": 72}
+    fixed_request["current"]["channels"] = {channel: dict(zero) for channel in channels}
+    fixed_request["budget"] = "300000.000000"
+    cold = client.post("/v1/plans", json=fixed_request).json()
+
+    fixed_request["history"] = [_history_entry(["social_1"])]
+    warm_response = client.post("/v1/plans", json=fixed_request)
+    assert warm_response.status_code == 200, warm_response.text
+    warm = warm_response.json()
+    assert warm["plan_id"] != cold["plan_id"]
+    assert warm["allocations"] != cold["allocations"]
+    assert warm["expected"] != cold["expected"]
+
+
+def test_history_does_not_change_uniform_plan_id(
+    client: TestClient, fixed_request: dict[str, Any]
+) -> None:
+    cold = client.post("/v1/plans", json=fixed_request).json()
+    fixed_request["history"] = [_history_entry(["social_1"])]
+    warm = client.post("/v1/plans", json=fixed_request).json()
+    assert warm["plan_id"] == cold["plan_id"]
+    assert warm["allocations"] == cold["allocations"]
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda entry: entry["channels"]["social_1"]["bins"].pop(),
+        lambda entry: entry["channels"]["social_1"]["bins"][3].__setitem__("hour", 4),
+        lambda entry: entry["channels"]["social_1"]["bins"][0].__setitem__("clicks", "999999"),
+        lambda entry: entry.__setitem__("horizon_hours", 24),
+        lambda entry: entry.__setitem__("hidden_cpm", "1.0"),
+    ],
+)
+def test_invalid_history_is_rejected(
+    client: TestClient, fixed_request: dict[str, Any], mutate: Any
+) -> None:
+    entry = _history_entry(["social_1"])
+    mutate(entry)
+    fixed_request["history"] = [entry]
+    response = client.post("/v1/plans", json=fixed_request)
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation_failed"

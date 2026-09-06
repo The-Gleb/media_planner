@@ -32,7 +32,7 @@ integers and rejects non-canonical, signed-negative or fractional values.
 |---|---|---|
 | `PlanType` | `fixed_budget`, `target_kpi` | Target mode derives an approved budget before execution |
 | `KPI` | `unique_reach`, `clicks`, `conversions` | Recorded; does not influence uniform v0 allocation |
-| `Strategy` | `uniform` | Only supported strategy |
+| `Strategy` | `uniform`, `optimized` | Exact even split or saturation-aware marginal allocation |
 | `MarketStatus` | `unavailable` | No runtime market feed; target mode uses a local public-catalog benchmark |
 | `PlanningStatus` | `idle`, `initial_planning`, `resetting_simulation`, `ready`, `stepping`, `replanning`, `replan_failed`, `finished`, `error` | Dashboard workflow state |
 
@@ -68,7 +68,7 @@ or exposed by Planner v0.
 | `duration_hours` | integer | Defines horizon `[0, duration_hours)` |
 | `budget` | MoneyText or null | Required only for fixed budget; total for full horizon |
 | `optimize` | KPI | Required for fixed budget |
-| `strategy` | Strategy | `uniform` in v0 |
+| `strategy` | Strategy | User-selectable for fixed budget; `optimized` for target KPI |
 | `target` | TargetKPI or null | Required for target mode |
 
 This replaces manually entered per-channel hourly budget fields. Those caps are Planner output.
@@ -149,6 +149,9 @@ Cross-field invariants:
 - `current.current_hour` is within `[from_hour, to_hour]`.
 - `current.state_revision = current.current_hour - from_hour`.
 - `current.channels` has exactly the same keys as `channels`.
+- `history` (optional, oldest first) lists finished campaigns on the same market as 24 hour-of-day
+  bins per channel of observable facts only: hours, requests, impressions, unique reach, clicks,
+  conversions, spend. It sharpens the catalog prior for optimized plans and enters their `plan_id`.
 - `simulation.currency` governs every monetary value.
 - `duration × channel_count <= 43,200`.
 
@@ -159,7 +162,7 @@ Cross-field invariants:
 | `channel_id` | ChannelID | One configured channel |
 | `hour` | Hour | One included horizon hour |
 | `budget_cap` | MoneyText | Non-negative exact cap |
-| `expected` | null | Explicitly unavailable in v0 |
+| `expected` | HourlyExpected or null | Benchmark expectation of the channel hour (`spend`, fractional `impressions`, `unique_reach`, `clicks`, `conversions`); null for committed hours and for channels absent from the catalog |
 
 Ordering is ascending `hour`, then lexicographic `channel_id`. Every pair occurs exactly once.
 
@@ -188,8 +191,9 @@ Therefore `sum(cap) = B` and `max(cap) - min(cap) <= 1 micro`.
 | `optimize` | KPI | Echoed selection |
 | `currency` | string | Echoed SimulationContext currency |
 | `budget` | MoneyText | Canonical input total |
+| `unallocated_budget` | MoneyText or null | Explicit reserve; zero for uniform, null for infeasible target responses |
 | `horizon` | Horizon | Echoed |
-| `expected` | null | No forecast |
+| `expected` | ExpectedOutcome or null | Projected campaign total: observed facts plus the forecast of future caps; null only when a channel is absent from the catalog |
 | `allocations` | Allocation[] | Complete deterministic schedule |
 | `required_budget` | null | Reserved for target mode |
 | `reason` | null | Reserved for infeasible future plans |
@@ -197,6 +201,11 @@ Therefore `sum(cap) = B` and `max(cap) - min(cap) <= 1 micro`.
 `plan_id` hashes a versioned canonical representation of PlanType, Strategy, KPI, budget, horizon,
 sorted channels and SimulationContext. Uniform excludes CampaignState and remains stable. Optimized
 also fingerprints CampaignState because every committed observation can change future allocations.
+
+Budget conservation depends on strategy. Uniform satisfies `sum(allocation caps) = budget`.
+Optimized satisfies `actual spent + future allocation caps + unallocated_budget = budget`; completed
+slots reconstruct actual spend for auditability, so equivalently the complete response satisfies
+`sum(allocation caps) + unallocated_budget = budget`.
 
 ## ActivePlan (dashboard state)
 

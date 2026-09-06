@@ -26,7 +26,7 @@ The Campaign section replaces manual per-channel hourly caps with:
 - total campaign budget and currency;
 - duration in hours, defining Planner horizon `[0, duration)`;
 - KPI: “Охват (`unique_reach`)”, “Клики (`clicks`)”, or “Конверсии (`conversions`)”;
-- strategy: “Равномерно (`uniform`)”.
+- strategy: “Равномерно (`uniform`)” or “Оптимизировано (`optimized`)”.
 
 Target-KPI mode accepts a positive target, fixes strategy `optimized` and explains that its calculated
 budget is a public-catalog estimate. Only Planner creates channel/hour caps; the UI never presents
@@ -39,7 +39,8 @@ On submit:
 1. Validate Simulation and Campaign drafts locally.
 2. Build zero CampaignState and request either a fixed-budget plan or an initial target-KPI estimate.
 3. For an infeasible target, show the capacity diagnosis and do not reset Simulator.
-4. For an executable result, validate correlation, exact budget sum, horizon and channel/hour coverage.
+4. For an executable result, validate correlation, exact `sum(caps) + unallocated_budget = budget`,
+   horizon and channel/hour coverage.
 5. Create/reset Simulator with the same start and duration.
 6. On success, atomically install the Simulator session and ActivePlan and clear old history, actual
    totals and pending operations.
@@ -55,6 +56,7 @@ After successful creation the dashboard shows:
 - source mode, selected KPI and strategy;
 - for target mode, the original target, calculated budget and benchmark forecast;
 - relative horizon and allocation count;
+- explicit “Резерв вне каналов” and a saturation explanation when it is non-zero;
 - plan ID prefix for traceability;
 - “Прогноз недоступен” for fixed-budget v0; a labeled public-catalog forecast for target mode;
 - an exact allocation table with hour rows and channel columns.

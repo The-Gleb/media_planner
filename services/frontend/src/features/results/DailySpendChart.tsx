@@ -1,10 +1,14 @@
+import { useThrottled } from './useThrottled'
 import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { HourlyResult } from '../../domain/types'
-import { dailySpendRows, dailySpendTotal, formatSpendDay, spendDays } from './dailySpend'
+import { campaignSpendRows, campaignSpendTotal, dailySpendRows, dailySpendTotal, formatSpendDay, spendDays } from './dailySpend'
+import { channelColor } from '../../app/palette'
+import { channelLabel, money } from '../../app/format'
 
-const COLORS = ['#0d6b58', '#e07a38', '#315ca8', '#8b4aa0', '#c69a00', '#327a8a', '#c33f62', '#59636d']
 const LATEST = '__latest__'
+const ALL_DAYS = '__all_days__'
+const ALL_HOURS = '__all_hours__'
 
 export function DailySpendChart({ history, channelIds, currency, timeZone, running }: {
   history: HourlyResult[]
@@ -13,38 +17,46 @@ export function DailySpendChart({ history, channelIds, currency, timeZone, runni
   timeZone: string
   running: boolean
 }) {
-  const days = useMemo(() => spendDays(history, timeZone), [history, timeZone])
+  const renderedHistory = useThrottled(history, running)
+  const days = useMemo(() => spendDays(renderedHistory, timeZone), [renderedHistory, timeZone])
   const latestDay = days.at(-1) ?? ''
-  const [selection, setSelection] = useState(LATEST)
+  const [selection, setSelection] = useState(ALL_DAYS)
+  const wholeCampaign = selection === ALL_DAYS || selection === ALL_HOURS
   const selectedDay = selection === LATEST || !days.includes(selection) ? latestDay : selection
-  const rows = useMemo(() => dailySpendRows(history, channelIds, timeZone, selectedDay), [history, channelIds, timeZone, selectedDay])
-  const total = useMemo(() => dailySpendTotal(history, timeZone, selectedDay), [history, timeZone, selectedDay])
+  const rows = useMemo(
+    () => wholeCampaign ? campaignSpendRows(renderedHistory, channelIds, timeZone, selection === ALL_DAYS ? 'day' : 'hour') : dailySpendRows(renderedHistory, channelIds, timeZone, selectedDay),
+    [wholeCampaign, renderedHistory, channelIds, timeZone, selection, selectedDay],
+  )
+  const total = useMemo(() => wholeCampaign ? campaignSpendTotal(renderedHistory) : dailySpendTotal(renderedHistory, timeZone, selectedDay), [wholeCampaign, renderedHistory, timeZone, selectedDay])
+  const scopeLabel = selection === ALL_DAYS ? 'вся кампания по дням' : selection === ALL_HOURS ? 'вся кампания по часам' : formatSpendDay(selectedDay)
 
   return <section className="card" aria-labelledby="daily-spend-title">
     <div className="status-line">
-      <div><p className="eyebrow">BUDGET PACE</p><h2 id="daily-spend-title">Дневной расход по часам</h2></div>
-      {running && selection === LATEST && <span className="live-indicator"><span aria-hidden="true" />Текущий день</span>}
+      <h2 id="daily-spend-title">Расход по каналам</h2>
+      {running && (selection === LATEST || wholeCampaign) && <span className="live-indicator"><span aria-hidden="true" />Обновляется</span>}
     </div>
     <div className="daily-spend-toolbar">
       <div className="field">
-        <label htmlFor="spend-day">День кампании</label>
+        <label htmlFor="spend-day">Период</label>
         <select id="spend-day" value={selection} onChange={(event) => setSelection(event.target.value)}>
-          <option value={LATEST}>Текущий · {formatSpendDay(latestDay)}</option>
+          <option value={ALL_DAYS}>Вся кампания · по дням</option>
+          <option value={ALL_HOURS}>Вся кампания · по часам</option>
+          <option value={LATEST}>Текущий день · {formatSpendDay(latestDay)}</option>
           {days.slice(0, -1).reverse().map((day) => <option key={day} value={day}>{formatSpendDay(day)}</option>)}
         </select>
       </div>
-      <div className="daily-spend-total"><span>Расход за выбранный день</span><strong>{total} {currency}</strong><small>{timeZone}</small></div>
+      <div className="daily-spend-total"><span>Расход за период</span><strong>{money(total, currency)}</strong><small>{timeZone}</small></div>
     </div>
-    <p className="muted">Столбец показывает общий расход за час, цветные сегменты — вклад каждого канала.</p>
-    <div className="chart-wrap daily-spend-chart" role="img" aria-label={`Почасовое распределение расходов по каналам за ${formatSpendDay(selectedDay)}. Валюта: ${currency}.`}>
+    <p className="muted">Столбец показывает общий расход за {selection === ALL_DAYS ? 'день' : 'час'}, цветные сегменты — вклад каждого канала.</p>
+    <div className="chart-wrap daily-spend-chart" role="img" aria-label={`Распределение расходов по каналам: ${scopeLabel}. Валюта: ${currency}.`}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={rows} accessibilityLayer margin={{ top: 12, right: 20, bottom: 12, left: 10 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="hour" interval={2} />
+          <XAxis dataKey="hour" interval={selection === ALL_HOURS ? 23 : selection === ALL_DAYS ? 0 : 2} minTickGap={12} />
           <YAxis width={82} />
-          <Tooltip />
+          <Tooltip formatter={(v) => money(String(v), currency, 2)} />
           <Legend />
-          {channelIds.map((channelId, index) => <Bar key={channelId} dataKey={channelId} name={channelId} stackId="daily-spend" fill={COLORS[index % COLORS.length]} isAnimationActive={!running} />)}
+          {channelIds.map((channelId) => <Bar key={channelId} dataKey={channelId} name={channelLabel(channelId)} stackId="daily-spend" fill={channelColor(channelId, channelIds)} isAnimationActive={!running} />)}
         </BarChart>
       </ResponsiveContainer>
     </div>

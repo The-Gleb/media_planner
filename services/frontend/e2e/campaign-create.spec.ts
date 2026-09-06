@@ -13,7 +13,7 @@ test('creates plan before Simulator and preserves validation input', async ({ pa
   await expect(page.getByLabel('ID симуляции')).toHaveValue('-invalid')
   await createCampaign(page)
   await expect(page.getByRole('heading', { name: 'Медиаплан' })).toBeVisible()
-  await expect(page.getByText(/Прогноз не отображается/)).toBeVisible()
+  await expect(page.getByText(/Прогноз плана/)).toBeVisible()
 })
 
 test('successful reset clears history while failed planning preserves run', async ({ page, request }) => {
@@ -26,6 +26,6 @@ test('successful reset clears history while failed planning preserves run', asyn
   await page.getByRole('button', { name: 'Перепланировать, сбросить и запустить' }).click()
   await expect(page.getByRole('heading', { name: /Последний час/ })).toBeVisible()
   await page.getByRole('button', { name: 'Перепланировать, сбросить и запустить' }).click()
-  await expect(page.getByText('0 из 2')).toBeVisible()
+  await expect(page.getByText(/час 0 из 2/)).toBeVisible()
   await expect(page.getByRole('heading', { name: /Последний час/ })).not.toBeVisible()
 })

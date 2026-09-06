@@ -226,6 +226,15 @@ outcome. Paths are repository-relative.
 - [X] T106 Freeze the calculated budget and reuse fixed-budget hourly replanning after launch
 - [X] T107 Add target solver, contract, codec, form and request-builder tests
 
+## Phase 10: P0 Channel Saturation
+
+- [X] T108 Replace request-relative optimized segments with horizon-capacity response curves for CPM, CTR, CR and reach
+- [X] T109 Project response-curve slopes to non-negative non-increasing marginal KPI gain and add property tests
+- [X] T110 Stop optimized allocation after useful positive-gain segments and expose exact `unallocated_budget`
+- [X] T111 Extend Planner DTO/OpenAPI and frontend codecs/summary with the reserve invariant and presentation
+- [X] T112 Reuse prepared response curves during target-KPI binary search and add high-budget anti-dumping tests
+- [X] T113 Update the canonical mathematical model and service/feature documentation
+
 ---
 
 ## Dependencies & Execution Order

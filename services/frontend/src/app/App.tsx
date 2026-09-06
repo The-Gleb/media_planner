@@ -1,40 +1,68 @@
-import { lazy, Suspense, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { simulatorClient } from '../api/simulatorClient'
 import type { ExecutionStatus, PendingStep, WorldMetadata } from '../domain/types'
-import { CampaignForm } from '../features/campaign/CampaignForm'
-import { CampaignSummary } from '../features/campaign/CampaignSummary'
-import { ServiceStatus } from '../features/campaign/ServiceStatus'
 import { useCampaignController } from '../features/campaign/useCampaignController'
 import { runRemaining } from '../features/execution/autoRunController'
 import { commitHourlyResult } from '../features/execution/history'
 import { createPendingStep, submitPendingStep } from '../features/execution/stepController'
-import { RunProgress } from '../features/execution/RunProgress'
-import { StepControls } from '../features/execution/StepControls'
-import { AllocationTable } from '../features/planning/AllocationTable'
 import { buildPlanRequest } from '../features/planning/planRequest'
-import { PlanSummary } from '../features/planning/PlanSummary'
 import { ReplanningStatus } from '../features/planning/ReplanningStatus'
 import { usePlanningController } from '../features/planning/usePlanningController'
-import { ActualKPISummary } from '../features/results/ActualKPISummary'
-import { LatestObservations } from '../features/results/LatestObservations'
-import { StrategyComparison } from '../features/results/StrategyComparison'
 import { userError } from './messages'
-import { useServicesBootstrap } from './useServicesBootstrap'
+import { useServicesBootstrap, type ServiceBootstrap } from './useServicesBootstrap'
+import { buildApprovedPayload, buildRecentHours, sameMarket, savePastCampaigns } from '../domain/history'
+import { BriefStep } from '../features/brief/BriefStep'
+import { InfeasibleDiagnosis, PlanStep } from '../features/plan/PlanStep'
+import { CampaignStep } from '../features/run/CampaignStep'
+import { WorldTab } from '../features/world/WorldTab'
+import { useViewMode, ViewModeProvider, ViewModeToggle } from './viewMode'
 
-const MetricHistory = lazy(() => import('../features/results/MetricHistory').then((module) => ({ default: module.MetricHistory })))
+type Step = 'brief' | 'plan' | 'run' | 'world'
+
+const BATCH_FLUSH_MS = 300
 
 export function App() {
-  const bootstrap = useServicesBootstrap()
-  return <main className="app-shell stack">
-    <header><p className="eyebrow">MEDIA PLANNER · MARKET LAB</p><h1>Планировщик рекламной кампании</h1><p className="lead">Задайте бюджет и горизонт, получите медиаплан и наблюдайте фактический результат по часам.</p></header>
-    <ServiceStatus state={bootstrap} onRetry={() => void bootstrap.refresh()} />
-    {bootstrap.metadata && <ReadyDashboard key={bootstrap.metadata.worldConfigDigest} metadata={bootstrap.metadata} plannerReady={bootstrap.planner === 'ready'} />}
-  </main>
+  return <ViewModeProvider><Shell /></ViewModeProvider>
 }
 
-function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; plannerReady: boolean }) {
+function Shell() {
+  const bootstrap = useServicesBootstrap()
+  const [step, setStep] = useState<Step>('brief')
+  return <div className="app">
+    <header className="topbar">
+      <div className="topbar-inner">
+        <div className="brand"><span className="brand-mark" aria-hidden="true">MP</span><div><strong>MediaPlan Optimizer</strong><span className="muted">Медиаплан → почасовое ведение кампании на симуляторе рынка</span></div></div>
+        <div className="topbar-right"><ServiceChips state={bootstrap} onRetry={() => void bootstrap.refresh()} /><ViewModeToggle /></div>
+      </div>
+    </header>
+    <main className="app-shell stack">
+      {!bootstrap.metadata && <section className="card"><h2>Подключение к сервисам</h2><p className="muted">{bootstrap.simulator === 'checking' || bootstrap.planner === 'checking' ? 'Проверяем симулятор и планировщик…' : 'Симулятор или планировщик недоступны. Проверьте, что стек запущен, и повторите.'}</p>{(bootstrap.simulator === 'unavailable' || bootstrap.planner === 'unavailable') && <button type="button" className="secondary" onClick={() => void bootstrap.refresh()}>Повторить</button>}</section>}
+      {bootstrap.metadata && <ReadyDashboard key={bootstrap.metadata.worldConfigDigest} metadata={bootstrap.metadata} plannerReady={bootstrap.planner === 'ready'} step={step} setStep={setStep} />}
+    </main>
+    <footer className="foot muted">Каналы абстрактные, данные синтетические. Прототип планирования и управления темпом расходования бюджета, не система закупок.</footer>
+  </div>
+}
+
+function ServiceChips({ state, onRetry }: { state: ServiceBootstrap; onRetry: () => void }) {
+  const chip = (name: string, status: ServiceBootstrap['planner']) => <span className="chip chip-dot" data-tone={status === 'ready' ? 'ok' : status === 'unavailable' ? 'bad' : undefined} title={`${name}: ${status === 'ready' ? 'готов' : status === 'checking' ? 'проверка' : 'недоступен'}`}>{name}</span>
+  return <div className="chips" aria-label="Сервисы">{chip('Симулятор', state.simulator)}{chip('Планировщик', state.planner)}{(state.simulator === 'unavailable' || state.planner === 'unavailable') && <button type="button" className="link-button" onClick={onRetry}>повторить</button>}</div>
+}
+
+function Stepper({ step, setStep, planReady, runReady, expert }: { step: Step; setStep: (step: Step) => void; planReady: boolean; runReady: boolean; expert: boolean }) {
+  const items: { id: Step; n: string; title: string; who: string; enabled: boolean }[] = [
+    { id: 'brief', n: '1', title: 'Бриф', who: 'медиапланер', enabled: true },
+    { id: 'plan', n: '2', title: 'Медиаплан', who: 'утверждение', enabled: planReady },
+    { id: 'run', n: '3', title: 'Кампания', who: 'трафик-менеджер', enabled: runReady },
+  ]
+  if (expert) items.push({ id: 'world', n: '◎', title: 'Мир и модели', who: 'для экспертов', enabled: true })
+  return <nav className="stepper" aria-label="Шаги">{items.map((item) => <button key={item.id} type="button" className="step" aria-current={step === item.id ? 'step' : undefined} disabled={!item.enabled} onClick={() => setStep(item.id)}><span className="step-n">{item.n}</span><span className="step-text"><strong>{item.title}</strong><span>{item.who}</span></span></button>)}</nav>
+}
+
+function ReadyDashboard({ metadata, plannerReady, step, setStep }: { metadata: WorldMetadata; plannerReady: boolean; step: Step; setStep: (step: Step) => void }) {
+  const { expert } = useViewMode()
   const campaign = useCampaignController(metadata)
-  const { state, dispatch, getState, createOrReset } = campaign
+  const { state, dispatch, getState, createOrReset, clearHistory, beginBatch, flushIfDue, endBatch } = campaign
+  const marketHistory = state.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, state.draft.simulation.worldSeed))
   const planning = usePlanningController(metadata.channelIds, dispatch)
   const [execution, setExecution] = useState<ExecutionStatus>('idle')
   const [playbackDelayMs, setPlaybackDelayMs] = useState(500)
@@ -58,6 +86,16 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
     if (!current.session || !current.activeDraft || !current.activePlan) throw new Error('campaign_missing')
     const committed = commitHourlyResult(current.history, current.session, current.facts, pending, response.data, response.etag)
     pendingStepRef.current = null
+    const { execution: mode, useHistory } = current.activeDraft.campaign
+    if (mode === 'frozen' || committed.session.status === 'finished') {
+      dispatch({ type: 'facts-committed', ...committed, pendingRound: null })
+      if (committed.session.status === 'finished') savePastCampaigns(getState().pastCampaigns)
+      return
+    }
+    const history = useHistory
+      ? current.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, current.activeDraft!.simulation.worldSeed)).map((record) => record.payload)
+      : []
+    const tracking = mode === 'adaptive' && current.activePlan.strategy === 'optimized' && current.approvedPlan
     const request = buildPlanRequest({
       simulation: current.activeDraft.simulation,
       durationHours: Number(current.activeDraft.campaign.durationHours),
@@ -68,6 +106,9 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
       optimize: current.activePlan.optimize,
       strategy: current.activePlan.strategy,
       facts: committed.facts,
+      history,
+      recentHours: buildRecentHours(committed.history, metadata.channelIds),
+      approved: tracking ? buildApprovedPayload(current.approvedPlan!) : null,
     })
     const expectedPlanId = current.activePlan.strategy === 'uniform' ? current.activePlan.planId : null
     const round = planning.prepare(request, expectedPlanId, current.activePlan)
@@ -97,41 +138,78 @@ function ReadyDashboard({ metadata, plannerReady }: { metadata: WorldMetadata; p
     if (!current.session || current.planning !== 'idle' || ['stepping', 'running', 'stopping'].includes(execution) || current.session.status === 'finished') return
     stopRef.current = false
     setExecution('running')
+    // Without a playback delay the screen is refreshed a few times per second, not every hour.
+    const batched = playbackDelayRef.current === 0
+    if (batched) beginBatch()
     try {
       const outcome = await runRemaining({
         getSession: () => { const session = getState().session; if (!session) throw new Error('campaign_missing'); return session },
         createPending: () => nextPending(),
         submit: (session, pending) => submitPendingStep(simulatorClient, session, pending),
-        commit: commitAndReplan,
+        commit: async (pending, response) => { await commitAndReplan(pending, response); if (batched) flushIfDue(BATCH_FLUSH_MS) },
         shouldStop: () => stopRef.current,
         waitBeforeNext: async () => {
           const delay = playbackDelayRef.current
           if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay))
         },
       })
+      if (batched) endBatch()
       setExecution(outcome === 'stopped' ? 'stopped' : 'idle')
-    } catch (error) { fail(error, 'Автоматический прогон') }
+    } catch (error) { if (batched) endBatch(); fail(error, 'Автоматический прогон') }
   }
 
   async function retryReplan() {
     try { await planning.retry(); setExecution('idle') } catch { setExecution('error') }
   }
 
+  async function submitBrief() {
+    planning.invalidate()
+    pendingStepRef.current = null
+    setExecution('idle')
+    await createOrReset()
+    const after = getState()
+    if (after.activePlan && !after.error && after.planning === 'idle' && Object.keys(after.fieldErrors).length === 0) setStep('plan')
+    else if (after.diagnosis) setStep('plan')
+  }
+
+  function acceptRecommendedTarget() {
+    const { draft, diagnosis } = getState()
+    if (!diagnosis) return
+    dispatch({ type: 'draft', draft: { ...draft, campaign: { ...draft.campaign, targetValue: diagnosis.reason.recommendedTarget } } })
+    void submitBrief()
+  }
+
+  function extendHorizon() {
+    const { draft } = getState()
+    dispatch({ type: 'draft', draft: { ...draft, campaign: { ...draft.campaign, durationHours: String(Number(draft.campaign.durationHours) + 168) } } })
+    void submitBrief()
+  }
+
   const blocked = !plannerReady || state.planning !== 'idle'
   const mutating = state.busy || blocked || ['stepping', 'running', 'stopping'].includes(execution)
+  const planReady = Boolean(state.activePlan) || Boolean(state.diagnosis)
+  const runReady = Boolean(state.session && state.activeDraft && state.activePlan && state.approvedPlan)
+  const sessionStarted = state.history.length > 0
+
   return <>
-    <ActualKPISummary facts={state.facts} currency={metadata.currency} finished={state.session?.status === 'finished'} />
-    <CampaignForm metadata={metadata} draft={state.draft} errors={state.fieldErrors} busy={mutating} hasSession={Boolean(state.session)} onChange={(draft) => dispatch({ type: 'draft', draft })} onSubmit={() => { planning.invalidate(); pendingStepRef.current = null; setExecution('idle'); void createOrReset() }} />
+    <Stepper step={step} setStep={setStep} planReady={planReady} runReady={runReady} expert={expert} />
     {state.error && <section className="operation-error" role="alert"><strong>Операция не выполнена</strong><p>{state.error}</p></section>}
     <ReplanningStatus status={state.planning} onRetry={() => void retryReplan()} />
-    {state.completedRuns.length > 0 && state.activeDraft && <StrategyComparison previous={state.completedRuns.at(-1)!} current={{ strategy: state.activeDraft.campaign.strategy, optimize: state.activeDraft.campaign.optimize, facts: state.facts, audience: state.session?.audience, finished: state.session?.status === 'finished' }} />}
-    {state.session && state.activeDraft && state.activePlan && <>
-      <PlanSummary plan={state.activePlan} />
-      <AllocationTable plan={state.activePlan} currentHour={state.facts.currentHour} />
-      <CampaignSummary session={state.session} activeDraft={state.activeDraft} />
-      <section className="card stack timelapse-player" aria-labelledby="control-title"><div className="status-line"><div><p className="eyebrow">TIMELAPSE</p><h2 id="control-title">Ход кампании</h2></div><span className="status-badge" data-tone={execution === 'running' ? 'ok' : undefined}>{execution === 'running' ? 'В эфире' : state.session.status === 'finished' ? 'Завершена' : 'Ожидает'}</span></div><RunProgress session={state.session} status={execution} /><StepControls session={state.session} status={execution} blocked={blocked} playbackDelayMs={playbackDelayMs} onPlaybackDelayChange={(delay) => { playbackDelayRef.current = delay; setPlaybackDelayMs(delay) }} onStep={() => void oneHour()} onRun={() => void runToEnd()} onStop={() => { stopRef.current = true; setExecution('stopping') }} /></section>
-      {state.history.length > 0 && <Suspense fallback={<section className="card" aria-busy="true">Подготовка графика…</section>}><MetricHistory history={state.history} channelIds={state.session.channelIds} currency={state.session.currency} timeZone={state.session.timeZone} running={execution === 'running' || execution === 'stopping'} /></Suspense>}
-      {state.history.length > 0 && <LatestObservations result={state.history.at(-1)!} currency={state.session.currency} />}
-    </>}
+
+    {step === 'brief' && <BriefStep metadata={metadata} draft={state.draft} errors={state.fieldErrors} busy={mutating} hasSession={Boolean(state.session)} pastCampaigns={marketHistory} onClearHistory={clearHistory} onChange={(draft) => dispatch({ type: 'draft', draft })} onSubmit={() => void submitBrief()} />}
+
+    {step === 'plan' && state.diagnosis && <InfeasibleDiagnosis diagnosis={state.diagnosis} currency={metadata.currency} onAcceptTarget={acceptRecommendedTarget} onExtendHorizon={extendHorizon} onEdit={() => setStep('brief')} />}
+    {step === 'plan' && !state.diagnosis && state.approvedPlan && state.activeDraft && <PlanStep plan={state.approvedPlan} execution={state.activeDraft.campaign.execution} historyCount={state.historyCount} currency={metadata.currency} channelIds={metadata.channelIds} hasSession={Boolean(state.session)} sessionStarted={sessionStarted} onApprove={() => setStep('run')} onEdit={() => setStep('brief')} />}
+    {step === 'plan' && !state.diagnosis && !state.approvedPlan && <section className="card"><p className="muted">Медиаплан ещё не рассчитан. Заполните бриф.</p></section>}
+
+    {step === 'run' && state.session && state.activeDraft && state.activePlan && state.approvedPlan && <CampaignStep
+      session={state.session} activeDraft={state.activeDraft} activePlan={state.activePlan} approvedPlan={state.approvedPlan} planRevisions={state.planRevisions}
+      history={state.history} facts={state.facts} historyCount={state.historyCount} completedRuns={state.completedRuns}
+      execution={execution} blocked={blocked} playbackDelayMs={playbackDelayMs}
+      onPlaybackDelayChange={(delay) => { playbackDelayRef.current = delay; setPlaybackDelayMs(delay) }}
+      onStep={() => void oneHour()} onRun={() => void runToEnd()} onStop={() => { stopRef.current = true; setExecution('stopping') }}
+      onNewCampaign={() => setStep('brief')} />}
+
+    {step === 'world' && <WorldTab metadata={metadata} />}
   </>
 }

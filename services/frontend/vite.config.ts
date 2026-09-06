@@ -2,7 +2,21 @@ import { randomUUID } from 'node:crypto'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const proxy = {
+  '/planner-api': {
+    target: process.env.PLANNER_URL ?? 'http://127.0.0.1:8082',
+    changeOrigin: true,
+    rewrite: (path: string) => path.replace(/^\/planner-api/, ''),
+  },
+  '/api': {
+    target: process.env.SIMULATOR_URL ?? 'http://127.0.0.1:8080',
+    changeOrigin: true,
+    rewrite: (path: string) => path.replace(/^\/api/, ''),
+  },
+}
+
 export default defineConfig({
+  preview: { proxy, port: 5175, strictPort: true },
   plugins: [react()],
   server: {
     port: 5173,

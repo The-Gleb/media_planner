@@ -49,7 +49,10 @@ def test_target_solver_is_deterministic_exact_and_quantized() -> None:
         "clicks",
         simulation=_simulation(),
     )
-    assert forecast_allocations(previous, Horizon(0, 336), list(load_catalog())).clicks < 50_000
+    assert (
+        forecast_allocations(previous, Horizon(0, 336), list(load_catalog()), _simulation()).clicks
+        < 50_000
+    )
 
 
 def test_impossible_target_returns_capacity_diagnosis_without_plan() -> None:

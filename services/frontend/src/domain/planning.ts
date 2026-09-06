@@ -1,5 +1,6 @@
 import type { Audience } from './audience'
-import type { ChannelID, MoneyText, SimulationDraft } from './types'
+import type { ChannelID, ExecutionMode, MoneyText, SimulationDraft } from './types'
+import type { ApprovedPayload, PastCampaignPayload, RecentHourPayload } from './history'
 
 export type KPI = 'unique_reach' | 'clicks' | 'conversions'
 export type PlanType = 'fixed_budget' | 'target_kpi'
@@ -16,19 +17,20 @@ export interface CampaignFacts {
   channels: Record<ChannelID, ChannelFacts>
 }
 export interface Horizon { fromHour: number; toHour: number }
-export interface Allocation { channelId: ChannelID; hour: number; budgetCap: MoneyText; expected: null }
+export interface HourlyExpected { spend: MoneyText; impressions: string; uniqueReach: string; clicks: string; conversions: string }
+export interface Allocation { channelId: ChannelID; hour: number; budgetCap: MoneyText; expected: HourlyExpected | null }
 export interface TargetKPI { metric: KPI; value: string }
 export interface ExpectedOutcome { spend: MoneyText; impressions: string; uniqueReach: string; clicks: string; conversions: string }
 export interface MediaPlan {
   audience?: Audience
   requestId: string; stateRevision: number; planId: string; feasible: true; type: PlanType
   strategy: Strategy; optimize: KPI; currency: string; budget: MoneyText; horizon: Horizon
-  expected: ExpectedOutcome | null; allocations: Allocation[]; requiredBudget: MoneyText | null; reason: null; target: TargetKPI | null
+  expected: ExpectedOutcome | null; allocations: Allocation[]; unallocatedBudget: MoneyText; requiredBudget: MoneyText | null; reason: null; target: TargetKPI | null
 }
 export interface InfeasibleTargetPlan {
   audience?: Audience
   requestId: string; stateRevision: 0; planId: null; feasible: false; type: 'target_kpi'; strategy: 'optimized'; optimize: KPI
-  currency: string; budget: null; horizon: Horizon; expected: ExpectedOutcome; allocations: []
+  currency: string; budget: null; horizon: Horizon; expected: ExpectedOutcome; allocations: []; unallocatedBudget: null
   requiredBudget: null; target: TargetKPI
   reason: { code: 'target_exceeds_capacity'; detail: string; maxAchievable: string; recommendedTarget: string }
 }
@@ -40,20 +42,22 @@ export interface FixedBudgetPlanRequest {
   channels: string[]
   simulation: { simulation_id: string; world_seed: string; campaign_seed: string; start_hour: string; time_zone: string; currency: string; world_config_digest: string }
   market: { status: 'unavailable' }
-  current: { current_hour: number; state_revision: number; last_step_id: string | null; last_observed_at: string | null; spent: string; unique_reach: string; clicks: string; conversions: string; channels: Record<string, { spent: string; requests: string; impressions: string; unique_reach: string; clicks: string; conversions: string }> }
-  budget: string; optimize: KPI; target: null
+  current: { current_hour: number; state_revision: number; last_step_id: string | null; last_observed_at: string | null; spent: string; unique_reach: string; clicks: string; conversions: string; channels: Record<string, { spent: string; requests: string; impressions: string; unique_reach: string; clicks: string; conversions: string }>; recent_hours?: RecentHourPayload[] }
+  history?: PastCampaignPayload[]
+  budget: string; optimize: KPI; target: null; approved?: ApprovedPayload | null
 }
 export interface TargetKPIPlanRequest {
   audience?: Audience
   request_id: string; type: 'target_kpi'; strategy: 'optimized'; horizon: { from_hour: number; to_hour: number }
   channels: string[]; simulation: FixedBudgetPlanRequest['simulation']; market: { status: 'unavailable' }
-  current: FixedBudgetPlanRequest['current']; budget: null; optimize: null; target: { metric: KPI; value: string }
+  current: FixedBudgetPlanRequest['current']; history?: PastCampaignPayload[]; budget: null; optimize: null; target: { metric: KPI; value: string }
 }
 export type PlanRequest = FixedBudgetPlanRequest | TargetKPIPlanRequest
 export interface PlanRequestInput {
   audience?: Audience
   simulation: SimulationDraft; durationHours: number; channels: ChannelID[]; currency: string
   worldConfigDigest: string; budget: MoneyText; optimize: KPI; strategy?: Strategy; facts: CampaignFacts; requestId?: string
+  history?: PastCampaignPayload[]; recentHours?: RecentHourPayload[]; approved?: ApprovedPayload | null
 }
 export interface TargetPlanRequestInput extends Omit<PlanRequestInput, 'budget' | 'optimize' | 'strategy'> {
   targetMetric: KPI; targetValue: string
@@ -69,4 +73,8 @@ export interface CompletedRun {
   optimize: KPI
   planId: string
   facts: CampaignFacts
+  execution?: ExecutionMode
+  historyCount?: number
+  planSpend?: MoneyText | null
+  planKpi?: string | null
 }

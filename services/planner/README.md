@@ -5,20 +5,51 @@ makes no outbound calls, and supports fixed-budget schedules plus initial target
 Target planning uses only public catalog ranges, searches in one-ruble quanta and returns either an
 executable plan or a structured `target_exceeds_capacity` result.
 
-## Exact allocation
+## Allocation and budget conservation
 
 Money is transported as canonical non-negative decimal strings and converted to signed-64-safe
 integer micro-units. For `N = hours × channels`, the allocator uses `divmod(total_micros, N)` and
 assigns one remainder micro in ascending-hour, then lexicographic-channel order. Every response uses
-exactly six fractional digits, and caps sum exactly to the requested budget. For `uniform`, observed
+exactly six fractional digits. For `uniform`, caps sum exactly to the requested budget; observed
 campaign state is validated but does not change the schedule or `plan_id`.
 
 `optimized` reads public ranges from the mounted world config and recalibrates channel CPM, CTR, CR
-and supply from cumulative Simulator facts. Every hour it subtracts actual spend, accounts for
-observed saturation, and water-fills the remaining budget over the remaining horizon by marginal
-reach/click/conversion gain—regardless of whether the run is ahead of or behind its initial KPI
-trajectory. State changes produce a new plan ID; largest-remainder conversion keeps the full
-schedule's micro-unit sum exact. Planner never calls Simulator or reads the seeded hidden world.
+and supply from cumulative Simulator facts. Its response curves model increasing effective CPM and
+decreasing CTR, CR and new reach as reach and frequency rise. A 128-point quadratic grid gives finer
+resolution at low spend; a concavity projection makes marginal gains non-increasing, and deterministic
+water-filling buys only segments with positive marginal KPI return. Every hour Planner subtracts
+actual spend and reallocates the remaining useful amount over the remaining horizon—regardless of
+whether the run is ahead of or behind its initial KPI trajectory.
+
+Every plan whose channels exist in the public catalog also carries a benchmark trajectory: each future
+allocation has `expected` hourly spend, impressions, new unique reach, clicks and conversions computed
+by the same saturation model and the same calibration the optimizer uses, and the top-level `expected`
+is the projected campaign total (observed facts plus the forecast of future caps). At revision zero the
+cumulative sum of hourly expectations is the approved plan trajectory used for plan-versus-fact MAPE;
+committed hours carry `expected: null`. The frozen-versus-adaptive evaluation harness lives in
+`tools/evaluation/`.
+
+Optimized plans accept an optional `history`: finished campaigns on the same market as 24
+hour-of-day bins per channel of observable facts (hours, requests, impressions, unique reach, clicks,
+conversions, spend), oldest first. Planner turns them into a recency-weighted prior for CTR, CR, CPM,
+daily supply and the hourly supply profile, correcting each campaign's rates for the saturation it
+ran under, and then applies the ordinary current-campaign calibration on top. The first campaign on a
+market plans from public benchmarks; every next one plans from what that market actually showed.
+History enters the optimized `plan_id` and never changes uniform plans.
+
+When the client also sends the latest committed hours (`current.recent_hours`), calibration uses a
+24-hour half-life window with a change-point test: a CTR, CPM or supply jump in the last six hours
+makes the window collapse to those hours, so a shock overrides both prior and earlier facts within
+hours; zero requests are read as a paused channel. When the client sends the `approved` plan (its
+KPI target and channel budgets), replanning tracks it instead of maximising: the approved channel
+mix is kept while the projected finish is on plan and on budget, and budget moves toward the
+KPI-maximising allocation only as far as needed to get back on plan or to spend money a paused
+channel cannot take.
+
+The optimized conservation invariant is `actual spend + future caps + unallocated_budget = approved
+budget`. The explicit reserve prevents a very large budget from being dumped into a saturated channel.
+State changes produce a new plan ID; largest-remainder conversion keeps all allocated micro-units
+exact. Planner never calls Simulator or reads the seeded hidden world.
 
 ## Target-KPI planning
 

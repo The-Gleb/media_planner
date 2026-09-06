@@ -23,7 +23,7 @@ export function mediaPlan(overrides: Partial<MediaPlan> = {}): MediaPlan {
   return { requestId: '00000000-0000-4000-8000-000000000010', stateRevision: 0, planId: 'b'.repeat(64), feasible: true, type: 'fixed_budget', strategy: 'uniform', optimize: 'unique_reach', currency: 'RUB', budget: '12.000000', horizon: { fromHour: 0, toHour: 2 }, expected: null, allocations: [
     { channelId: 'search_1', hour: 0, budgetCap: '3.000000', expected: null }, { channelId: 'social_1', hour: 0, budgetCap: '3.000000', expected: null },
     { channelId: 'search_1', hour: 1, budgetCap: '3.000000', expected: null }, { channelId: 'social_1', hour: 1, budgetCap: '3.000000', expected: null },
-  ], requiredBudget: null, reason: null, target: null, ...overrides }
+  ], unallocatedBudget: '0.000000', requiredBudget: null, reason: null, target: null, ...overrides }
 }
 export function activePlan(overrides: Partial<MediaPlan> = {}): ActivePlan {
   const plan = mediaPlan(overrides), index = new Map<number, ReadonlyMap<string, string>>()

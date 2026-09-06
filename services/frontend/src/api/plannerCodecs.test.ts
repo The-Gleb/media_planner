@@ -5,6 +5,7 @@ const raw = () => ({
   request_id: '00000000-0000-4000-8000-000000000010', state_revision: 0,
   plan_id: 'b'.repeat(64), feasible: true, type: 'fixed_budget', strategy: 'uniform',
   optimize: 'unique_reach', currency: 'RUB', budget: '12.000000',
+  unallocated_budget: '0.000000',
   horizon: { from_hour: 0, to_hour: 2 }, expected: null,
   allocations: [
     { channel_id: 'search_1', hour: 0, budget_cap: '3.000000', expected: null },
@@ -26,6 +27,20 @@ describe('planner codecs', () => {
     value.strategy = 'optimized'
     expect(decodeMediaPlan(value).strategy).toBe('optimized')
   })
+  it('decodes hourly and total expectations of a fixed-budget plan', () => {
+    const value = raw() as Record<string, unknown>
+    value.strategy = 'optimized'
+    value.expected = { spend: '12.000000', impressions: '1000', unique_reach: '100', clicks: '10', conversions: '1' }
+    const hourly = { spend: '3.000000', impressions: '250.500000', unique_reach: '25.05', clicks: '2.5', conversions: '0.25' }
+    const allocations = value.allocations as Array<Record<string, unknown>>
+    allocations[2].expected = hourly; allocations[3].expected = hourly
+    const plan = decodeMediaPlan(value)
+    expect(plan.expected).toEqual({ spend: '12.000000', impressions: '1000', uniqueReach: '100', clicks: '10', conversions: '1' })
+    expect(plan.allocations[0].expected).toBeNull()
+    expect(plan.allocations[3].expected).toEqual({ spend: '3.000000', impressions: '250.500000', uniqueReach: '25.05', clicks: '2.5', conversions: '0.25' })
+    allocations[3].expected = { ...hourly, clicks: '-1' }
+    expect(() => decodeMediaPlan(value)).toThrow('invalid_hourly_expected')
+  })
   it('decodes executable and infeasible target results', () => {
     const executable = raw() as Record<string, unknown>
     executable.type = 'target_kpi'; executable.strategy = 'optimized'
@@ -33,7 +48,7 @@ describe('planner codecs', () => {
     executable.expected = { spend: '12.000000', impressions: '1000', unique_reach: '100', clicks: '10', conversions: '1' }
     executable.required_budget = '12.000000'
     expect(decodePlanResult(executable)).toMatchObject({ feasible: true, type: 'target_kpi', requiredBudget: '12.000000' })
-    const infeasible = { ...executable, feasible: false, plan_id: null, budget: null, required_budget: null, allocations: [], reason: { code: 'target_exceeds_capacity', detail: 'capacity', max_achievable: '90', recommended_target: '90' } }
+    const infeasible = { ...executable, feasible: false, plan_id: null, budget: null, unallocated_budget: null, required_budget: null, allocations: [], reason: { code: 'target_exceeds_capacity', detail: 'capacity', max_achievable: '90', recommended_target: '90' } }
     expect(decodePlanResult(infeasible)).toMatchObject({ feasible: false, reason: { maxAchievable: '90' } })
   })
   it.each([
@@ -44,8 +59,10 @@ describe('planner codecs', () => {
   ])('rejects %s', (_, change) => {
     const value = raw(); change(value); expect(() => decodeMediaPlan(value)).toThrow()
   })
-  it('rejects missing pairs and inexact sum', () => {
-    const value = raw(); value.allocations[0].budget_cap = '2.000000'
+  it('accepts an explicit reserve and rejects an inexact conserved total', () => {
+    const value = raw(); value.strategy = 'optimized'; value.allocations[0].budget_cap = '2.000000'; value.unallocated_budget = '1.000000'
+    expect(() => validatePlanCoverage(decodeMediaPlan(value), ['search_1', 'social_1'])).not.toThrow()
+    value.unallocated_budget = '0.000000'
     expect(() => validatePlanCoverage(decodeMediaPlan(value), ['search_1', 'social_1'])).toThrow('invalid_plan_total')
   })
 })

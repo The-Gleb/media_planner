@@ -17,7 +17,9 @@ class ChannelBenchmark:
     saturation_threshold: float
     price_growth: float
     reach_decay: float
+    frequency_reach_decay: float
     ctr_fatigue: float
+    frequency_fatigue: float
     hourly_profile: tuple[float, ...]
 
 
@@ -79,7 +81,9 @@ def _load_catalog(configured: str) -> dict[str, ChannelBenchmark]:
             saturation_threshold=_mid(saturation["start_threshold"]),
             price_growth=_mid(saturation["price_growth_strength"]),
             reach_decay=_mid(saturation["reach_decay_strength"]),
+            frequency_reach_decay=_mid(saturation["frequency_reach_decay_strength"]),
             ctr_fatigue=_mid(saturation["ctr_fatigue_strength"]),
+            frequency_fatigue=_mid(saturation["frequency_fatigue_strength"]),
             hourly_profile=_hourly_profile(item["hourly_patterns"]["supply"]),
         )
     return result

@@ -3,7 +3,18 @@ import { formatMoney, parseMoney } from '../../domain/numeric'
 
 export type DailySpendRow = { hour: string } & Record<string, string | number>
 
+const localCache = new Map<string, { date: string; hour: number }>()
 function localDateAndHour(iso: string, timeZone: string): { date: string; hour: number } {
+  const key = timeZone + '|' + iso
+  const hit = localCache.get(key)
+  if (hit) return hit
+  const computed = computeLocalDateAndHour(iso, timeZone)
+  if (localCache.size > 8192) localCache.clear()
+  localCache.set(key, computed)
+  return computed
+}
+
+function computeLocalDateAndHour(iso: string, timeZone: string): { date: string; hour: number } {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',
@@ -51,3 +62,35 @@ export function formatSpendDay(day: string): string {
   return new Intl.DateTimeFormat('ru-RU', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' })
     .format(new Date(Date.UTC(year, month - 1, date, 12)))
 }
+
+export type SpendGranularity = 'day' | 'hour'
+
+/** Stacked spend per channel over the whole campaign: one bar per local day or per campaign hour. */
+export function campaignSpendRows(history: readonly HourlyResult[], channelIds: readonly string[], timeZone: string, granularity: SpendGranularity): DailySpendRow[] {
+  const knownChannels = new Set(channelIds)
+  const rows: DailySpendRow[] = []
+  const byKey = new Map<string, DailySpendRow>()
+  history.forEach((result, index) => {
+    const local = localDateAndHour(result.observedHour, timeZone)
+    const key = granularity === 'day' ? local.date : `${index}`
+    let row = byKey.get(key)
+    if (!row) {
+      const [, month, date] = local.date.split('-')
+      row = { hour: granularity === 'day' ? `${date}.${month}` : `д${Math.floor(index / 24) + 1} ${local.hour.toString().padStart(2, '0')}:00`, ...Object.fromEntries(channelIds.map((channelId) => [channelId, 0])) }
+      byKey.set(key, row)
+      rows.push(row)
+    }
+    for (const observation of result.observations) {
+      if (!knownChannels.has(observation.channelId)) continue
+      row[observation.channelId] = Number(row[observation.channelId]) + Number(observation.spend)
+    }
+  })
+  return rows
+}
+
+export function campaignSpendTotal(history: readonly HourlyResult[]): string {
+  let total = 0n
+  for (const result of history) for (const observation of result.observations) total += parseMoney(observation.spend)
+  return formatMoney(total)
+}
+

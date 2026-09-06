@@ -54,6 +54,10 @@ Int64Text = Annotated[
     StringConstraints(pattern=r"^-?(0|[1-9][0-9]*)$"),
     AfterValidator(_valid_int64),
 ]
+DecimalText = Annotated[
+    str,
+    StringConstraints(pattern=r"^(0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$"),
+]
 ChannelID = Annotated[
     str, StringConstraints(pattern=r"^[a-z][a-z0-9_-]{0,63}$", min_length=1, max_length=64)
 ]
@@ -118,6 +122,13 @@ class ChannelStateDTO(StrictModel):
     conversions: CountText
 
 
+class RecentHourDTO(StrictModel):
+    """Facts of one committed campaign hour per channel; feeds the windowed calibration."""
+
+    hour: StrictInt = Field(ge=0, le=2159)
+    channels: dict[ChannelID, ChannelStateDTO] = Field(min_length=1, max_length=20)
+
+
 class CampaignStateDTO(StrictModel):
     current_hour: StrictInt = Field(ge=0, le=2160)
     state_revision: StrictInt = Field(ge=0, le=2160)
@@ -128,6 +139,7 @@ class CampaignStateDTO(StrictModel):
     clicks: CountText
     conversions: CountText
     channels: dict[ChannelID, ChannelStateDTO] = Field(min_length=1, max_length=20)
+    recent_hours: list[RecentHourDTO] = Field(default_factory=list, max_length=168)
 
     @model_validator(mode="after")
     def validate_snapshot(self) -> CampaignStateDTO:
@@ -168,6 +180,14 @@ class CampaignStateDTO(StrictModel):
         ):
             raise ValueError("last_observed_at must be aligned to the start of an hour")
 
+        hours = [item.hour for item in self.recent_hours]
+        if hours != sorted(hours) or len(set(hours)) != len(hours):
+            raise ValueError("recent_hours must be strictly ascending")
+        if hours and hours[-1] != self.current_hour - 1:
+            raise ValueError("recent_hours must end with the latest committed hour")
+        for item in self.recent_hours:
+            if set(item.channels) - set(self.channels):
+                raise ValueError("recent_hours may only mention campaign channels")
         channel_values = tuple(self.channels.values())
         if money_to_micros(self.spent) != sum(
             money_to_micros(item.spent) for item in channel_values
@@ -186,6 +206,96 @@ class TargetKPIDTO(StrictModel):
     value: PositiveCountText
 
 
+class HourBinDTO(StrictModel):
+    """Facts of one channel over the past-campaign hours sharing this hour of local day."""
+
+    hour: StrictInt = Field(ge=0, le=23)
+    hours: StrictInt = Field(ge=0, le=90)
+    requests: CountText
+    impressions: CountText
+    unique_reach: CountText
+    clicks: CountText
+    conversions: CountText
+    spent: MoneyText
+
+    @model_validator(mode="after")
+    def validate_funnel(self) -> HourBinDTO:
+        impressions = count_to_int(self.impressions)
+        clicks = count_to_int(self.clicks)
+        if clicks > impressions or count_to_int(self.conversions) > clicks:
+            raise ValueError(
+                "clicks cannot exceed impressions and conversions cannot exceed clicks"
+            )
+        if count_to_int(self.unique_reach) > impressions:
+            raise ValueError("unique reach cannot exceed impressions")
+        if self.hours == 0 and any(
+            (
+                count_to_int(self.requests),
+                impressions,
+                money_to_micros(self.spent),
+            )
+        ):
+            raise ValueError("a bin without observed hours cannot carry facts")
+        return self
+
+
+class DailyFactsDTO(StrictModel):
+    """One campaign day of a channel plus its cumulative reach and impressions at day start."""
+
+    day: StrictInt = Field(ge=0, le=89)
+    hours: StrictInt = Field(ge=1, le=24)
+    requests: CountText
+    impressions: CountText
+    unique_reach: CountText
+    clicks: CountText
+    conversions: CountText
+    spent: MoneyText
+    reach_before: CountText
+    impressions_before: CountText
+
+    @model_validator(mode="after")
+    def validate_funnel(self) -> DailyFactsDTO:
+        impressions = count_to_int(self.impressions)
+        clicks = count_to_int(self.clicks)
+        if clicks > impressions or count_to_int(self.conversions) > clicks:
+            raise ValueError(
+                "clicks cannot exceed impressions and conversions cannot exceed clicks"
+            )
+        if count_to_int(self.unique_reach) > impressions:
+            raise ValueError("unique reach cannot exceed impressions")
+        if count_to_int(self.reach_before) > count_to_int(self.impressions_before):
+            raise ValueError("cumulative reach cannot exceed cumulative impressions")
+        return self
+
+
+class PastCampaignChannelDTO(StrictModel):
+    bins: list[HourBinDTO] = Field(min_length=24, max_length=24)
+    daily: list[DailyFactsDTO] = Field(default_factory=list, max_length=90)
+
+    @model_validator(mode="after")
+    def validate_bins(self) -> PastCampaignChannelDTO:
+        if [item.hour for item in self.bins] != list(range(24)):
+            raise ValueError("bins must cover hours 0..23 exactly once in order")
+        days = [item.day for item in self.daily]
+        if days != sorted(days) or len(set(days)) != len(days):
+            raise ValueError("daily rows must be strictly ascending by day")
+        return self
+
+
+class PastCampaignDTO(StrictModel):
+    """Observable outcome of one finished campaign on the same market, oldest first."""
+
+    horizon_hours: StrictInt = Field(ge=1, le=2160)
+    channels: dict[ChannelID, PastCampaignChannelDTO] = Field(min_length=1, max_length=20)
+
+    @model_validator(mode="after")
+    def validate_hours(self) -> PastCampaignDTO:
+        for channel_id, channel in self.channels.items():
+            if sum(item.hours for item in channel.bins) > self.horizon_hours:
+                raise ValueError(f"channel {channel_id} observed more hours than the horizon")
+        return self
+
+
 class RequestBase(StrictModel):
     request_id: UUID
     strategy: Strategy
@@ -196,6 +306,7 @@ class RequestBase(StrictModel):
     simulation: SimulationContextDTO
     market: MarketForecastDTO
     current: CampaignStateDTO
+    history: list[PastCampaignDTO] = Field(default_factory=list, max_length=50)
 
     @model_validator(mode="after")
     def validate_relationships(self) -> RequestBase:
@@ -222,11 +333,30 @@ class RequestBase(StrictModel):
         return self
 
 
+class ApprovedPlanDTO(StrictModel):
+    """Approved plan that adaptive replanning keeps the campaign on."""
+
+    kpi_target: PositiveCountText
+    channel_budgets: dict[ChannelID, MoneyText] = Field(min_length=1, max_length=20)
+
+
 class FixedBudgetPlanRequestDTO(RequestBase):
     type: Literal["fixed_budget"]
     budget: MoneyText
     optimize: KPI
     target: None = None
+    approved: ApprovedPlanDTO | None = None
+
+    @model_validator(mode="after")
+    def validate_budget_balance(self) -> FixedBudgetPlanRequestDTO:
+        if money_to_micros(self.current.spent) > money_to_micros(self.budget):
+            raise ValueError("campaign spent cannot exceed the approved budget")
+        if self.approved is not None:
+            if set(self.approved.channel_budgets) - set(self.channels):
+                raise ValueError("approved channel budgets may only mention campaign channels")
+            if self.strategy is not Strategy.OPTIMIZED:
+                raise ValueError("an approved plan can only be tracked by the optimized strategy")
+        return self
 
 
 class TargetKPIPlanRequestDTO(RequestBase):
@@ -242,11 +372,21 @@ PlanRequestDTO = Annotated[
 ]
 
 
+class HourlyExpectedDTO(StrictModel):
+    """Benchmark expectation of one channel hour; fractional counts keep trajectories exact."""
+
+    spend: MoneyText
+    impressions: DecimalText
+    unique_reach: DecimalText
+    clicks: DecimalText
+    conversions: DecimalText
+
+
 class AllocationDTO(StrictModel):
     channel_id: ChannelID
     hour: StrictInt = Field(ge=0, le=2159)
     budget_cap: MoneyText
-    expected: None
+    expected: HourlyExpectedDTO | None
 
 
 class ExpectedOutcomeDTO(StrictModel):
@@ -274,8 +414,9 @@ class MediaPlanDTO(StrictModel):
     optimize: KPI
     currency: Currency
     budget: MoneyText
+    unallocated_budget: MoneyText
     horizon: HorizonDTO
-    expected: None
+    expected: ExpectedOutcomeDTO | None
     allocations: list[AllocationDTO] = Field(min_length=1, max_length=43_200)
     required_budget: None
     reason: None
@@ -292,6 +433,7 @@ class TargetKPIPlanDTO(StrictModel):
     optimize: KPI
     currency: Currency
     budget: MoneyText
+    unallocated_budget: MoneyText
     horizon: HorizonDTO
     expected: ExpectedOutcomeDTO
     allocations: list[AllocationDTO] = Field(min_length=1, max_length=43_200)
@@ -310,6 +452,7 @@ class InfeasibleTargetKPIPlanDTO(StrictModel):
     optimize: KPI
     currency: Currency
     budget: None
+    unallocated_budget: None
     horizon: HorizonDTO
     expected: ExpectedOutcomeDTO
     allocations: list[AllocationDTO] = Field(max_length=0)
