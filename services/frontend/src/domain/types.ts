@@ -24,7 +24,13 @@ export interface WorldMetadata {
   channelIds: ChannelID[]
 }
 
+export interface AudienceFilters { age: string; gender: string; geo: string }
+
+export type AudienceSelection = Record<ChannelID, { segment_ids: string[] }>
+
 export interface SimulationDraft {
+  audience?: AudienceSelection
+  audienceFilters?: AudienceFilters
   simulationId: string
   worldSeed: string
   campaignSeed: string
@@ -51,6 +57,7 @@ export interface CampaignDraft {
   strategy: 'uniform' | 'optimized'
   targetMetric: 'unique_reach' | 'clicks' | 'conversions'
   targetValue: string
+  kpiCompletionPolicy: 'stop_at_kpi' | 'spend_budget'
   execution: ExecutionMode
   useHistory: boolean
 }
@@ -67,6 +74,7 @@ export interface LaunchDraft {
 export interface ActiveRun {
   simulationId: string
   status: SimulationStatus
+  completionReason?: 'kpi_reached' | 'budget_spent'
   currentHour: string
   endHourExclusive: string
   durationHours: number

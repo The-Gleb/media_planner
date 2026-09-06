@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { useCallback, useReducer, useRef } from 'react'
 import { plannerClient } from '../../api/plannerClient'
 import { SimulatorProblemError, simulatorClient } from '../../api/simulatorClient'
 import { userError } from '../../app/messages'
@@ -19,7 +19,8 @@ const apiFieldPaths: Record<string, string> = {
 export function useCampaignController(metadata: WorldMetadata) {
   const [state, reactDispatch] = useReducer(campaignReducer, metadata, createCampaignState)
   const ref = useRef(state)
-  useEffect(() => { ref.current = state }, [state])
+  // Only dispatch advances execution state. React may render a queued snapshot after
+  // newer hours have committed; copying that snapshot back would roll the run back.
   // Batched mode: the ref is the source of truth for the run loop; React only receives the
   // accumulated state on flush, so a fast timelapse renders a few times per second instead of
   // two or three times per simulated hour.
@@ -50,7 +51,7 @@ export function useCampaignController(metadata: WorldMetadata) {
       const facts = zeroCampaignFacts(metadata.channelIds)
       const requestId = crypto.randomUUID()
       const history = campaign.useHistory
-        ? current.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, simulation.worldSeed)).map((record) => record.payload)
+        ? current.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, simulation.worldSeed, simulation.audience)).map((record) => record.payload)
         : []
       const common = { simulation, durationHours: Number(campaign.durationHours), channels: metadata.channelIds,
         currency: metadata.currency, worldConfigDigest: metadata.worldConfigDigest, facts, requestId, history }
@@ -74,6 +75,7 @@ export function useCampaignController(metadata: WorldMetadata) {
         world_seed: simulation.worldSeed, campaign_seed: simulation.campaignSeed,
         start_hour: new Date(simulation.startHour).toISOString().replace('.000Z', 'Z'),
         duration_hours: Number(campaign.durationHours), time_zone: simulation.timeZone,
+        ...(simulation.audience ? { audience: simulation.audience } : {}),
         disable_random_events: simulation.disableRandomEvents,
         scenario_events: simulation.scenario.enabled ? [{
           channel_id: simulation.scenario.channelId, metric: simulation.scenario.metric,

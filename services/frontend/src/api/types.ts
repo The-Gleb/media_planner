@@ -10,6 +10,7 @@ export interface ProblemDetails {
 }
 
 export interface SimulationConfigPayload {
+  audience?: import('../domain/types').AudienceSelection
   world_seed: string
   campaign_seed: string
   start_hour: string

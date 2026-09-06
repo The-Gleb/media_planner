@@ -22,6 +22,10 @@ export function validateDraft(draft: LaunchDraft, metadata: WorldMetadata): Fiel
   if (!simulation.startHour || Number.isNaN(start.valueOf()) || start.getUTCMinutes() !== 0 || start.getUTCSeconds() !== 0 || start.getUTCMilliseconds() !== 0) {
     errors['simulation.startHour'] = 'Введите RFC 3339 время, выровненное на начало часа.'
   }
+  if (simulation.audience) {
+    const selections = Object.entries(simulation.audience)
+    if (!selections.length || selections.some(([channel, selection]) => !metadata.channelIds.includes(channel) || !selection.segment_ids.length || new Set(selection.segment_ids).size !== selection.segment_ids.length || selection.segment_ids.some(id => !id))) errors['simulation.audience'] = 'Выберите хотя бы один сегмент для каждого ограниченного канала.'
+  }
   const duration = Number(campaign.durationHours)
   if (!Number.isInteger(duration) || duration < 1 || duration > 2160) errors['campaign.durationHours'] = 'Введите целое число от 1 до 2160.'
   try { new Intl.DateTimeFormat('ru-RU', { timeZone: simulation.timeZone }).format(start) } catch { errors['simulation.timeZone'] = 'Введите существующий часовой пояс IANA.' }
@@ -43,6 +47,7 @@ export function validateDraft(draft: LaunchDraft, metadata: WorldMetadata): Fiel
   } else if (!/^[1-9][0-9]*$/.test(campaign.targetValue)) {
     errors['campaign.targetValue'] = 'Введите положительное целое значение цели.'
   }
+  if (campaign.planType === 'target_kpi' && !['stop_at_kpi', 'spend_budget'].includes(campaign.kpiCompletionPolicy)) errors['campaign.kpiCompletionPolicy'] = 'Выберите действие при достижении KPI.'
   return errors
 }
 
@@ -58,7 +63,7 @@ export function initialDraft(metadata: WorldMetadata): LaunchDraft {
     campaign: {
       durationHours: '504',
       planType: 'fixed_budget', totalBudget: '1200000', optimize: 'conversions', strategy: 'optimized',
-      targetMetric: 'clicks', targetValue: '50000',
+      targetMetric: 'clicks', targetValue: '50000', kpiCompletionPolicy: 'stop_at_kpi',
       execution: 'adaptive_max', useHistory: true,
     },
   }

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { simulatorClient } from '../api/simulatorClient'
 import type { ExecutionStatus, PendingStep, WorldMetadata } from '../domain/types'
 import { useCampaignController } from '../features/campaign/useCampaignController'
+import { applyCompletionPolicy, remainingBudgetActions, targetReached } from '../features/execution/completionPolicy'
 import { runRemaining } from '../features/execution/autoRunController'
 import { commitHourlyResult } from '../features/execution/history'
 import { createPendingStep, submitPendingStep } from '../features/execution/stepController'
@@ -62,7 +63,7 @@ function ReadyDashboard({ metadata, plannerReady, step, setStep }: { metadata: W
   const { expert } = useViewMode()
   const campaign = useCampaignController(metadata)
   const { state, dispatch, getState, createOrReset, clearHistory, beginBatch, flushIfDue, endBatch } = campaign
-  const marketHistory = state.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, state.draft.simulation.worldSeed))
+  const marketHistory = state.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, state.draft.simulation.worldSeed, state.draft.simulation.audience))
   const planning = usePlanningController(metadata.channelIds, dispatch)
   const [execution, setExecution] = useState<ExecutionStatus>('idle')
   const [playbackDelayMs, setPlaybackDelayMs] = useState(500)
@@ -77,6 +78,7 @@ function ReadyDashboard({ metadata, plannerReady, step, setStep }: { metadata: W
     const pending = prior?.expectedHour === current.session.currentHour
       ? { ...prior, attempt: prior.attempt + 1 }
       : createPendingStep(current.session, current.activePlan)
+    if (prior?.expectedHour !== current.session.currentHour && current.activeDraft) pending.actions = remainingBudgetActions(pending.actions, current.session, current.activeDraft.campaign, current.facts)
     pendingStepRef.current = pending
     return pending
   }
@@ -85,17 +87,19 @@ function ReadyDashboard({ metadata, plannerReady, step, setStep }: { metadata: W
     const current = getState()
     if (!current.session || !current.activeDraft || !current.activePlan) throw new Error('campaign_missing')
     const committed = commitHourlyResult(current.history, current.session, current.facts, pending, response.data, response.etag)
+    committed.session = applyCompletionPolicy(committed.session, current.activeDraft.campaign, committed.facts)
     pendingStepRef.current = null
     const { execution: mode, useHistory } = current.activeDraft.campaign
-    if (mode === 'frozen' || committed.session.status === 'finished') {
+    const spendRemainder = current.activeDraft.campaign.planType === 'target_kpi' && current.activeDraft.campaign.kpiCompletionPolicy === 'spend_budget' && targetReached(current.activeDraft.campaign, committed.facts)
+    if ((mode === 'frozen' && !spendRemainder) || committed.session.status === 'finished') {
       dispatch({ type: 'facts-committed', ...committed, pendingRound: null })
       if (committed.session.status === 'finished') savePastCampaigns(getState().pastCampaigns)
       return
     }
     const history = useHistory
-      ? current.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, current.activeDraft!.simulation.worldSeed)).map((record) => record.payload)
+      ? current.pastCampaigns.filter((record) => sameMarket(record, metadata.worldConfigDigest, current.activeDraft!.simulation.worldSeed, current.activeDraft!.simulation.audience)).map((record) => record.payload)
       : []
-    const tracking = mode === 'adaptive' && current.activePlan.strategy === 'optimized' && current.approvedPlan
+    const tracking = !spendRemainder && mode === 'adaptive' && current.activePlan.strategy === 'optimized' && current.approvedPlan
     const request = buildPlanRequest({
       simulation: current.activeDraft.simulation,
       durationHours: Number(current.activeDraft.campaign.durationHours),
@@ -197,6 +201,7 @@ function ReadyDashboard({ metadata, plannerReady, step, setStep }: { metadata: W
 
     {step === 'brief' && <BriefStep metadata={metadata} draft={state.draft} errors={state.fieldErrors} busy={mutating} hasSession={Boolean(state.session)} pastCampaigns={marketHistory} onClearHistory={clearHistory} onChange={(draft) => dispatch({ type: 'draft', draft })} onSubmit={() => void submitBrief()} />}
 
+    {step === 'plan' && state.activeDraft?.simulation.audience && !state.diagnosis && <p className="note">Показы будут ограничены выбранными сегментами аудитории. Первоначальный прогноз рассчитан по каналам в целом и пока не учитывает это ограничение.</p>}
     {step === 'plan' && state.diagnosis && <InfeasibleDiagnosis diagnosis={state.diagnosis} currency={metadata.currency} onAcceptTarget={acceptRecommendedTarget} onExtendHorizon={extendHorizon} onEdit={() => setStep('brief')} />}
     {step === 'plan' && !state.diagnosis && state.approvedPlan && state.activeDraft && <PlanStep plan={state.approvedPlan} execution={state.activeDraft.campaign.execution} historyCount={state.historyCount} currency={metadata.currency} channelIds={metadata.channelIds} hasSession={Boolean(state.session)} sessionStarted={sessionStarted} onApprove={() => setStep('run')} onEdit={() => setStep('brief')} />}
     {step === 'plan' && !state.diagnosis && !state.approvedPlan && <section className="card"><p className="muted">Медиаплан ещё не рассчитан. Заполните бриф.</p></section>}

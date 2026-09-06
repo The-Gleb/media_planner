@@ -1,4 +1,5 @@
-import type { ChannelID, HourlyResult } from './types'
+import { audienceKey } from './audience'
+import type { AudienceSelection, ChannelID, HourlyResult } from './types'
 import type { ActivePlan, CampaignFacts } from './planning'
 import { formatMoney, parseMoney } from './numeric'
 
@@ -12,6 +13,7 @@ export interface ApprovedPayload { kpi_target: string; channel_budgets: Record<C
 
 /** A finished campaign kept for later planning on the same market. */
 export interface PastCampaignRecord {
+  audience?: AudienceSelection
   worldConfigDigest: string
   worldSeed: string
   campaignSeed: string
@@ -99,8 +101,8 @@ export function buildApprovedPayload(plan: ActivePlan): ApprovedPayload | null {
   return { kpi_target: kpi, channel_budgets: Object.fromEntries([...budgets].map(([channelId, micros]) => [channelId, formatMoney(micros)])) }
 }
 
-export function sameMarket(record: PastCampaignRecord, worldConfigDigest: string, worldSeed: string): boolean {
-  return record.worldConfigDigest === worldConfigDigest && record.worldSeed === worldSeed
+export function sameMarket(record: PastCampaignRecord, worldConfigDigest: string, worldSeed: string, audience?: AudienceSelection): boolean {
+  return record.worldConfigDigest === worldConfigDigest && record.worldSeed === worldSeed && audienceKey(record.audience) === audienceKey(audience)
 }
 
 const STORAGE_KEY = 'media-planner.past-campaigns'

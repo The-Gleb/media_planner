@@ -29,6 +29,7 @@ export function userError(error: unknown, operation: string): string {
     const message = problemMessages[error.problem.code] ?? error.problem.detail ?? error.problem.title
     return `${operation}: ${message}${error.problem.trace_id ? ` Trace ID: ${error.problem.trace_id}` : ''}`
   }
+  if (error instanceof Error && ['step_desynchronized', 'step_transition_invalid', 'step_channel_coverage_invalid', 'duplicate_hourly_commit', 'duplicate_fact_commit'].includes(error.message)) return `${operation}: состояние прогона не совпало с ответом симулятора (${error.message}).`
   if (error instanceof Error && error.message === 'stale_plan') return `${operation}: получен устаревший или несвязанный план. Повторите текущий раунд.`
   if (error instanceof Error && (error.message === 'missing_plan_hour' || error.message === 'missing_plan_allocation')) return `${operation}: в активном плане отсутствует лимит для текущего часа.`
   if (error instanceof Error && error.message.startsWith('invalid_')) return `${operation}: ответ сервиса не прошёл проверку (${error.message}).`
