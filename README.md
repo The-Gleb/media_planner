@@ -1,39 +1,55 @@
 # Media Planner
 
-Prototype of an adaptive media-planning system with three independent services: a seeded Go market
-Simulator, a stateless Python Planner, and a React dashboard that orchestrates planning and hourly execution.
+Прототип адаптивной системы медиапланирования из трёх независимых сервисов: детерминированный
+симулятор рекламного рынка на Go (с сидами), планировщик на Python без состояния и дашборд на
+React, который управляет планированием и почасовым исполнением кампании.
 
 ```bash
 docker compose up --build --wait
 ```
 
-- Dashboard: `http://127.0.0.1:8081`
-- Simulator API: `http://127.0.0.1:8080`
-- Planner API: `http://127.0.0.1:8082`
-- Simulator OpenAPI: `specs/001-adaptive-media-planning/contracts/openapi.yaml`
-- Planner OpenAPI: `specs/003-minimal-budget-planner/contracts/planner.openapi.yaml`
+- Дашборд: `http://127.0.0.1:8081`
+- API симулятора: `http://127.0.0.1:8080`
+- API планировщика: `http://127.0.0.1:8082`
+- OpenAPI симулятора: `specs/001-adaptive-media-planning/contracts/openapi.yaml`
+- OpenAPI планировщика: `specs/003-minimal-budget-planner/contracts/planner.openapi.yaml`
 
-The browser coordinates `Planner → Simulator step → committed facts → Planner` through same-origin
-`/planner-api/` and `/api/` proxies. Planner and Simulator never call each other. A Planner failure
-after a committed hour blocks the next Simulator step until the exact planning round is retried.
-Money remains decimal text at service boundaries and integer micros in calculations.
+Браузер ведёт цикл «планировщик → шаг симулятора → зафиксированные факты → планировщик» через
+прокси `/planner-api/` и `/api/` на одном origin. Планировщик и симулятор друг друга не вызывают.
+Если планировщик упал после зафиксированного часа, следующий шаг симулятора блокируется, пока тот
+же раунд планирования не будет повторён. Деньги на границах сервисов передаются десятичным
+текстом, а в расчётах хранятся целыми микроединицами.
 
-The default deterministic world contains eight channels (`social_1..3`, `programmatic`,
-`marketplace_1..3`, `sms`). Planner offers exact `uniform` allocation and a catalog-based
-`optimized` water-filling strategy. The optimized model raises effective CPM and lowers CTR, CR and
-new reach as a channel saturates; money with no positive marginal KPI return is exposed as an
-explicit unallocated reserve instead of being forced into the current best channel. Controlled
-market shocks can be attached to reset. To compare
-strategies, finish one run, select the other strategy and reset: execution remains sequential while
-the dashboard retains both result summaries.
+Мир по умолчанию содержит восемь каналов (`social_1..3`, `programmatic`, `marketplace_1..3`,
+`sms`). Планировщик предлагает точное равномерное распределение (`uniform`) и стратегию
+`optimized` на основе каталога: она заполняет каналы по убыванию предельной отдачи
+(water-filling). По мере насыщения канала модель повышает эффективный CPM и снижает CTR, CR и
+прирост нового охвата; деньги без положительной предельной отдачи по KPI показываются как явный
+нераспределённый резерв, а не вливаются принудительно в лучший на данный момент канал. К сбросу
+симуляции можно прикрепить контролируемые рыночные шоки. Чтобы сравнить стратегии, завершите один
+прогон, выберите другую стратегию и сделайте сброс: исполнение остаётся последовательным, а дашборд
+сохраняет сводки обоих результатов.
 
-Target-KPI mode implements planning type B at campaign creation: it binary-searches the least
-whole-ruble budget whose public-catalog benchmark forecast reaches the requested reach, clicks or
-conversions. An unreachable target returns a capacity diagnosis without resetting Simulator. A
-reachable target freezes the calculated budget and then reuses the ordinary fixed-budget hourly
-replanning loop, so execution never increases approved spend automatically.
+Режим целевого KPI реализует планирование типа B при создании кампании: бинарным поиском
+подбирается наименьший бюджет в целых рублях, при котором прогноз по публичному каталогу
+достигает заданного охвата, кликов или конверсий. Для недостижимой цели возвращается диагноз по
+ёмкости без сброса симулятора. Для достижимой цели рассчитанный бюджет фиксируется, после чего
+используется обычный цикл почасового перепланирования с фиксированным бюджетом, так что
+исполнение никогда не увеличивает утверждённый расход автоматически.
 
-See `services/simulator/README.md`, `services/planner/README.md`, `services/frontend/README.md`, and
-`specs/003-minimal-budget-planner/quickstart.md` for development, failure handling, and validation details.
-How the planner thinks, learns from campaign history and keeps a campaign on plan is explained
-in `docs/how-planner-works.md`; the formula-to-code reference is `docs/mathematical-model.md`.
+Планировщик умеет учитывать историю прошлых кампаний (априорные оценки CTR, CR, CPM, ёмкости и
+почасового профиля каналов) и калибруется по свежим почасовым фактам во время кампании. Лайв-режим
+`adaptive_max` каждый час перераспределяет оставшийся бюджет ради максимума KPI, режим `adaptive`
+удерживает утверждённый микс, пока прогноз укладывается в план.
+
+Качество измеряется отдельно для планировщика и для трафик-менеджера харнесом в
+`tools/evaluation/` (см. `tools/evaluation/README.md`). Результаты и ноутбуки с выводами лежат в
+`tools/evaluation/results/`: `experiment-a-planner.ipynb` — точность прогноза плана,
+`experiment-b-traffic-manager.ipynb` — прирост KPI лайв-режимов к статическому плану и к ручному
+дневному перераспределению.
+
+Подробности разработки, обработки отказов и проверки — в `services/simulator/README.md`,
+`services/planner/README.md`, `services/frontend/README.md` и
+`specs/003-minimal-budget-planner/quickstart.md`. Как планировщик рассуждает, учится на истории
+кампаний и удерживает кампанию на плане, описано в `docs/how-planner-works.md`; соответствие
+формул коду — в `docs/mathematical-model.md`.
