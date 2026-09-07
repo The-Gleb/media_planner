@@ -68,5 +68,7 @@
 
 | Slice | Pairs | Uplift p50 | Uplift p10 | Wins | Recovered p50 | Reaction h p50 | Reacted | Reallocated p50 | Budget use p50 | |Dev KPI| p50 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| adaptive_max · none | 16 | +1.1% | +0.4% | 100% | — | — | — | 28% | 100.0% | 7.8% |
+| adaptive_max · ctr_drop | 16 | +6.8% | +3.9% | 100% | +54% | 6 | 100% | 58% | 100.0% | 5.8% |
 
 Uplift is the live mode's fact KPI over frozen execution of the same approved plan on the same world, seed and shock; wins is the share of pairs with positive uplift. Recovered is the share of the KPI the shock took from frozen execution that the live mode won back: (live − frozen_shock) / (frozen_calm − frozen_shock). Reaction is the number of hours after the shock until the live plan cut the shocked channel's cap by 20 % relative to the same live mode without the shock (6 h smoothing); reacted is the share of shocked pairs where that happened at all. Reallocated is the share of budget moved away from the approved caps. |Dev KPI| is the case metric of the live run: its final deviation from the approved plan.
