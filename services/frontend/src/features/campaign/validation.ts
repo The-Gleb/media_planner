@@ -48,6 +48,7 @@ export function validateDraft(draft: LaunchDraft, metadata: WorldMetadata): Fiel
   } else if (!/^[1-9][0-9]*$/.test(campaign.targetValue)) {
     errors['campaign.targetValue'] = 'Введите положительное целое значение цели.'
   }
+  if (campaign.planType === 'target_kpi' && !['stop_at_kpi', 'spend_budget'].includes(campaign.kpiCompletionPolicy)) errors['campaign.kpiCompletionPolicy'] = 'Выберите действие при достижении KPI.'
   return errors
 }
 
@@ -63,7 +64,7 @@ export function initialDraft(metadata: WorldMetadata): LaunchDraft {
     campaign: {
       durationHours: '504',
       planType: 'fixed_budget', totalBudget: '1200000', optimize: 'conversions', strategy: 'optimized',
-      targetMetric: 'clicks', targetValue: '50000',
+      targetMetric: 'clicks', targetValue: '50000', kpiCompletionPolicy: 'stop_at_kpi',
       execution: 'adaptive_max', useHistory: true,
     },
   }

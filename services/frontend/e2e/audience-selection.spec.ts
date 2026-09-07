@@ -104,6 +104,7 @@ for (const legacy of [false, true]) for (const strategy of ['uniform', 'optimize
       await page.getByRole('radio', { name: /Задача B/ }).check()
       await page.getByLabel('Целевая метрика').selectOption('clicks')
       await page.getByLabel('Целевой объём').fill('100')
+      await page.getByLabel('Что делать при досрочном достижении KPI?').selectOption('spend_budget')
     } else await page.getByLabel('Алгоритм распределения').selectOption(strategy)
     try {
       await page.getByRole('button', { name: 'Рассчитать медиаплан', exact: true }).click()

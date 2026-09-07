@@ -16,7 +16,7 @@ export async function runRemaining(port: AutoRunPort): Promise<'finished' | 'sto
     const pending = port.createPending(session)
     const response = await port.submit(session, pending)
     await port.commit(pending, response)
-    if (response.data.status === 'finished') return 'finished'
+    if (port.getSession().status === 'finished' || response.data.status === 'finished') return 'finished'
     if (port.shouldStop()) return 'stopped'
     await port.waitBeforeNext?.()
   }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { useCallback, useReducer, useRef } from 'react'
 import { plannerClient } from '../../api/plannerClient'
 import { SimulatorProblemError, simulatorClient } from '../../api/simulatorClient'
 import { userError } from '../../app/messages'
@@ -19,7 +19,8 @@ const apiFieldPaths: Record<string, string> = {
 export function useCampaignController(metadata: WorldMetadata) {
   const [state, reactDispatch] = useReducer(campaignReducer, metadata, createCampaignState)
   const ref = useRef(state)
-  useEffect(() => { ref.current = state }, [state])
+  // Only dispatch advances execution state. React may render a queued snapshot after
+  // newer hours have committed; copying that snapshot back would roll the run back.
   // Batched mode: the ref is the source of truth for the run loop; React only receives the
   // accumulated state on flush, so a fast timelapse renders a few times per second instead of
   // two or three times per simulated hour.

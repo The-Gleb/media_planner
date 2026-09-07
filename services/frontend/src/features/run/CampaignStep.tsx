@@ -59,6 +59,11 @@ export function CampaignStep(props: Props) {
         <div><h2 id="control-title">Ход кампании</h2><p className="muted">Один шаг — один час кампании. Трафик-менеджер видит факт по каналам и то, как остаток бюджета перекладывается между ними.</p></div>
         <div className="chips"><span className="chip">{EXECUTION_LABEL[mode]}</span><span className="chip" data-tone={running ? 'ok' : finished ? 'good' : undefined}>{status}</span></div>
       </div>
+      {activeDraft.campaign.planType === 'target_kpi' && <p className="note">{session.completionReason === 'kpi_reached'
+        ? `Целевой KPI достигнут. Кампания завершена, остаток бюджета ${money(formatMoney(parseMoney(activePlan.budget) - parseMoney(facts.spent)), session.currency)} сохранён.`
+        : session.completionReason === 'budget_spent' ? 'Расчётный бюджет израсходован. Кампания завершена.'
+        : activeDraft.campaign.kpiCompletionPolicy === 'stop_at_kpi' ? 'При достижении целевого KPI кампания завершится после текущего часа.' : 'После достижения KPI продолжаем расходовать расчётный бюджет на дополнительный результат.'}</p>}
+      {activeDraft.campaign.audience && <p className="note">Показы ограничены выбранной в брифе аудиторией в {Object.keys(activeDraft.campaign.audience).length} каналах. Выбор зафиксирован на весь прогон; первоначальный прогноз относится к каналам в целом.</p>}
       <RunProgress session={session} status={execution} />
       <StepControls session={session} status={execution} blocked={props.blocked} playbackDelayMs={props.playbackDelayMs} onPlaybackDelayChange={props.onPlaybackDelayChange} onStep={props.onStep} onRun={props.onRun} onStop={props.onStop} />
     </section>

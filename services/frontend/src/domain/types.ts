@@ -53,6 +53,7 @@ export interface CampaignDraft {
   strategy: 'uniform' | 'optimized'
   targetMetric: 'unique_reach' | 'clicks' | 'conversions'
   targetValue: string
+  kpiCompletionPolicy: 'stop_at_kpi' | 'spend_budget'
   execution: ExecutionMode
   useHistory: boolean
 }
@@ -70,6 +71,7 @@ export interface ActiveRun {
   audience?: Audience
   simulationId: string
   status: SimulationStatus
+  completionReason?: 'kpi_reached' | 'budget_spent'
   currentHour: string
   endHourExclusive: string
   durationHours: number

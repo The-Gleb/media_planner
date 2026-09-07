@@ -77,7 +77,7 @@ export function BriefStep({ metadata, draft, errors, busy, hasSession, pastCampa
 
   return <form className="stack" noValidate onSubmit={(event) => { event.preventDefault(); if (busy || audienceBlocked) return; setEditAudience(false); onSubmit() }} aria-labelledby="brief-title">
     <section className="card stack">
-      <div className="card-head"><div><h2 id="brief-title">Бриф кампании</h2><p className="muted">Медиапланер задаёт постановку, сервис строит достижимый медиаплан и прогноз по восьми абстрактным каналам.</p></div></div>
+      <div className="card-head"><div><h2 id="brief-title">Бриф кампании</h2><p className="muted">Медиапланер задаёт постановку, сервис строит достижимый медиаплан и прогноз по доступным каналам.</p></div></div>
       {hasErrors && <p className="inline-alert" role="alert">Проверьте отмеченные поля.{!expert && Object.entries(errors).filter(([key]) => key.startsWith('simulation.')).map(([key, text]) => <span key={key} className="block"> Условия рынка: {text} Откройте экспертный режим, чтобы поправить параметры стенда.</span>)}</p>}
 
       <div className="segmented segmented-wide" role="radiogroup" aria-label="Постановка задачи">
@@ -98,6 +98,14 @@ export function BriefStep({ metadata, draft, errors, busy, hasSession, pastCampa
         <Field id="durationDays" label="Срок кампании, дней" value={days} error={errors['campaign.durationHours'] && !expert ? errors['campaign.durationHours'] : undefined} inputMode="numeric" disabled={busy} placeholder={days ? undefined : `${hours} ч`} onChange={(v) => { const n = Number(v); setCampaign('durationHours', v === '' ? '' : Number.isFinite(n) ? String(Math.round(n * 24)) : campaign.durationHours) }} />
         {expert && <Field id="durationHours" label="Срок кампании, часов" value={campaign.durationHours} error={errors['campaign.durationHours']} inputMode="numeric" disabled={busy} onChange={(v) => setCampaign('durationHours', v)} />}
       </div>
+      {campaign.planType === 'target_kpi' && <div className="field">
+        <label htmlFor="kpiCompletionPolicy">Что делать при досрочном достижении KPI?</label>
+        <select id="kpiCompletionPolicy" value={campaign.kpiCompletionPolicy} disabled={busy} onChange={(e) => setCampaign('kpiCompletionPolicy', e.target.value as CampaignDraft['kpiCompletionPolicy'])}>
+          <option value="stop_at_kpi">Завершить кампанию и сохранить остаток бюджета</option>
+          <option value="spend_budget">Потратить остаток бюджета на дополнительный результат</option>
+        </select>
+        <p className="field-hint">Проверяем фактический KPI после каждого часа. В последнем часе цель может быть превышена. Расход ограничен доступным инвентарём и сроком кампании.</p>
+      </div>}
       {campaign.planType === 'target_kpi' && <p className="note">Сервис подберёт минимальный бюджет по публичному каталогу. Если ёмкость каналов не позволяет достичь цели, вы получите диагноз и рекомендацию вместо плана.</p>}
     </section>
 

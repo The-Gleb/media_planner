@@ -40,8 +40,14 @@ export class SimulatorClient {
       engineVersion: raw.engine_version, worldConfigDigest: raw.world_config_digest,
       channels: raw.channels.map((channel) => {
         const item = channel as Record<string, unknown>
-        const segments = Array.isArray(item.segments) ? item.segments as Record<string, unknown>[] : []
-        return { channelId: String(item.channel_id), segments: segments.map((segment) => ({ segmentId: String(segment.segment_id), geo: String(segment.geo), gender: String(segment.gender), ageFrom: Number(segment.age_from), ageToExclusive: Number(segment.age_to_exclusive) })) }
+        if (typeof item.channel_id !== 'string' || !Array.isArray(item.segments)) throw new Error('invalid_audience_segments')
+        const segments = item.segments as Record<string, unknown>[]
+        const decoded = segments.map(segment => {
+          if (!segment || typeof segment.segment_id !== 'string' || typeof segment.geo !== 'string' || typeof segment.gender !== 'string' || !Number.isSafeInteger(segment.age_from) || !Number.isSafeInteger(segment.age_to_exclusive) || Number(segment.age_from) < 0 || Number(segment.age_to_exclusive) <= Number(segment.age_from)) throw new Error('invalid_audience_segments')
+          return { segmentId: segment.segment_id, geo: segment.geo, gender: segment.gender, ageFrom: segment.age_from as number, ageToExclusive: segment.age_to_exclusive as number }
+        })
+        if (new Set(decoded.map(segment => segment.segmentId)).size !== decoded.length) throw new Error('invalid_audience_segments')
+        return { channelId: item.channel_id, segments: decoded }
       }),
     }
   }
