@@ -77,6 +77,8 @@ class Cell:
 CELLS = [
     Cell("modes-h3"),
     Cell("modes-h0", history_levels="0"),
+    Cell("manual-h3", modes="frozen,manual"),
+    Cell("manual-h0", history_levels="0", modes="frozen,manual"),
     Cell("noisy-h3", scenarios="none", modes="frozen,adaptive_max", random_events=True),
     Cell(
         "noisy-h0",
@@ -349,6 +351,43 @@ def summarize(pairs: list[dict[str, Any]]) -> str:
             for m in ("adaptive", "adaptive_max")
             for s in ("none", "ctr_drop")
         ],
+    )
+    lines.append(
+        "\n## Baselines: hand rebalancing once a day versus frozen, and adaptive_max versus hand\n"
+    )
+    lines.append(
+        "| History | Shock | Pairs | Manual over frozen p50 | Manual wins | adaptive_max over manual p50 "
+        "| adaptive_max over manual p10 | adaptive_max wins over manual |\n|---:|---|---:|---:|---:|---:|---:|---:|"
+    )
+    for h in (3, 0):
+        manual = {
+            key(p, "world_seed", "campaign_seed", "scenario"): p
+            for p in pairs
+            if p["cell"] == f"manual-h{h}" and p["mode"] == "manual"
+        }
+        for s in [*scenarios, "all"]:
+            rows = []
+            for p in pairs:
+                if p["cell"] != f"modes-h{h}" or p["mode"] != "adaptive_max":
+                    continue
+                if s != "all" and p["scenario"] != s:
+                    continue
+                m = manual.get(key(p, "world_seed", "campaign_seed", "scenario"))
+                if m is None or m["uplift"] is None or p["uplift"] is None:
+                    continue
+                rows.append((m["uplift"], (1 + p["uplift"]) / (1 + m["uplift"]) - 1))
+            if not rows:
+                continue
+            mu = [r[0] for r in rows]
+            au = [r[1] for r in rows]
+            lines.append(
+                f"| {h} | {s} | {len(rows)} | {q(mu, 0.5):+.1%} | {sum(v > 0 for v in mu) / len(mu):.0%} "
+                f"| {q(au, 0.5):+.1%} | {q(au, 0.1):+.1%} | {sum(v > 0 for v in au) / len(au):.0%} |"
+            )
+    lines.append(
+        "\nManual is a hand rule without a model: once a day, move 20 % of the remaining budget "
+        "from channels with a worse than average cost per KPI yesterday toward the better ones, "
+        "at most 30 % per channel per day, hourly shapes as approved."
     )
     lines.append(
         "\nUplift is the live mode's fact KPI over frozen execution of the same approved plan on "

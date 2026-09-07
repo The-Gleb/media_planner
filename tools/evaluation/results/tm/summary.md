@@ -71,4 +71,23 @@
 | adaptive_max · none | 16 | +1.1% | +0.4% | 100% | — | — | — | 28% | 100.0% | 7.8% |
 | adaptive_max · ctr_drop | 16 | +6.8% | +3.9% | 100% | +54% | 6 | 100% | 58% | 100.0% | 5.8% |
 
+## Baselines: hand rebalancing once a day versus frozen, and adaptive_max versus hand
+
+| History | Shock | Pairs | Manual over frozen p50 | Manual wins | adaptive_max over manual p50 | adaptive_max over manual p10 | adaptive_max wins over manual |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 3 | none | 16 | +0.1% | 50% | +2.2% | -0.0% | 88% |
+| 3 | ctr_drop | 16 | +1.1% | 81% | +4.7% | +1.7% | 100% |
+| 3 | cpm_spike | 16 | +0.6% | 75% | +4.1% | +2.0% | 94% |
+| 3 | supply_drop | 16 | -0.1% | 44% | +1.5% | +0.5% | 94% |
+| 3 | pause | 16 | +0.0% | 50% | +8.9% | +5.3% | 100% |
+| 3 | all | 80 | +0.3% | 60% | +3.8% | +0.7% | 95% |
+| 0 | none | 16 | +16.5% | 100% | +3.6% | +1.7% | 94% |
+| 0 | ctr_drop | 16 | +19.1% | 100% | +6.3% | +1.9% | 94% |
+| 0 | cpm_spike | 16 | +18.1% | 100% | +5.5% | +1.2% | 94% |
+| 0 | supply_drop | 16 | +16.2% | 88% | +4.6% | +1.3% | 94% |
+| 0 | pause | 16 | +16.7% | 100% | +9.2% | +3.3% | 94% |
+| 0 | all | 80 | +17.3% | 98% | +5.9% | +1.6% | 94% |
+
+Manual is a hand rule without a model: once a day, move 20 % of the remaining budget from channels with a worse than average cost per KPI yesterday toward the better ones, at most 30 % per channel per day, hourly shapes as approved.
+
 Uplift is the live mode's fact KPI over frozen execution of the same approved plan on the same world, seed and shock; wins is the share of pairs with positive uplift. Recovered is the share of the KPI the shock took from frozen execution that the live mode won back: (live − frozen_shock) / (frozen_calm − frozen_shock). Reaction is the number of hours after the shock until the live plan cut the shocked channel's cap by 20 % relative to the same live mode without the shock (6 h smoothing); reacted is the share of shocked pairs where that happened at all. Reallocated is the share of budget moved away from the approved caps. |Dev KPI| is the case metric of the live run: its final deviation from the approved plan.

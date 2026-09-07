@@ -22,6 +22,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
 import json
 import os
@@ -47,7 +48,9 @@ DEFAULT_WORLD_CONFIG = REPO_ROOT / "services/simulator/configs/world-config.audi
 DEFAULT_PLANNER_CONFIG = REPO_ROOT / "services/simulator/configs/world-config.mediaplan.json"
 MICROS = 1_000_000
 SCENARIOS = ("none", "ctr_drop", "cpm_spike", "supply_drop", "pause")
-MODES = ("frozen", "adaptive", "adaptive_max")
+MODES = ("frozen", "manual", "adaptive", "adaptive_max")
+MANUAL_SHIFT = 0.2
+MANUAL_MAX_STEP = 0.3
 RECENT_HOURS = 72
 SHOCK_MULTIPLIERS = {"ctr_drop": 0.6, "cpm_spike": 1.6, "supply_drop": 0.5}
 FACT_KEYS = ("requests", "impressions", "unique_reach", "clicks", "conversions")
@@ -475,6 +478,45 @@ class Execution:
     top_spend: list[float] = field(default_factory=list)
 
 
+def manual_rebalance(
+    current: PlanView, hour: int, facts_yesterday: dict[str, dict[str, int]], optimize: str
+) -> PlanView:
+    """Daily hand rebalancing, the way a traffic manager without a model does it.
+
+    Once a day the manager looks at yesterday's cost per KPI of every funded channel and moves
+    MANUAL_SHIFT of the remaining budget from channels worse than the average toward the better
+    ones, at most MANUAL_MAX_STEP per channel per day. Hourly shapes stay as approved; nothing
+    unspent is carried over; channels the plan never funded stay closed."""
+    remaining_hours = [h for h in current.caps if h >= hour]
+    planned = {c: sum(current.caps[h][c] for h in remaining_hours) for c in current.channels}
+    funded = [c for c in current.channels if planned[c] > 0 and facts_yesterday[c]["spent"] > 0]
+    if len(funded) < 2:
+        return current
+    efficiency = {
+        c: facts_yesterday[c][optimize] / (facts_yesterday[c]["spent"] / MICROS) for c in funded
+    }
+    total_spent = sum(facts_yesterday[c]["spent"] for c in funded) / MICROS
+    average = sum(facts_yesterday[c][optimize] for c in funded) / total_spent
+    if average <= 0:
+        return current
+    factors = {
+        c: min(
+            1 + MANUAL_MAX_STEP,
+            max(1 - MANUAL_MAX_STEP, 1 + MANUAL_SHIFT * (efficiency[c] / average - 1)),
+        )
+        for c in funded
+    }
+    before = sum(planned[c] for c in funded)
+    after = sum(planned[c] * factors[c] for c in funded)
+    scale = before / after if after > 0 else 1.0
+    view = copy.copy(current)
+    view.caps = {h: dict(caps) for h, caps in current.caps.items()}
+    for h in remaining_hours:
+        for c in funded:
+            view.caps[h][c] = int(round(current.caps[h][c] * factors[c] * scale))
+    return view
+
+
 def _local(observed_hour: str, time_zone: str) -> datetime:
     return datetime.fromisoformat(observed_hour.replace("Z", "+00:00")).astimezone(
         ZoneInfo(time_zone)
@@ -495,6 +537,7 @@ def execute_campaign(
     random_events: bool,
     adaptive: bool,
     tracking: bool,
+    manual: bool,
     history: Sequence[dict[str, Any]],
     dataset: Any,
     dataset_tags: Mapping[str, object],
@@ -599,6 +642,16 @@ def execute_campaign(
         fact_spend.append(sum(facts[c]["spent"] for c in channels) / MICROS)
         fact_kpi.append(float(sum(facts[c][brief.optimize] for c in channels)))
         next_hour = hour + 1
+        if manual and next_hour < duration and next_hour % 24 == 0:
+            yesterday = {
+                c: {
+                    "spent": sum(x["spent"] for x in daily[c][-1:]),
+                    **{k: sum(x[k] for x in daily[c][-1:]) for k in FACT_KEYS},
+                }
+                for c in channels
+            }
+            current = manual_rebalance(current, next_hour, yesterday, brief.optimize)
+            replans += 1
         if adaptive and next_hour < duration and next_hour % brief.replan_every == 0:
             body = plan_request(
                 brief,
@@ -719,8 +772,9 @@ def load_or_generate_history(
             campaign_seed=campaign_seed,
             events=[],
             random_events=brief.history_random_events,
-            adaptive=brief.history_mode != "uniform" and brief.history_mode != "frozen",
+            adaptive=brief.history_mode in ("adaptive", "adaptive_max"),
             tracking=brief.history_mode == "adaptive",
+            manual=brief.history_mode == "manual",
             history=history,
             dataset=dataset,
             dataset_tags={
@@ -820,8 +874,9 @@ def run_campaign(
         campaign_seed=spec.campaign_seed,
         events=events,
         random_events=brief.random_events,
-        adaptive=spec.mode != "frozen",
+        adaptive=spec.mode in ("adaptive", "adaptive_max"),
         tracking=spec.mode == "adaptive",
+        manual=spec.mode == "manual",
         history=history,
         dataset=dataset,
         dataset_tags={
