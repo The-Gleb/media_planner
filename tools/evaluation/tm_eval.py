@@ -156,6 +156,12 @@ def pair_rows(out_dir: Path, rows: list[dict[str, Any]]) -> list[dict[str, Any]]
         if run["mode"] == "frozen":
             continue
         frozen = by_mode.get(key(run, *PAIR_FIELDS, "mode")[:-1] + ("frozen",))
+        if frozen is None and run["shock_start"] in (None, 252):
+            # Ablation cells run only the live mode; frozen execution does not depend on the
+            # live-loop settings, so the base cell's frozen twin is the same run.
+            frozen = by_mode.get(
+                (f"modes-h{run['history']}",) + key(run, *PAIR_FIELDS[1:]) + ("frozen",)
+            )
         if frozen is None:
             continue
         calm_key = key(run, "cell", "world_seed", "campaign_seed", "history") + ("none",)
