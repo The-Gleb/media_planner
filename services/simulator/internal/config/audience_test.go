@@ -92,7 +92,7 @@ func TestAudienceRequiredAndNeutralFields(t *testing.T) {
 	}
 	for _, bad := range [][]byte{
 		bytes.Replace(m.Normalized, []byte(`"warm_capacity":`), []byte(`"unknown_capacity":`), 1),
-		bytes.Replace(m.Normalized, []byte(`"age_from":25`), []byte(`"age_from":null`), 1),
+		bytes.Replace(m.Normalized, []byte(`"age_from":13`), []byte(`"age_from":null`), 1),
 		bytes.Replace(m.Normalized, []byte(`"cpm":1.2`), []byte(`"cpm":null`), 1),
 	} {
 		if _, err := Load(bytes.NewReader(bad)); err == nil {

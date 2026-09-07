@@ -56,7 +56,7 @@ func TestSaturatedPoolsAndPause(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if first[0].UniqueReach > 8 {
+	if first[0].UniqueReach > int64(len(c.Segments)) {
 		t.Fatal(first)
 	}
 	paused, err := e.Step([]domain.ChannelAction{{ChannelID: c.ID, BudgetCap: 1000000}})

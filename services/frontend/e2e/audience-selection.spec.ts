@@ -1,6 +1,38 @@
 import { expect, test } from '@playwright/test'
 import { legacyPlanner } from './fixtures/legacy-planner'
 
+test('independent demographic cards map to every channel and fit mobile', async ({ page }, testInfo) => {
+  test.skip(!process.env.AUDIENCE_E2E, 'Requires isolated segmented service')
+  await page.goto('/')
+  const picker = page.getByRole('group', { name: 'Аудитория кампании', exact: true })
+  await expect(picker.getByRole('group', { name: 'География', exact: true })).toBeVisible()
+  await expect(picker.getByRole('group', { name: 'Пол', exact: true })).toBeVisible()
+  for (const label of ['Подростки · 13–18', 'Молодёжь · 19–30', 'Зрелая аудитория · 31–45', 'Опытные потребители · 46–59', 'Пожилые · 60+']) await expect(picker.getByRole('checkbox', { name: label, exact: true })).toBeChecked()
+  await picker.getByRole('checkbox', { name: 'Другие регионы', exact: true }).uncheck()
+  await picker.getByRole('checkbox', { name: 'Мужчины', exact: true }).uncheck()
+  await picker.getByRole('button', { name: 'Снять выбор: Возраст' }).click()
+  await expect(page.getByRole('button', { name: 'Рассчитать медиаплан', exact: true })).toBeDisabled()
+  await picker.getByRole('checkbox', { name: 'Подростки · 13–18', exact: true }).check()
+  await picker.getByRole('checkbox', { name: 'Пожилые · 60+', exact: true }).check()
+  await expect(page.getByRole('button', { name: 'Рассчитать медиаплан', exact: true })).toBeEnabled()
+  await picker.screenshot({ path: testInfo.outputPath('audience-desktop.png') })
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(picker.getByRole('checkbox', { name: 'Пожилые · 60+', exact: true })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await picker.screenshot({ path: testInfo.outputPath('audience-mobile.png') })
+  let resetBody: Record<string, unknown> | undefined
+  await page.route('**/v1/simulations/*', async route => {
+    if (route.request().method() !== 'PUT') return route.continue()
+    resetBody = route.request().postDataJSON()
+    await route.abort('failed') // Inspect mapping without creating a campaign.
+  })
+  await page.getByRole('button', { name: 'Рассчитать медиаплан', exact: true }).click()
+  await expect.poll(() => resetBody).toBeDefined()
+  const audience = resetBody!.audience as Record<string, { segment_ids: string[] }>
+  expect(Object.keys(audience)).toHaveLength(8)
+  for (const selection of Object.values(audience)) expect(selection.segment_ids.sort()).toEqual(['moscow_female_13_18', 'moscow_female_60_plus'])
+})
+
 for (const mode of ['frozen', 'adaptive', 'adaptive_max']) test(`new dashboard timelapse: ${mode}, default all audiences`, async ({ page, request }) => {
   test.skip(!process.env.AUDIENCE_E2E, 'Requires isolated segmented service')
   const id = `audience-e2e-mode-${mode}`
@@ -120,7 +152,7 @@ for (const legacy of [false, true]) for (const strategy of ['uniform', 'optimize
       await page.getByRole('button', { name: 'Новая кампания или сравнение стратегий' }).click()
       await expect(page.getByLabel('Все аудитории', { exact: true })).toBeDisabled()
       await page.getByRole('button', { name: 'Изменить аудиторию для нового запуска' }).click()
-      await page.getByLabel('Москва · Женщины · 25–34', { exact: true }).uncheck()
+      await page.getByRole('checkbox', { name: 'Молодёжь · 19–30', exact: true }).uncheck()
       await page.getByRole('button', { name: 'Пересчитать медиаплан', exact: true }).click()
       await page.getByRole('button', { name: 'Утвердить план и перейти к запуску' }).click()
       await expect(step).toBeEnabled(); await step.click()

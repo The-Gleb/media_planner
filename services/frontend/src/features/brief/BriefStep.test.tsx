@@ -25,7 +25,7 @@ describe('business brief audience integration', () => {
     render(<Form />)
     const all = await screen.findByRole('checkbox', { name: 'Все аудитории' })
     await userEvent.click(all)
-    const women = screen.getByRole('checkbox', { name: 'Москва · Женщины · 25–34' })
+    const women = screen.getByRole('checkbox', { name: 'Женщины' })
     await userEvent.click(women)
     expect(screen.getByRole('button', { name: 'Рассчитать медиаплан' })).toBeDisabled()
     await userEvent.click(women)

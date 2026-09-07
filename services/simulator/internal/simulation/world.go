@@ -13,6 +13,7 @@ import (
 )
 
 type HiddenChannel struct {
+	SMS                                              *config.SMSConfig  `json:"sms,omitempty"`
 	Segments                                         []config.Segment   `json:"segments,omitempty"`
 	ID                                               domain.ChannelID   `json:"id"`
 	BaseCPM                                          domain.MoneyMicros `json:"base_cpm_micros"`
@@ -48,6 +49,7 @@ func generateWorld(loaded config.Loaded, seed int64) (World, error) {
 		h := HiddenChannel{ID: c.ID, BaseCPM: baseCPM, BaseCTR: logitUniform(stream("base/ctr"), c.Base.CTR.Range.Min, c.Base.CTR.Range.Max), BaseCR: logitUniform(stream("base/cr"), c.Base.CR.Range.Min, c.Base.CR.Range.Max), BaseRequestsPerDay: requests, AudienceCapacity: capacity}
 		h.HourlySupply = generateHourly(c.HourlyPatterns.Supply, stream("hourly/supply"))
 		h.Segments = c.Segments
+		h.SMS = c.SMS
 		h.HourlyCPM = generateHourly(c.HourlyPatterns.CPM, stream("hourly/cpm"))
 		h.HourlyCTR = generateHourly(c.HourlyPatterns.CTR, stream("hourly/ctr"))
 		h.HourlyCR = generateHourly(c.HourlyPatterns.CR, stream("hourly/cr"))

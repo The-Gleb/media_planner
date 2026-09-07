@@ -2054,8 +2054,8 @@
         "cpm": {
           "distribution": "log_uniform",
           "range": {
-            "min": 1800,
-            "max": 3200
+            "min": 14680,
+            "max": 14680
           }
         },
         "ctr": {
@@ -2075,15 +2075,15 @@
         "requests_per_day": {
           "distribution": "log_uniform",
           "range": {
-            "min": 38000,
-            "max": 66000
+            "min": 1000000,
+            "max": 2000000
           }
         },
         "audience_capacity": {
           "distribution": "log_uniform",
           "range": {
-            "min": 150000,
-            "max": 400000
+            "min": 20000000,
+            "max": 20000000
           }
         }
       },

@@ -102,7 +102,11 @@ def test_response_segments_have_non_increasing_non_negative_marginal_gain() -> N
 
 def test_exhausted_inventory_is_left_unallocated_instead_of_dumped() -> None:
     channels = list(load_catalog())
-    budget = 10_000_000_000_000
+    # Deliberately exceed the whole catalog's daily supply, including a large SMS base.
+    budget = int(100 * sum(
+        c.daily_capacity * c.cpm * (1 + c.price_growth) * 1000
+        for c in load_catalog().values()
+    ))
     allocations = allocate_optimized(budget, Horizon(0, 24), channels, "conversions")
     totals = {
         channel: sum(item.budget_micros for item in allocations if item.channel_id == channel)

@@ -14,7 +14,7 @@ func TestAudienceImmutableAndReplay(t *testing.T) {
 	}
 	r := NewRegistry(model)
 	hour, _ := domain.ParseHour("2026-09-03T06:00:00Z")
-	a := domain.Audience{"social_1": {SegmentIDs: []string{"moscow_female_25_34"}}}
+	a := domain.Audience{"social_1": {SegmentIDs: []string{"moscow_female_19_30"}}}
 	cfg := domain.SimulationConfig{WorldSeed: 42, CampaignSeed: 77, StartHour: hour, TimeZone: "UTC", DurationHours: 168, Audience: a}
 	_, etag, _, err := r.Reset("demo", cfg, "", true)
 	if err != nil {
@@ -29,7 +29,7 @@ func TestAudienceImmutableAndReplay(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(first, same) {
 		t.Fatal("replay", err)
 	}
-	changed := domain.Audience{"social_1": {SegmentIDs: []string{"moscow_female_35_44"}}}
+	changed := domain.Audience{"social_1": {SegmentIDs: []string{"moscow_female_31_45"}}}
 	if _, _, err := r.Step("demo", "two", next, actions, changed); err == nil {
 		t.Fatal("changed selection")
 	}

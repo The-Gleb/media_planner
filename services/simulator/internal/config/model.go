@@ -103,7 +103,15 @@ type ShockPatterns struct {
 	Pause  PauseConfig `json:"pause"`
 }
 
+// SMSConfig enables fixed-price, fully delivered messages with aggregate recipient cooldown.
+type SMSConfig struct {
+	SegmentPrice       float64 `json:"segment_price"`
+	SegmentsPerMessage int     `json:"segments_per_message"`
+	MinIntervalHours   int     `json:"min_interval_hours"`
+}
+
 type ChannelModelConfig struct {
+	SMS             *SMSConfig       `json:"sms,omitempty"`
 	Segments        []Segment        `json:"segments,omitempty"`
 	ID              domain.ChannelID `json:"id"`
 	Type            string           `json:"type"`

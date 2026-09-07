@@ -34,7 +34,7 @@ func TestAudienceHTTP(t *testing.T) {
 		t.Fatal(catalog.Body.String())
 	}
 	path := "/v1/simulations/audience-test"
-	selection := `{"social_1":{"segment_ids":["moscow_female_25_34"]}}`
+	selection := `{"social_1":{"segment_ids":["moscow_female_19_30"]}}`
 	reset := `{"world_seed":"42","campaign_seed":"77","start_hour":"2026-09-03T06:00:00Z","duration_hours":2,"time_zone":"UTC","audience":` + selection + `}`
 	w := call("PUT", path, reset, "*")
 	if w.Code != 201 {
@@ -63,7 +63,7 @@ func TestAudienceHTTP(t *testing.T) {
 			t.Fatal("temperature accepted", bad.Code)
 		}
 	}
-	mismatch := strings.Replace(strings.Replace(step, "11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222", 1), "moscow_female_25_34", "moscow_female_35_44", 1)
+	mismatch := strings.Replace(strings.Replace(step, "11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222", 1), "moscow_female_19_30", "moscow_female_31_45", 1)
 	if w = call("POST", path+"/steps", mismatch, etag); w.Code != 422 {
 		t.Fatal(w.Code, w.Body.String())
 	}

@@ -14,16 +14,17 @@ import (
 type runtimeState struct{ Impressions, UniqueReach int64 }
 
 type Engine struct {
-	mu      sync.Mutex
-	model   config.Loaded
-	cfg     domain.SimulationConfig
-	world   World
-	current domain.Hour
-	steps   int
-	states  map[domain.ChannelID]runtimeState
-	pools   map[poolKey]runtimeState
-	events  map[domain.ChannelID][]EventSchedule
-	ready   bool
+	mu          sync.Mutex
+	model       config.Loaded
+	cfg         domain.SimulationConfig
+	world       World
+	current     domain.Hour
+	steps       int
+	states      map[domain.ChannelID]runtimeState
+	pools       map[poolKey]runtimeState
+	smsCooldown map[poolKey][]smsCohort
+	events      map[domain.ChannelID][]EventSchedule
+	ready       bool
 }
 
 func New(model config.Loaded) *Engine { return &Engine{model: model} }
@@ -68,6 +69,7 @@ func (e *Engine) Reset(cfg domain.SimulationConfig) error {
 	e.steps = 0
 	e.states = states
 	e.pools = map[poolKey]runtimeState{}
+	e.smsCooldown = map[poolKey][]smsCohort{}
 	e.events = events
 	e.ready = true
 	return nil

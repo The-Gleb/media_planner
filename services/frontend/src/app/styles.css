@@ -31,6 +31,26 @@
   --shadow: 0 1px 2px rgb(24 24 27 / 4%), 0 4px 16px rgb(24 24 27 / 5%);
 }
 
+.audience-picker { min-width: 0; border: 0; padding: 0; margin: 0; }
+.audience-picker > legend { font-size: 1.125rem; font-weight: 650; margin-bottom: 8px; }
+.audience-toolbar, .audience-group-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.audience-toolbar { justify-content: space-between; padding: 12px 16px; border-radius: var(--radius); background: var(--fill); margin-bottom: 16px; }
+.audience-dimensions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.audience-dimension { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin: 0; }
+.audience-dimension > legend { font-weight: 650; padding: 0 6px; }
+.audience-dimension-age { grid-column: 1 / -1; }
+.audience-group-actions { margin-bottom: 12px; font-size: 0.85rem; }
+.audience-group-actions > span { margin-right: auto; }
+.audience-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.audience-option { display: flex; align-items: flex-start; gap: 10px; padding: 14px; min-height: 48px; border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; background: var(--surface); transition: border-color 120ms, background 120ms; }
+.audience-option[data-selected="true"] { border-color: var(--primary); background: var(--primary-soft); }
+.audience-option:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
+.audience-option input { flex: 0 0 auto; margin-top: 3px; accent-color: var(--primary); }
+.audience-option strong, .audience-option small { display: block; }
+.audience-option small { color: var(--muted); margin-top: 5px; line-height: 1.4; }
+.audience-picker:disabled .audience-option { opacity: 0.65; cursor: not-allowed; }
+@media (max-width: 600px) { .audience-dimensions { grid-template-columns: 1fr; } .audience-options { grid-template-columns: 1fr; } }
+
 * { box-sizing: border-box; }
 html, body { max-width: 100%; overflow-x: hidden; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--layout); }

@@ -83,6 +83,18 @@ func validate(model WorldModelConfig) error {
 			return invalid(prefix+".type", "required")
 		}
 		checked := channel
+		if s := channel.SMS; s != nil {
+			if channel.Type != "sms" || model.EngineVersion != SegmentedEngineVersion {
+				return invalid(prefix+".sms", "requires_segmented_sms_channel")
+			}
+			if s.SegmentsPerMessage < 1 || s.SegmentsPerMessage > 100 || s.MinIntervalHours < 1 || s.MinIntervalHours > 8760 {
+				return invalid(prefix+".sms", "invalid_segments_or_interval")
+			}
+			price, err := domain.QuantizeFloat64(s.SegmentPrice * float64(s.SegmentsPerMessage) * 1000)
+			if err != nil || price <= 0 || price%1000 != 0 {
+				return invalid(prefix+".sms.segment_price", "invalid_message_price")
+			}
+		}
 		if model.EngineVersion == SegmentedEngineVersion {
 			checked.Base.AudienceCapacity = BasePositive{Distribution: "log_uniform", Range: FloatRange{Min: 1, Max: 1}}
 		}

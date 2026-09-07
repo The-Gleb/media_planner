@@ -1,4 +1,5 @@
 import math
+from dataclasses import replace
 
 import pytest
 
@@ -57,7 +58,8 @@ def test_hourly_forecast_sums_to_the_campaign_total() -> None:
 
 
 def test_hourly_spend_never_exceeds_the_cap_and_reach_saturates() -> None:
-    channel = load_catalog()["sms"]
+    # Small explicit fixture: the production SMS base need not saturate at this budget.
+    channel = replace(load_catalog()["sms"], audience_capacity=200_000)
     caps = [50_000_000_000] * 240
     steps = forecast_hourly(channel, ObservedChannel(), caps, Horizon(0, 240), 0)
     assert all(step.spend_micros <= cap for step, cap in zip(steps, caps, strict=True))
@@ -87,9 +89,11 @@ def test_forecast_uses_the_same_calibration_as_the_optimizer() -> None:
     horizon = Horizon(0, 48)
     weak = _current(12, "6000.000000", "120000", "30")
     strong = _current(12, "6000.000000", "120000", "3000")
-    allocations = allocate_optimized(100_000_000_000, horizon, CHANNELS, "clicks", weak, SIMULATION)
-    weak_forecast = forecast_plan(allocations, horizon, CHANNELS, weak, SIMULATION)
-    strong_forecast = forecast_plan(allocations, horizon, CHANNELS, strong, SIMULATION)
+    # Ensure the calibrated channel receives budget regardless of competing catalog channels.
+    channels = ["programmatic"]
+    allocations = allocate_optimized(100_000_000_000, horizon, channels, "clicks", weak, SIMULATION)
+    weak_forecast = forecast_plan(allocations, horizon, channels, weak, SIMULATION)
+    strong_forecast = forecast_plan(allocations, horizon, channels, strong, SIMULATION)
     assert weak_forecast is not None and strong_forecast is not None
     weak_clicks = sum(f.clicks for (c, _), f in weak_forecast.hourly.items() if c == "programmatic")
     strong_clicks = sum(

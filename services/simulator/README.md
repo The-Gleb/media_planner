@@ -81,9 +81,28 @@ See `specs/001-adaptive-media-planning/quickstart.md` for full contract examples
 From the repository root: `docker compose up --build -d`.
 Recreating Simulator loses its in-memory run. Planner keeps `world-config.mediaplan.json`
 for channel benchmarks and does not need segment support.
-The synthetic `world-config.audience.json` uses sim-v2-delivery: eight geo/gender/age groups,
+The synthetic `world-config.audience.json` uses sim-v2-delivery: twenty geo/gender/age groups per channel,
 each with independent warm/cold capacity and history. `GET /v1/audience-segments` exposes only
-IDs and dimensions. PUT/reset accepts optional `audience`; Step may confirm the same selection
+IDs and dimensions. Ages are [13,19), [19,31), [31,46), [46,60), [60,131):
+13–18, 19–30, 31–45, 46–59 and 60+ (130 is the schema's maximum supported age).
+Age capacity uses the following relative weights within each geo/gender combination:
+
+| Channel | 13–18 | 19–30 | 31–45 | 46–59 | 60+ |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| social_1 | 15 | 15 | 10 | 7 | 5 |
+| social_2 | 8 | 10 | 12 | 12 | 8 |
+| social_3 | 5 | 7 | 10 | 15 | 15 |
+| marketplace_1/2/3 | 7 | 10 | 12 | 12 | 8 |
+| programmatic, sms | 1 | 1 | 1 | 1 | 1 |
+
+Weights are normalized separately for warm/cold pools, retaining each geo/gender pool's
+total capacity. Integer rounding uses largest remainders, with younger ages breaking ties.
+These are synthetic channel archetypes, not demographic estimates or measured conversion rates.
+Existing CTR/CR/CPM/supply multipliers are unchanged: age affects capacity, not intrinsic
+conversion probability. Supply already depends on pool capacity; no extra age supply multiplier is added.
+The previous 25–34/35–44 IDs are replaced; the config digest changes. Finish existing runs before
+deploying and create a new simulation with the new catalogue. Old IDs are rejected, not reinterpreted.
+PUT/reset accepts optional `audience`; Step may confirm the same selection
 but cannot change it. Omission on Step uses the reset selection; null/empty selections are invalid.
 Public selection contains only segment_ids. Temperature is not accepted in PUT/Step.
 Internally warm/cold compete by history-based delivery score (priority4/1, saturation/fatigue floors0.05);
@@ -94,6 +113,40 @@ Responses retain channel aggregates and `ecpm`, with no segment details.
 
 Budgets are hourly caps, not deposited balances. Underdelivery is not charged or stored;
 only actual spend reduces the campaign's remaining budget in the caller.
+
+### SMS delivery
+
+The default segmented world enables a separate SMS policy through the channel's `sms` block:
+`segment_price: 7.34`, `segments_per_message: 2`, `min_interval_hours: 168`.
+One message costs 14.68 RUB and is delivered with probability 1 (an explicit v0 simplification).
+No auction, geo, saturation, drift or shock CPM multiplier changes that price. Supply/pause
+events, temporal throughput, CTR/CR and response fatigue still apply.
+
+The synthetic SMS base contains 20 million recipients (4 million warm, 16 million cold),
+split equally across the twenty geo/gender/age groups. This is not a measured operator audience.
+Base throughput is 1–2 million messages/day before hourly/weekday/noise/event factors.
+Targeting reduces the available base and throughput. Warm/cold remain internal.
+
+Each pool keeps aggregate cooldown cohorts, not individual recipients. Every send reserves one
+recipient until step `sent_at + 168`, including when the campaign crosses a calendar week.
+New recipients are contacted first within a pool; repeats are allowed only after cooldown.
+Unreached + eligible repeats + cooldown recipients always equals pool capacity. No refresh of
+the base occurs during a run. Reset clears reach and cooldown together. Campaigns of less than
+168 hours cannot send a second message to the same recipient.
+
+Public fields remain unchanged: `requests` is hourly send opportunities capped by eligible
+recipients, `impressions` counts delivered messages (not technical SMS segments), `unique_reach`
+counts newly contacted recipients, and clicks/conversions are sampled from messages/clicks.
+`spend = impressions * 14.68`; nonempty `ecpm = 14680` is only a reporting equivalent.
+Empty delivery has zero spend and null eCPM. Exhausted recipients or throughput cause unspent budget.
+
+The `sms` block is optional and valid only for SMS channels in a segmented world. Configs without
+it retain their original CPM-based behavior. The legacy `world-config.mediaplan.json` remains a
+Planner benchmark (updated price/capacity/throughput), not the source of cooldown behavior.
+Planner receives no recipient state and must learn underdelivery from observations. Deploy with
+a fresh/reset simulation: the new config has a different digest. Restore the previous config to
+roll back the SMS policy; no public API migration is needed.
+
 For rollback, finish the run and restore the old binary with its sim-v0 config; no in-memory
 state migration is supported. See `specs/004-audience-segments/quickstart.md` for tests and
 1-CPU latency/RSS checks (100/500 ms p95 for 8/128 segments, 256 MiB).

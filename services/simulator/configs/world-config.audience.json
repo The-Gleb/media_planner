@@ -289,13 +289,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -308,13 +308,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -327,13 +327,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23553,
+          "cold_capacity": 94211,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 16487,
+          "cold_capacity": 65948,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 11776,
+          "cold_capacity": 47105,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -346,13 +403,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -365,13 +422,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23553,
+          "cold_capacity": 94211,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 16487,
+          "cold_capacity": 65948,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 11776,
+          "cold_capacity": 47105,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -384,13 +498,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -403,13 +517,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23553,
+          "cold_capacity": 94211,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -422,13 +536,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 16487,
+          "cold_capacity": 65948,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 11776,
+          "cold_capacity": 47105,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 61237,
-          "cold_capacity": 244949,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 35329,
+          "cold_capacity": 141317,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23553,
+          "cold_capacity": 94211,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 16487,
+          "cold_capacity": 65948,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 11776,
+          "cold_capacity": 47105,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -728,13 +956,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -747,13 +975,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 17320,
+          "cold_capacity": 69282,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -766,13 +994,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -785,13 +1070,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 17320,
+          "cold_capacity": 69282,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -804,13 +1089,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -823,13 +1165,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 17320,
+          "cold_capacity": 69282,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -842,13 +1184,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -861,13 +1203,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 43301,
-          "cold_capacity": 173205,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 17320,
+          "cold_capacity": 69282,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 20785,
+          "cold_capacity": 83138,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 13856,
+          "cold_capacity": 55426,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1167,13 +1623,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 9853,
+          "cold_capacity": 39411,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1186,13 +1642,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 13794,
+          "cold_capacity": 55176,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1205,13 +1661,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 19705,
+          "cold_capacity": 78823,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 9853,
+          "cold_capacity": 39411,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1224,13 +1737,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 13794,
+          "cold_capacity": 55176,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1243,13 +1756,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 19705,
+          "cold_capacity": 78823,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 9853,
+          "cold_capacity": 39411,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1262,13 +1832,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 13794,
+          "cold_capacity": 55176,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1281,13 +1851,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 19705,
+          "cold_capacity": 78823,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1300,13 +1870,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 51234,
-          "cold_capacity": 204939,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 9853,
+          "cold_capacity": 39411,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 13794,
+          "cold_capacity": 55176,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 19705,
+          "cold_capacity": 78823,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 29558,
+          "cold_capacity": 118234,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1606,13 +2290,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1625,13 +2309,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1644,13 +2328,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 77460,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1663,13 +2404,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -1682,13 +2423,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 77460,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1701,13 +2499,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1720,13 +2518,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 77460,
+          "cold_capacity": 309838,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -1739,13 +2537,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 193649,
-          "cold_capacity": 774596,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 77460,
+          "cold_capacity": 309839,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 77460,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 77459,
+          "cold_capacity": 309838,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2045,13 +2957,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13552,
+          "cold_capacity": 54211,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2064,13 +2976,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 19360,
+          "cold_capacity": 77444,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2083,13 +2995,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 15488,
+          "cold_capacity": 61955,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13552,
+          "cold_capacity": 54211,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2102,13 +3071,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 19360,
+          "cold_capacity": 77444,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2121,13 +3090,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 15488,
+          "cold_capacity": 61955,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13552,
+          "cold_capacity": 54211,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2140,13 +3166,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 19360,
+          "cold_capacity": 77444,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2159,13 +3185,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2178,13 +3204,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 15488,
+          "cold_capacity": 61955,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 47433,
-          "cold_capacity": 189738,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 13552,
+          "cold_capacity": 54211,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 19360,
+          "cold_capacity": 77444,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 23233,
+          "cold_capacity": 92933,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 15488,
+          "cold_capacity": 61955,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2484,13 +3624,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 17276,
+          "cold_capacity": 69105,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2503,13 +3643,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 24680,
+          "cold_capacity": 98722,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2522,13 +3662,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 29615,
+          "cold_capacity": 118467,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29615,
+          "cold_capacity": 118466,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 19744,
+          "cold_capacity": 78978,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 17276,
+          "cold_capacity": 69105,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2541,13 +3738,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 24680,
+          "cold_capacity": 98722,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2560,13 +3757,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 29615,
+          "cold_capacity": 118467,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29615,
+          "cold_capacity": 118466,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 19744,
+          "cold_capacity": 78978,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 17276,
+          "cold_capacity": 69105,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2579,13 +3833,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 24680,
+          "cold_capacity": 98722,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2598,13 +3852,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 29615,
+          "cold_capacity": 118467,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2617,13 +3871,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29615,
+          "cold_capacity": 118466,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 19744,
+          "cold_capacity": 78978,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 60465,
-          "cold_capacity": 241869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 17276,
+          "cold_capacity": 69105,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 24680,
+          "cold_capacity": 98722,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 29615,
+          "cold_capacity": 118467,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 29615,
+          "cold_capacity": 118466,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 19744,
+          "cold_capacity": 78978,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -2923,13 +4291,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 6776,
+          "cold_capacity": 27105,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2942,13 +4310,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 9680,
+          "cold_capacity": 38722,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2961,13 +4329,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 11615,
+          "cold_capacity": 46467,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 11615,
+          "cold_capacity": 46466,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 7744,
+          "cold_capacity": 30978,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 6776,
+          "cold_capacity": 27105,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2980,13 +4405,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 9680,
+          "cold_capacity": 38722,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -2999,13 +4424,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 11615,
+          "cold_capacity": 46467,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 11615,
+          "cold_capacity": 46466,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 7744,
+          "cold_capacity": 30978,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 6776,
+          "cold_capacity": 27105,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3018,13 +4500,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 9680,
+          "cold_capacity": 38722,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3037,13 +4519,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 11615,
+          "cold_capacity": 46467,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3056,13 +4538,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 11615,
+          "cold_capacity": 46466,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 7744,
+          "cold_capacity": 30978,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 23715,
-          "cold_capacity": 94869,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 6776,
+          "cold_capacity": 27105,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 9680,
+          "cold_capacity": 38722,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 11615,
+          "cold_capacity": 46467,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 11615,
+          "cold_capacity": 46466,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 7744,
+          "cold_capacity": 30978,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3083,8 +4679,8 @@
         "cpm": {
           "distribution": "log_uniform",
           "range": {
-            "min": 1800,
-            "max": 3200
+            "min": 14680,
+            "max": 14680
           }
         },
         "ctr": {
@@ -3104,8 +4700,8 @@
         "requests_per_day": {
           "distribution": "log_uniform",
           "range": {
-            "min": 38000,
-            "max": 66000
+            "min": 1000000,
+            "max": 2000000
           }
         }
       },
@@ -3362,13 +4958,13 @@
       },
       "segments": [
         {
-          "id": "moscow_female_25_34",
+          "id": "moscow_female_13_18",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -3381,13 +4977,13 @@
           }
         },
         {
-          "id": "moscow_female_35_44",
+          "id": "moscow_female_19_30",
           "geo": "moscow",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -3400,13 +4996,70 @@
           }
         },
         {
-          "id": "moscow_male_25_34",
+          "id": "moscow_female_31_45",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_46_59",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_female_60_plus",
+          "geo": "moscow",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_13_18",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -3419,13 +5072,13 @@
           }
         },
         {
-          "id": "moscow_male_35_44",
+          "id": "moscow_male_19_30",
           "geo": "moscow",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 1.2,
             "supply": 1
@@ -3438,13 +5091,70 @@
           }
         },
         {
-          "id": "other_female_25_34",
+          "id": "moscow_male_31_45",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_46_59",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "moscow_male_60_plus",
+          "geo": "moscow",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 1.2,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_13_18",
           "geo": "other",
           "gender": "female",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3457,13 +5167,13 @@
           }
         },
         {
-          "id": "other_female_35_44",
+          "id": "other_female_19_30",
           "geo": "other",
           "gender": "female",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3476,13 +5186,13 @@
           }
         },
         {
-          "id": "other_male_25_34",
+          "id": "other_female_31_45",
           "geo": "other",
-          "gender": "male",
-          "age_from": 25,
-          "age_to_exclusive": 35,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "gender": "female",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3495,13 +5205,127 @@
           }
         },
         {
-          "id": "other_male_35_44",
+          "id": "other_female_46_59",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_female_60_plus",
+          "geo": "other",
+          "gender": "female",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_13_18",
           "geo": "other",
           "gender": "male",
-          "age_from": 35,
-          "age_to_exclusive": 45,
-          "warm_capacity": 6123,
-          "cold_capacity": 24495,
+          "age_from": 13,
+          "age_to_exclusive": 19,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_19_30",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 19,
+          "age_to_exclusive": 31,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_31_45",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 31,
+          "age_to_exclusive": 46,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_46_59",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 46,
+          "age_to_exclusive": 60,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
+          "multipliers": {
+            "cpm": 0.9,
+            "supply": 1
+          },
+          "warm_multipliers": {
+            "cr": 1.5
+          },
+          "cold_multipliers": {
+            "cr": 0.8
+          }
+        },
+        {
+          "id": "other_male_60_plus",
+          "geo": "other",
+          "gender": "male",
+          "age_from": 60,
+          "age_to_exclusive": 131,
+          "warm_capacity": 200000,
+          "cold_capacity": 800000,
           "multipliers": {
             "cpm": 0.9,
             "supply": 1
@@ -3513,7 +5337,12 @@
             "cr": 0.8
           }
         }
-      ]
+      ],
+      "sms": {
+        "segment_price": 7.34,
+        "segments_per_message": 2,
+        "min_interval_hours": 168
+      }
     }
   ]
 }

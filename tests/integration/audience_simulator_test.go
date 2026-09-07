@@ -51,18 +51,18 @@ func TestAudienceSimulatorLifecycle(t *testing.T) {
 	if catalog["engine_version"] != "sim-v2-delivery" {
 		t.Fatal("not segmented")
 	}
-	audience := map[string]any{"social_1": map[string]any{"segment_ids": []string{"moscow_female_25_34"}}}
+	audience := map[string]any{"social_1": map[string]any{"segment_ids": []string{"moscow_female_19_30"}}}
 	cfg := map[string]any{"world_seed": "42", "campaign_seed": "77", "start_hour": "2026-09-03T06:00:00Z", "duration_hours": 168, "time_zone": "UTC", "audience": audience}
 	code, etag, result := call("PUT", path, cfg, "*")
 	if code != 201 {
 		t.Fatal(code, result)
 	}
 	_, beforeTag, before := call("GET", path+"/current-hour", nil, "")
-	bad := map[string]any{"step_id": "99999999-1111-4111-8111-111111111111", "actions": []any{}, "audience": map[string]any{"social_1": map[string]any{"segment_ids": []string{"moscow_female_25_34"}, "temperature": "warm"}}}
+	bad := map[string]any{"step_id": "99999999-1111-4111-8111-111111111111", "actions": []any{}, "audience": map[string]any{"social_1": map[string]any{"segment_ids": []string{"moscow_female_19_30"}, "temperature": "warm"}}}
 	if status, _, _ := call("POST", path+"/steps", bad, etag); status != 400 {
 		t.Fatal("temperature accepted", status)
 	}
-	bad["audience"] = map[string]any{"social_1": map[string]any{"segment_ids": []string{"moscow_female_35_44"}}}
+	bad["audience"] = map[string]any{"social_1": map[string]any{"segment_ids": []string{"moscow_female_31_45"}}}
 	if status, _, _ := call("POST", path+"/steps", bad, etag); status != 422 {
 		t.Fatal("mismatch accepted", status)
 	}

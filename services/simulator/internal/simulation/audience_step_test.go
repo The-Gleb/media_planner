@@ -14,7 +14,7 @@ func TestAudienceReplayAndBudget(t *testing.T) {
 	}
 	cfg := testSimulationConfig(t)
 	cfg.DurationHours = 168
-	cfg.Audience = domain.Audience{"social_1": {SegmentIDs: []string{"moscow_female_25_34"}}}
+	cfg.Audience = domain.Audience{"social_1": {SegmentIDs: []string{"moscow_female_19_30"}}}
 	a, b := New(model), New(model)
 	if err := a.Reset(cfg); err != nil {
 		t.Fatal(err)
@@ -65,7 +65,7 @@ func TestAudienceReplayAndBudget(t *testing.T) {
 		}
 	}
 	for key, s := range a.pools {
-		if key.Channel == "social_1" && (key.Segment != "moscow_female_25_34") && s.Impressions != 0 {
+		if key.Channel == "social_1" && (key.Segment != "moscow_female_19_30") && s.Impressions != 0 {
 			t.Fatal("delivery outside selection", key)
 		}
 	}

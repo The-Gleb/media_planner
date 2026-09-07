@@ -73,6 +73,7 @@ func (e *Engine) stepAudience(budgets map[domain.ChannelID]domain.MoneyMicros) (
 		return nil, domain.NewError(domain.CodeInternal, "audience step failed: "+err.Error())
 	}
 	next := make(map[poolKey]runtimeState, len(e.pools))
+	nextCooldown := make(map[poolKey][]smsCohort, len(e.smsCooldown))
 	for k, v := range e.pools {
 		next[k] = v
 	}
@@ -91,6 +92,10 @@ func (e *Engine) stepAudience(budgets map[domain.ChannelID]domain.MoneyMicros) (
 			supply = 0
 		}
 		price := c.BaseCPM.Float64() * c.HourlyCPM[hour] * c.WeekdayCPM[int(weekday)] * factors.CPM * noise("noise/cpm", c.CPMSigma)
+		if c.SMS != nil {
+			// CPM is only an adapter for the shared integer allocator, not an auction price.
+			price = c.SMS.SegmentPrice * float64(c.SMS.SegmentsPerMessage) * 1000
+		}
 		baseCTR := c.BaseCTR * c.HourlyCTR[hour] * c.WeekdayCTR[int(weekday)] * factors.CTR
 		baseCR := c.BaseCR * c.HourlyCR[hour] * c.WeekdayCR[int(weekday)] * factors.CR
 		p := []poolHour{}
@@ -108,7 +113,11 @@ func (e *Engine) stepAudience(budgets map[domain.ChannelID]domain.MoneyMicros) (
 				if capacity > 0 && c.AudienceCapacity > 0 {
 					raw = supply * (float64(capacity) / float64(c.AudienceCapacity)) * s.Multipliers.Get("supply")
 				}
-				cpm, err := domain.QuantizeFloat64(price * s.Multipliers.Get("cpm") * m.Get("cpm") * dyn.PriceFactor)
+				poolPrice := price * s.Multipliers.Get("cpm") * m.Get("cpm") * dyn.PriceFactor
+				if c.SMS != nil {
+					poolPrice = price
+				}
+				cpm, err := domain.QuantizeFloat64(poolPrice)
 				if err != nil || cpm <= 0 {
 					return fail(fmt.Errorf("invalid CPM"))
 				}
@@ -123,6 +132,13 @@ func (e *Engine) stepAudience(budgets map[domain.ChannelID]domain.MoneyMicros) (
 		}
 		if err := roundedSupply(p); err != nil {
 			return fail(err)
+		}
+		if c.SMS != nil {
+			for i, v := range p {
+				active, unavailable := activeSMSCooldown(e.smsCooldown[v.key], e.steps)
+				nextCooldown[v.key] = active
+				p[i].requests = min64(v.requests, v.capacity-unavailable)
+			}
 		}
 		weights, err := deliveryWeights(p, e.pools)
 		if err != nil {
@@ -139,12 +155,22 @@ func (e *Engine) stepAudience(budgets map[domain.ChannelID]domain.MoneyMicros) (
 				tag, _ := json.Marshal([]string{v.key.Segment, v.key.Temperature, purpose})
 				return newStream(e.cfg.CampaignSeed, e.model.Model.EngineVersion, string(c.ID), string(tag), e.steps)
 			}
-			reach, err := sampleBinomial(stream("reach"), impressions, v.dyn.NewUserProbability)
-			if err != nil {
-				return fail(err)
-			}
 			state := e.pools[v.key]
-			reach = min64(reach, v.capacity-state.UniqueReach)
+			var reach int64
+			if c.SMS != nil {
+				// Contact unreached recipients first, then eligible repeat recipients.
+				// Every allocated message is delivered, once per recipient in this hour.
+				reach = min64(impressions, v.capacity-state.UniqueReach)
+				if impressions > 0 {
+					nextCooldown[v.key] = append(nextCooldown[v.key], smsCohort{e.steps + c.SMS.MinIntervalHours, impressions})
+				}
+			} else {
+				reach, err = sampleBinomial(stream("reach"), impressions, v.dyn.NewUserProbability)
+				if err != nil {
+					return fail(err)
+				}
+				reach = min64(reach, v.capacity-state.UniqueReach)
+			}
 			clicks, err := sampleBinomial(stream("clicks"), impressions, v.ctr)
 			if err != nil {
 				return fail(err)
@@ -188,6 +214,7 @@ func (e *Engine) stepAudience(budgets map[domain.ChannelID]domain.MoneyMicros) (
 	}
 	sort.Slice(observations, func(i, j int) bool { return observations[i].ChannelID < observations[j].ChannelID })
 	e.pools = next
+	e.smsCooldown = nextCooldown
 	e.steps++
 	e.current = e.current.Add(time.Hour)
 	return observations, nil
